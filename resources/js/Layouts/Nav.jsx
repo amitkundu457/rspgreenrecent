@@ -50,11 +50,11 @@ const Nav = ({ user_type, usrrr }) => {
             link: "/deductions",
             perm: "view_employee",
         },
-        // {
-        //     name: "office time",
-        //     link: "/office-hours",
-        //     perm: "view_employee",
-        // },
+        {
+            name: "office time",
+            link: "/office-hours",
+            perm: "view_leave" ,
+        },
 
         // { name: "payroll", link: "/payroll", perm: "view_payroll" },
     ];

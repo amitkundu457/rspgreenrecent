@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm } from "@inertiajs/inertia-react"; // Import useForm
+import { useForm } from "@inertiajs/inertia-react";
 
 const OfficeHours = () => {
   const [officeHours, setOfficeHours] = useState([]);
@@ -7,7 +7,7 @@ const OfficeHours = () => {
   const [modalData, setModalData] = useState(null);
 
   // Set up useForm hook for managing form state
-  const { data, setData, post, put, errors, reset } = useForm({
+  const { data, setData, errors, reset } = useForm({
     start_time: "",
     end_time: "",
   });
@@ -46,41 +46,36 @@ const OfficeHours = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (modalData) {
-      // Update existing office hour
-      fetch(`/office-hours/${modalData.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
-        .then((response) => response.json())
-        .then((updatedHour) => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content'); // Get CSRF token
+
+    const requestOptions = {
+      method: modalData ? "PUT" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": csrfToken, // Add CSRF token to the request
+      },
+      body: JSON.stringify(data),
+    };
+
+    const url = modalData
+      ? `/office-hours/${modalData.id}`
+      : "/office-hours";
+
+    fetch(url, requestOptions)
+      .then((response) => response.json())
+      .then((newOrUpdatedHour) => {
+        if (modalData) {
           setOfficeHours(
             officeHours.map((hour) =>
-              hour.id === updatedHour.id ? updatedHour : hour
+              hour.id === newOrUpdatedHour.id ? newOrUpdatedHour : hour
             )
           );
-        })
-        .catch((error) => console.error("Error updating office hour:", error));
-    } else {
-      // Add new office hour
-      fetch("/office-hours", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+        } else {
+          setOfficeHours([...officeHours, newOrUpdatedHour]);
+        }
+        setIsModalOpen(false);
       })
-        .then((response) => response.json())
-        .then((newHour) => {
-          setOfficeHours([...officeHours, newHour]);
-        })
-        .catch((error) => console.error("Error adding office hour:", error));
-    }
-
-    setIsModalOpen(false);
+      .catch((error) => console.error("Error saving office hour:", error));
   };
 
   return (
