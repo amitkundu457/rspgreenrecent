@@ -1,0 +1,1 @@
+import{j as r}from"./app-Cn1PjxUx.js";import{H as m,N as o}from"./Nav-BNNd6Nrg.js";import"./iconBase-BPFLjw48.js";import"./index-BxkI7NKl.js";import"./index-mSteYAay.js";const x=({user:s})=>r.jsxs("div",{className:"px-[8rem]",children:[r.jsx(m,{user:s}),r.jsx(o,{})]});export{x as default};
