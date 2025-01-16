@@ -9,11 +9,11 @@ const SalaryPage = ({
     user,
     notif,
     user_type,
-    employees,
     salary,
     deductions,
     deductionsss,
     combinedData,
+    employees,
 }) => {
     const [selectedEmployee, setSelectedEmployee] = useState("All Employees");
     const [selectedMonth, setSelectedMonth] = useState("2025-01");
@@ -70,7 +70,6 @@ const SalaryPage = ({
     return (
         <div className="flex flex-col w-full ml-[11.5rem]">
             <Header user={user} notif={notif} />
-            {/* <Nav user_type={user_type} /> */}
             <Nav user_type={user_type} />
             <div className="px-[5rem] py-4 w-full">
                 {!selectedSalary ? (
@@ -118,7 +117,6 @@ const SalaryPage = ({
                                     <th className="border p-2">
                                         Generate Date
                                     </th>
-                                    <th className="border p-2">Status</th>
                                     <th className="border p-2">Total Amount</th>
                                     <th className="border p-2">Action</th>
                                 </tr>
@@ -133,37 +131,41 @@ const SalaryPage = ({
                                             {sal.generate_date}
                                         </td>
                                         <td className="border p-2">
-                                            {sal.status}
-                                        </td>
-                                        <td className="border p-2">
                                             {sal.total_amount}
                                         </td>
                                         <td className="border p-2">
-    <button
-        className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded mr-2"
-        onClick={() =>
-            setSelectedSalary({
-                ...sal,
-                employeeName: nameMap[sal.employee_id],
-                deductions: deductionsss,
-            })
-        }
-        title="View salary details"
-    >
-        View Details
-    </button>
-    <Link
-        href={`/all-salary/print/${sal.employee_id}`}
-        className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded"
-        onClick={() =>
-            console.log(`Navigating to salary with ID: ${sal.id}`)
-        }
-        title="Download PDF"
-    >
-        PDF
-    </Link> 
-</td>
-   
+                                            <button
+                                                className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded mr-2"
+                                                onClick={() =>
+                                                    setSelectedSalary({
+                                                        ...sal,
+                                                        employeeName:
+                                                            nameMap[
+                                                                sal.employee_id
+                                                            ],
+                                                        employeeId:
+                                                            sal.employee_id, // Add employee_id here
+                                                        deductions:
+                                                            deductionsss,
+                                                    })
+                                                }
+                                                title="View salary details"
+                                            >
+                                                View Details
+                                            </button>
+                                            <Link
+                                                href={`/all-salary/print/${sal.employee_id}`}
+                                                className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded"
+                                                onClick={() =>
+                                                    console.log(
+                                                        `Navigating to salary with ID: ${sal.id}`
+                                                    )
+                                                }
+                                                title="Download PDF"
+                                            >
+                                                PDF
+                                            </Link>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -171,7 +173,6 @@ const SalaryPage = ({
                     </>
                 ) : (
                     <div>
-                        {/* Wrap SalarySlip with ref */}
                         <div ref={printRef}>
                             <SalarySlip
                                 combinedData={[selectedSalary]}
@@ -179,6 +180,7 @@ const SalaryPage = ({
                                 signatureName={selectedSalary.employeeName}
                                 salary={salary}
                                 data={combinedData}
+                                employeeId={selectedSalary.employeeId} // Pass employee_id to SalarySlip
                             />
                         </div>
                     </div>

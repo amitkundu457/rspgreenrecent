@@ -81,18 +81,18 @@ class SalaryController extends Controller
 
         // Fetch combined data for employees, attendance, leave, and holidays
         $combinedData = DB::table('branches')
-            ->join('holidays', 'branches.id', '=', 'holidays.id')
-            ->join('employees', 'employees.branch_id', '=', 'branches.id')
-            ->join('locations_holiday', 'branches.location_id', '=', 'locations_holiday.id')
-            ->join('users', 'employees.user_id', '=', 'users.id')
-            ->join('leave_management', 'leave_management.employee_id', '=', 'employees.user_id')
+            ->leftJoin('holidays', 'branches.id', '=', 'holidays.id')
+            ->leftJoin('employees', 'employees.branch_id', '=', 'branches.id')
+            // ->leftJoin('locations_holiday', 'branches.location_id', '=', 'locations_holiday.id')
+            ->leftJoin('users', 'employees.user_id', '=', 'users.id')
+            ->leftJoin('leave_management', 'leave_management.employee_id', '=', 'employees.user_id')
             ->leftJoin('attendances', 'attendances.employee_id', '=', 'users.id') // Join attendances
             ->select(
                 'holidays.name as holiday_name',
                 'holidays.start_date as holiday_start_date',
                 'holidays.end_date as holiday_end_date',
                 'branches.*',
-                'locations_holiday.name as location_holiday_name',
+                // 'locations_holiday.name as location_holiday_name',
                 'employees.*',
                 'users.name as employee_name',
                 'employees.basic_salary',
@@ -106,7 +106,7 @@ class SalaryController extends Controller
                 'employees.id',
                 'holidays.id',
                 'branches.id',
-                'locations_holiday.id',
+                // 'locations_holiday.id',
                 'users.id',
                 'leave_management.id',
                 'branches.name'
@@ -225,15 +225,15 @@ class SalaryController extends Controller
             'total_amount',
             'allowance'
         )
-        ->where('employee_id', $employeeId) // Filter salary for the specific employee
-        ->get();
-    
+            ->where('employee_id', $employeeId) // Filter salary for the specific employee
+            ->get();
+
         // Fetch data for the specified employee
         $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
             ->select('users.name', 'users.id', 'employees.basic_salary')
             ->where('users.id', $employeeId) // Filter by employee ID
             ->get();
-    
+
         // Fetch combined data for the specified employee
         $combinedData = DB::table('branches')
             ->join('holidays', 'branches.id', '=', 'holidays.id')
@@ -257,7 +257,7 @@ class SalaryController extends Controller
                 DB::raw('COUNT(attendances.id) as total_working_days'), // Total working days
                 DB::raw('SUM(CASE WHEN in_time > "10:00:00" THEN 1 ELSE 0 END) as late_days') // Late days count
             )
-            ->where('employees.id', $employeeId) // Filter for the specific employee
+            ->where('users.id', $employeeId) // Filter for the specific employee
             ->groupBy(
                 'employees.id',
                 'holidays.id',
@@ -267,56 +267,56 @@ class SalaryController extends Controller
                 'leave_management.id'
             )
             ->get();
-    
-       // Process the combined data to calculate adjusted leave days, late deductions, and salary adjustments
-$combinedData = $combinedData->map(function ($item) {
-    $leaveStart = Carbon::parse($item->leave_start_date);
-    $leaveEnd = Carbon::parse($item->leave_end_date);
-    $holidayStart = Carbon::parse($item->holiday_start_date);
-    $holidayEnd = Carbon::parse($item->holiday_end_date);
 
-    // Calculate total leave days (inclusive of holidays)
-    $totalLeaveDays = $leaveStart->diffInDays($leaveEnd) + 1;
+        // Process the combined data to calculate adjusted leave days, late deductions, and salary adjustments
+        $combinedData = $combinedData->map(function ($item) {
+            $leaveStart = Carbon::parse($item->leave_start_date);
+            $leaveEnd = Carbon::parse($item->leave_end_date);
+            $holidayStart = Carbon::parse($item->holiday_start_date);
+            $holidayEnd = Carbon::parse($item->holiday_end_date);
 
-    // Calculate per day salary
-    $perDaySalary = $item->basic_salary / 30; // Assuming 30 days in a month
+            // Calculate total leave days (inclusive of holidays)
+            $totalLeaveDays = $leaveStart->diffInDays($leaveEnd) + 1;
 
-    // Leave deduction is based on total leave days (no adjustment for holidays)
-    $leaveDeductionAmount = $perDaySalary * $totalLeaveDays;
+            // Calculate per day salary
+            $perDaySalary = $item->basic_salary / 30; // Assuming 30 days in a month
 
-    // Calculate late day deduction (1 day's salary for every 3 late days)
-    $lateDeductionDays = intdiv($item->late_days, 3); // 1 day's salary for every 3 late days
-    $lateDeductionAmount = $perDaySalary * $lateDeductionDays;
+            // Leave deduction is based on total leave days (no adjustment for holidays)
+            $leaveDeductionAmount = $perDaySalary * $totalLeaveDays;
 
-    // Add calculated fields to the item
-    $item->total_leave_days = $totalLeaveDays;
-    $item->leave_deduction_amount = round($leaveDeductionAmount, 2);
-    $item->late_deduction_days = $lateDeductionDays;
-    $item->late_deduction_amount = round($lateDeductionAmount, 2);
+            // Calculate late day deduction (1 day's salary for every 3 late days)
+            $lateDeductionDays = intdiv($item->late_days, 3); // 1 day's salary for every 3 late days
+            $lateDeductionAmount = $perDaySalary * $lateDeductionDays;
 
-    return $item;
-});
+            // Add calculated fields to the item
+            $item->total_leave_days = $totalLeaveDays;
+            $item->leave_deduction_amount = round($leaveDeductionAmount, 2);
+            $item->late_deduction_days = $lateDeductionDays;
+            $item->late_deduction_amount = round($lateDeductionAmount, 2);
+
+            return $item;
+        });
+        // dd($combinedData);
 
         $deductions = Deduction::all();
-    
+
         foreach ($salary as $sal) {
             $basicSalary = $sal->total_amount;
             $allowance = $basicSalary * 0.20;
             $sal->allowance = $allowance;
-    
+
             $employeeData = $combinedData->firstWhere('employee_id', $sal->employee_id);
-    
+
             $leaveDeduction = $employeeData->leave_deduction_amount ?? 0;
             $lateDeduction = $employeeData->late_deduction_amount ?? 0;
-    
+
             $updatedSalary = $basicSalary - $leaveDeduction - $lateDeduction;
             $sal->total_amount = $updatedSalary;
             $sal->save();
-    
+
             Employee::where('id', $sal->employee_id)->update(['basic_salary' => $updatedSalary]);
         }
-    
+
         return Inertia::render('salary/salarypdf', compact('combinedData'));
     }
-    
 }

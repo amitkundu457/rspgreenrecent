@@ -25,7 +25,7 @@ class AttendanceController extends Controller
         $notif = Auth::user()->notifications;
         $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
             ->select('users.name', 'users.id')->get();
-            // dd($employees);
+        // dd($employees);
         $attendances = User::join('employees', 'employees.user_id', '=', 'users.id')
             ->join('attendances', 'attendances.employee_id', '=', 'users.id')
             ->select('users.name', 'attendances.id', 'attendances.date', 'attendances.in_time', 'attendances.out_time')->get();
@@ -36,6 +36,7 @@ class AttendanceController extends Controller
     {
         $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
             ->select('users.name', 'users.id')->get();
+        dd($employees);
         return Inertia::render('attendance/create', [
             'employees' => $employees,
         ]);
@@ -51,30 +52,31 @@ class AttendanceController extends Controller
         //     'in_time' => 'nullable|date_format:H:i',
         //     'out_time' => 'nullable|date_format:H:i|after:in_time',
         // ]);
-        
+
         // Create the attendance record
         $attendance = Attendance::create($request->all());
-        
+
         // Get the in_time and out_time from the created record
         $inTime = Carbon::createFromFormat('H:i', $attendance->in_time);
         $outTime = Carbon::createFromFormat('H:i', $attendance->out_time);
-        
+
         // Calculate the difference between out_time and in_time
         $totalTime = $outTime->diff($inTime);
-        
+
         // Format the total time difference as hours and minutes
         $totalTimeFormatted = $totalTime->format('%H:%I'); // Example: "10:59" hours and minutes
-    
+
         // Update the attendance record with the calculated total time worked
         $attendance->total_time = $totalTimeFormatted; // Save to the total_time field
         $attendance->save();
-        
+
         // Dump the attendance record and the total time worked (for debugging)
         // dd($attendance, 'Total Time Worked: ' . $totalTimeFormatted);
-        
+
         return redirect()->route('attendances.index')->with('success', 'Attendance recorded successfully.');
     }
-    public function show($id){
+    public function show($id)
+    {
         $attd = Attendance::findOrFail($id);
         return \response()->json($attd);
     }
@@ -83,6 +85,7 @@ class AttendanceController extends Controller
     public function edit(Attendance $attendance)
     {
         $employees = Employee::all();
+        dd($employees);
         return Inertia::render('Attendances/Edit', [
             'attendance' => $attendance,
             'employees' => $employees,

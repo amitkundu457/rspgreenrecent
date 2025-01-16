@@ -2,7 +2,7 @@ import Header from "@/Layouts/Header";
 import Nav from "@/Layouts/Nav";
 import React, { useRef, useEffect, useState } from "react";
 import { Inertia } from "@inertiajs/inertia";
-import { FaList, FaTimes } from "react-icons/fa";
+import { FaList, FaTimes, FaCalendar } from "react-icons/fa";
 import Modal from "@/Components/Modal";
 import { Link } from "@inertiajs/react";
 import "choices.js/public/assets/styles/choices.min.css";
@@ -15,6 +15,7 @@ function Screenshot({
     emp,
     hoursByUserAndDate,
     empi,
+    employees,
     sd,
     ed,
 }) {
@@ -25,7 +26,7 @@ function Screenshot({
     const [startDate, setStartDate] = useState(sd);
     const [endDate, setEndDate] = useState(ed);
     const logs = Object.entries(hoursByUserAndDate.data);
-
+    console.log("loacation", emp);
     useEffect(() => {
         const employeeChoicesInstance = new Choices(employeeSelectRef.current, {
             removeItemButton: true,
@@ -112,11 +113,15 @@ function Screenshot({
                                                         {lg.address}
                                                     </span>
                                                 ) : (
-                                                    <span className="text-sm">n/a</span>
+                                                    <span className="text-sm">
+                                                        n/a
+                                                    </span>
                                                 )}
                                             </td>
                                             <td className="py-2 px-3 text-sm">
-                                                {new Date(lg.timestamp).toLocaleString()}
+                                                {new Date(
+                                                    lg.timestamp
+                                                ).toLocaleString()}
                                             </td>
                                         </tr>
                                     ))}
@@ -140,8 +145,8 @@ function Screenshot({
                         className="rounded text-sm"
                     >
                         <option value="">All</option>
-                        {emp &&
-                            emp.map((e) => (
+                        {employees &&
+                            employees.map((e) => (
                                 <option key={e.id} value={e.id}>
                                     {e.name}
                                 </option>
@@ -149,7 +154,10 @@ function Screenshot({
                     </select>
                 </div>
                 <div className="w-1/4 p-2 flex flex-col space-y-1">
-                    <label htmlFor="start_date" className="text-sm font-semibold">
+                    <label
+                        htmlFor="start_date"
+                        className="text-sm font-semibold"
+                    >
                         Start Date
                     </label>
                     <input
@@ -218,28 +226,38 @@ function Screenshot({
                         {Array.isArray(logs) &&
                             logs.map((lg, i) => (
                                 <tr key={i}>
-                                    <td className="px-4 py-2 text-sm">{i + 1}</td>
-                                    <td className="px-4 py-2 text-sm">{lg[1]["name"]}</td>
+                                    <td className="px-4 py-2 text-sm">
+                                        {i + 1}
+                                    </td>
+                                    <td className="px-4 py-2 text-sm">
+                                        {lg[1]["name"]}
+                                    </td>
                                     <td className="px-4 py-2 text-sm">
                                         {new Date(lg[1]["date"]).toDateString()}
                                     </td>
                                     <td className="px-4 py-2 text-sm">
-                                    {'8 hrs'}
-                                       
+                                        {"8 hrs"}
                                     </td>
                                     <td className="px-4 py-2 text-sm">
-                                       
                                         {lg[1]["total_time"]}
                                     </td>
                                     <td className="px-4 py-2 text-sm">
                                         {lg[1]["remaining_time"]}
                                     </td>
-                                    <td>
+                                    <td className="flex gap-2">
                                         <button
-                                            onClick={(e) => handleLog(e, lg[1]["logs"])}
+                                            onClick={(e) =>
+                                                handleLog(e, lg[1]["logs"])
+                                            }
                                             className="bg-emerald-500 text-white px-2 py-1 rounded"
                                         >
                                             <FaList />
+                                        </button>
+                                        <button
+                                            className="bg-gray-500 text-white px-2 py-1 rounded"
+                                            title="Calendar"
+                                        >
+                                            <FaCalendar />
                                         </button>
                                     </td>
                                 </tr>
@@ -252,7 +270,9 @@ function Screenshot({
                     <button
                         className="bg-blue-500 px-3 text-sm py-1 rounded text-white disabled:bg-gray-400"
                         disabled={!hoursByUserAndDate.prev_page_url}
-                        onClick={() => changePage(hoursByUserAndDate.current_page - 1)}
+                        onClick={() =>
+                            changePage(hoursByUserAndDate.current_page - 1)
+                        }
                     >
                         Prev
                     </button>
@@ -264,7 +284,9 @@ function Screenshot({
                     <button
                         className="bg-blue-500 px-3 text-sm py-1 rounded text-white disabled:bg-gray-400"
                         disabled={!hoursByUserAndDate.next_page_url}
-                        onClick={() => changePage(hoursByUserAndDate.current_page + 1)}
+                        onClick={() =>
+                            changePage(hoursByUserAndDate.current_page + 1)
+                        }
                     >
                         Next
                     </button>
