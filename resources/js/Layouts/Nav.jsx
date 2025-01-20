@@ -14,9 +14,11 @@ import { MdOutlineReport } from "react-icons/md";
 import { FcLeave } from "react-icons/fc";
 import { MdHolidayVillage } from "react-icons/md";
 import { FaHandPaper } from "react-icons/fa";
+// import { MdHolidayVillage } from "react-icons/md";
 import { LuLogOut } from "react-icons/lu";
 import { FaHome } from "react-icons/fa";
 import DropdownMenu from "@/Components/DropdownMenu";
+import { FaSearchPlus } from "react-icons/fa";
 import { FaFolderClosed } from "react-icons/fa6";
 const Nav = ({ user_type, usrrr }) => {
     const [permissions, setPermissions] = useState([]);
@@ -33,7 +35,9 @@ const Nav = ({ user_type, usrrr }) => {
 
     const menuitems = [
         { name: "employees", link: "/employees", perm: "view_employee" },
+
         { name: "leave management", link: "/leave-index", perm: "view_leave" },
+        { name: "Loan Management", link: "/loans", perm: "view_leave" },
         { name: "employee setup", link: "/branches", perm: "view_employee" },
         // { name: "attendance", link: "/attendance", perm: "view_attendance" },
         { name: "Salary generate", link: "/salaries", perm: "view_salary" },
@@ -45,16 +49,17 @@ const Nav = ({ user_type, usrrr }) => {
             link: "/all-salary",
             perm: "view_salary",
         },
+
         {
             name: "Salary deduction",
             link: "/deductions",
             perm: "view_employee",
         },
-        {
-            name: "office time",
-            link: "/office-hours",
-            perm: "view_leave" ,
-        },
+        // {
+        //     name: "office time",
+        //     link: "/office-hours",
+        //     perm: "view_leave" ,
+        // },
 
         // { name: "payroll", link: "/payroll", perm: "view_payroll" },
     ];
@@ -116,7 +121,10 @@ const Nav = ({ user_type, usrrr }) => {
                                     : "p-2 text-black text-[0.9rem]"
                             }
                         >
-                            <Link href="/leave-index" className="flex space-x-2">
+                            <Link
+                                href="/leave-index"
+                                className="flex space-x-2"
+                            >
                                 {" "}
                                 <span>
                                     {" "}
@@ -162,7 +170,18 @@ const Nav = ({ user_type, usrrr }) => {
                             ]}
                         />
                     )}
-                    {}
+                    {props.auth.user.roles[0]?.name === "admin" && (
+                        <DropdownMenu
+                            icon={<FaUsers />}
+                            name={"Work Order"}
+                            items={[
+                                {
+                                    name: "Client Work-Order",
+                                    link: "/clients-workOrder",
+                                },
+                            ]}
+                        />
+                    )}
 
                     <DropdownMenu
                         icon={<FaFolderClosed />}
@@ -216,7 +235,7 @@ const Nav = ({ user_type, usrrr }) => {
                     )}
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <DropdownMenu
-                            icon={<FaEye />}
+                            icon={<MdHolidayVillage />}
                             name={"Holiday"}
                             items={[
                                 {
@@ -318,6 +337,24 @@ const Nav = ({ user_type, usrrr }) => {
                                     <FaHandPaper />
                                 </span>{" "}
                                 <span>Roles</span>{" "}
+                            </Link>
+                        </li>
+                    )}
+                    {props.auth.user.roles[0]?.name === "admin" && (
+                        <li
+                            className={
+                                url === "/enquiry"
+                                    ? "active bg-[#0A1B3F] p-2 px-5 text-[0.9rem] text-white"
+                                    : "p-2 text-black text-[0.9rem]"
+                            }
+                        >
+                            <Link href="/enquiry" className="flex space-x-2">
+                                {" "}
+                                <span>
+                                    {" "}
+                                    <FaSearchPlus />
+                                </span>{" "}
+                                <span>Enquiry</span>{" "}
                             </Link>
                         </li>
                     )}

@@ -172,18 +172,19 @@ const Product = ({ user, notif, user_type, holidays, vacations }) => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <select
-              className="border border-gray-300 rounded-md px-4 py-2 w-48"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            >
-              <option value="">Select Location</option>
-              {vacations.map((loc, index) => (
-                <option key={index} value={loc}>
-                  {loc}
-                </option>
-              ))}
-            </select>
+           <select
+  className="border border-gray-300 rounded-md px-4 py-2 w-48"
+  value={location}
+  onChange={(e) => setLocation(e.target.value)}
+>
+  <option value="">Select Location</option>
+  {vacations.map((loc, index) => (
+    <option key={index} value={loc.name}>
+      {loc.name} ({loc.holiday_count} holidays) {/* Display count */}
+    </option>
+  ))}
+</select>
+
           </div>
           <button
             className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600"

@@ -6,6 +6,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\DealController;
 use App\Http\Controllers\LeadController;
+use App\Http\Controllers\LoanController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\UserController;
@@ -44,14 +45,17 @@ use App\Http\Controllers\DailyStatusController;
 use App\Http\Controllers\HolidayWorkController;
 use App\Http\Controllers\ChartAccountController;
 use App\Http\Controllers\JournalEntryController;
+use App\Http\Controllers\QuoteRequestController;
 use App\Http\Controllers\EmpolyeeSetupController;
 use App\Http\Controllers\ProductServiceController;
 use App\Http\Controllers\StageOfProjectController;
+use App\Http\Controllers\ClientWorkOrderController;
 use App\Http\Controllers\HolidayLocationController;
 use App\Http\Controllers\LeaveManagementController;
 use App\Http\Controllers\NotificationAllController;
 use App\Http\Controllers\ServiceCategoryController;
 use Flasher\Prime\Test\Constraint\NotificationCount;
+
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -286,7 +290,7 @@ Route::get('/account/category', [AccountController::class, 'AccountCategory']);
 Route::post('/account/category/store', [AccountController::class, 'Accountstore']);
 Route::post('/account/category/update/{accountCategory}', [AccountController::class, 'Accountupdate']);
 Route::delete('/account/category/delete/{accountCategory}', [AccountController::class, 'Accountdestroy']);
-
+Route::resource('loans', LoanController::class);
 Route::get('account/unit', [AccountController::class, 'unit']);
 Route::post('account/unit/store', [AccountController::class, 'unitstore']);
 Route::post('account/unit/update/{unit}', [AccountController::class, 'unitupdate']);
@@ -329,6 +333,10 @@ Route::resource('/income', IncomeController::class);
 Route::get('/income/{id}/edit', [IncomeController::class, 'edit']);
 Route::resource('estimate', EstimateController::class);
 Route::resource('/Quotation', QuotationController::class);
+// Route::resource('/enquiry', QuotationController::class);
+Route::resource('enquiry', QuoteRequestController::class);
+Route::resource('clients-workOrder', ClientWorkOrderController::class);
+
 Route::get('/Get-Customer/{id}', [QuotationController::class, 'getCustomer']);
 Route::get('/getproduct', [QuotationController::class, 'getproduct']);
 Route::get('/gettaxoptions', [QuotationController::class, 'gettaxoptions']);

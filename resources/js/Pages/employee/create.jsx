@@ -53,6 +53,10 @@ const Create = ({ user, user_type, roles, notif, branches, department, designati
     can_cheque: '',
     declaration: '',
     employee:'',
+    employmentTypes: {
+      Permanent: '',
+      PartTime: '',
+    },
   });
   const [formData, setFormData] = useState({
     history: [{ company_name: "", department: "", role: "" }], // Default one entry
@@ -62,6 +66,10 @@ const Create = ({ user, user_type, roles, notif, branches, department, designati
     document_upload: null,
     basic_salary: "",
     gross_salary: "",
+    employmentTypes: {
+      Permanent: false,
+      PartTime: false,
+    },
   });
 
   // Handle dynamic changes for the history section
@@ -212,8 +220,16 @@ const Create = ({ user, user_type, roles, notif, branches, department, designati
   };
 
   const handleChange = (e) => {
-    setData(e.target.name, e.target.value);
+    const { name, type, value, checked } = e.target;
+  
+    // Check if it's a checkbox
+    if (type === "checkbox") {
+      setData(name, checked);
+    } else {
+      setData(name, value);
+    }
   };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -621,6 +637,34 @@ const Create = ({ user, user_type, roles, notif, branches, department, designati
                {errors.aadhar_no && <div className="text-red-500 text-sm">{errors.aadhar_no}</div>}
           </div>
 
+
+        
+        
+        <label className="">Employment Type</label>
+        <div className="flex items-center space-x-6">
+  <label className="flex items-center">
+    <input
+      type="radio"
+      name="employmentType"
+      value="Permanent"
+      checked={data.employmentType === "Permanent"}
+      onChange={handleChange}
+      className="mr-2"
+    />
+    Permanent
+  </label>
+  <label className="flex items-center">
+    <input
+      type="radio"
+      name="employmentType"
+      value="PartTime"
+      checked={data.employmentType === "PartTime"}
+      onChange={handleChange}
+      className="mr-2"
+    />
+    Part-time
+  </label>
+</div>
 
           <div className="col-span-2 mt-4">
             <h2 className="mb-4 text-xl font-bold">History</h2>

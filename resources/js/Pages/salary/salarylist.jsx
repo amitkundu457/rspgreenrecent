@@ -56,7 +56,7 @@ console.log("jhgf",salary)
                             <th className="p-3 text-left border">
                                 Approved By
                             </th>
-                            <th className="p-3 text-left border">Action</th>
+                            {/* <th className="p-3 text-left border">Action</th> */}
                         </tr>
                     </thead>
                     <tbody>
@@ -89,7 +89,7 @@ console.log("jhgf",salary)
                                 <td className="p-3 border">
                                     {salary.approved_by || "N/A"}
                                 </td>
-                                <td className="space-x-2">
+                                {/* <td className="space-x-2">
                                     {" "}
                                     <button
                                         type="button"
@@ -105,7 +105,7 @@ console.log("jhgf",salary)
                                     >
                                         <FaSms />
                                     </button>
-                                </td>
+                                </td> */}
                             </tr>
                         ))}
                     </tbody>

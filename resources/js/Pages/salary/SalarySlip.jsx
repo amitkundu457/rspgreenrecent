@@ -47,12 +47,7 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
         <div>
             {/* Buttons */}
             <div className="flex justify-start space-x-4 mb-4 print:hidden">
-                <button
-                    onClick={goBack}
-                    className="bg-teal-400 hover:bg-teal-500 text-white py-2 px-4 rounded-full"
-                >
-                    Back
-                </button>
+                
                 {/* <button
                     onClick={handleDownloadPDF}
                     className="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-full"
@@ -132,17 +127,17 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
                                             <td className="px-6 py-3 border border-gray-300">{generate_date || "N/A"}</td>
                                         </tr>
                                         <tr className="bg-blue-50 hover:bg-blue-100">
-                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Basic Salary</td>
+                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Basic Salary (Include Allowance)</td>
                                             <td className="px-6 py-3 border border-gray-300 text-green-600 font-bold">
                                                 {formatToCurrency(total_amount)}
                                             </td>
                                         </tr>
-                                        <tr className="hover:bg-blue-50">
+                                        {/* <tr className="hover:bg-blue-50">
                                             <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Allowance</td>
                                             <td className="px-6 py-3 border border-gray-300 text-teal-600 font-semibold">
                                                 {formatToCurrency(allowance)}
                                             </td>
-                                        </tr>
+                                        </tr> */}
                                         <tr className="bg-blue-50 hover:bg-blue-100">
                                             <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Total Earnings</td>
                                             <td className="px-6 py-3 border border-gray-300 text-indigo-600 font-bold">

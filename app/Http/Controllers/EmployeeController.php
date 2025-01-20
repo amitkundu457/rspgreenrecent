@@ -57,18 +57,25 @@ class EmployeeController extends Controller
     {
         $user = Auth::user()->name;
         $userss = Auth::user();
+        $user_type = [];
+        
         if ($userss) {
-            // Ensure permissions are assigned and fetched correctly
+            // Fetch and ensure permissions are assigned correctly
             $user_type = $userss->getAllPermissions()->pluck('name')->toArray();
-            // dd($permissions);
         }
+    
         $roles = Role::all();
         $notif = Auth::user()->notifications;
         $branches = Branch::all();
         $department = Department::all();
         $designation = Designation::all();
-        return Inertia::render('employee/create', compact('user', 'user_type', 'roles', 'notif', 'branches', 'department', 'designation'));
+    
+        // Fetch employees table members only
+        $employees = Employee::all(); // Replace with appropriate query if filtering is required
+    
+        return Inertia::render('employee/create', compact('user', 'user_type', 'roles', 'notif', 'branches', 'department', 'designation', 'employees'));
     }
+    
     protected function generateEmployeeId()
     {
         // Retrieve the latest employee based on the ID
@@ -92,52 +99,44 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         // Define validation rules
-
-        // dd($request->all());
         $validatedData = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'address' => 'required|string',
-            'dob' => 'required',
-            'gender' => 'required',
-            'joinning_date' => 'required',
-            'branch_id' => 'required',
-            'department_id' => 'required',
-            'designation_id' => 'required',
-            'company_doj' => 'required',
-            'account_holder_name' => 'required',
-            'account_number' => 'required',
-            'bank_name' => 'required',
-            'bank_identifier_code' => 'required',
-            'branch_location' => 'required',
-            'roleemployee' => 'required',
-            'net_salary' => 'required',
-            'basic_salary' => 'required',
-            'ifsc_code' => 'required',
-            // 'apc_no' => 'required',
-            'ptax_no' => 'required',
-            'pf_no' => 'required',
-            'esi_no' => 'required',
-            // 'd_name' => 'required',
-            // 'b_name' => 'required',
-            // 'ds_name' => 'required',
-            'pan_no' => 'required',
-            'aadhar_no' => 'required',
-            'department_id' => 'required',
-            'branch_id' => 'required',
-            'designation_id' => 'required',
+            'dob' => 'required|date',
+            'gender' => 'required|string',
+            'joinning_date' => 'required|date',
+            'branch_id' => 'required|integer',
+            'department_id' => 'required|integer',
+            'designation_id' => 'required|integer',
+            'company_doj' => 'required|date',
+            'account_holder_name' => 'required|string',
+            'account_number' => 'required|string',
+            'bank_name' => 'required|string',
+            'bank_identifier_code' => 'required|string',
+            'branch_location' => 'required|string',
+            'roleemployee' => 'required|string',
+            'net_salary' => 'required|numeric',
+            'basic_salary' => 'required|numeric',
+            'ifsc_code' => 'required|string',
+            'ptax_no' => 'required|string',
+            'pf_no' => 'required|string',
+            'pan_no' => 'required|string',
+            'aadhar_no' => 'required|string',
             'cv' => 'required',
             'can_cheque' => 'required',
             'declaration' => 'required',
             'employee' => 'required',
-            'phone' => 'required',
+            'employmentTypes' => 'required|array', // Validate as an array
+            'phone' => 'required|string',
         ]);
-
-
+    
+        // Store uploaded files
         $cvPath = $request->file('cv')->store('uploads/cv', 'public');
         $chequePath = $request->file('can_cheque')->store('uploads/cheques', 'public');
         $declarationPath = $request->file('declaration')->store('uploads/declarations', 'public');
         $employeePath = $request->file('employee')->store('uploads/employee', 'public');
+    
         // Create and save the new user
         $user = new User();
         $user->name = $request['name'];
@@ -145,60 +144,53 @@ class EmployeeController extends Controller
         $user->type = 2;
         $user->password = bcrypt($request['password']);
         $user->save();
-
+    
         // Assign the role to the user
         $user->assignRole($request['roleemployee']);
-
+    
         // Create and save the employee record
         $employee = new Employee();
         $employee->user_id = $user->id;
-        $employee->dob = $request['dob'];
-        $employee->gender = $request['gender'];
+        $employee->dob = $validatedData['dob'];
+        $employee->gender = $validatedData['gender'];
         $employee->phone = $validatedData['phone'];
-        $employee->address = $request['address'];
-
+        $employee->address = $validatedData['address'];
         $employee->employee_id = $this->generateEmployeeId();
-
-        $employee->branch_id = $request['branch_id'];
-        $employee->basic_salary = $request['basic_salary'];
-        $employee->net_salary = $request['net_salary'];
-        // $employee->department_id = $request['d_name'];
-        // $employee->designation_id = $request['ds_name'];
-        // $employee->company_doj = $request['company_doj'];
-
-        $employee->department_id = $request['department_id'];
-        $employee->designation_id = $request['designation_id'];
-        $employee->company_doj = $request['company_doj'];
-
-
-        $employee->documents = json_encode($request['documents']);;
-        $employee->account_holder_name = $request['account_holder_name'];
-        $employee->account_number = $request['account_number'];
-        $employee->bank_name = $request['bank_name'];
-        $employee->bank_identifier_code = $request['bank_identifier_code'];
-        $employee->branch_location = $request['branch_location'];
-        $employee->tax_payer_id = $request['tax_payer_id'];
-        $employee->apc_no = $request['apc_no'];
-        $employee->ifsc_code = $request['ifsc_code'];
-        $employee->ptax_no = $request['ptax_no'];
-        $employee->pf_no = $request['pf_no'];
-        // $employee->esi_no = $request['esi_no'];
-        $employee->pan_no = $request['pan_no'];
-        $employee->aadhar_no = $request['aadhar_no'];
-
+        $employee->branch_id = $validatedData['branch_id'];
+        $employee->basic_salary = $validatedData['basic_salary'];
+        $employee->net_salary = $validatedData['net_salary'];
+        $employee->department_id = $validatedData['department_id'];
+        $employee->designation_id = $validatedData['designation_id'];
+        $employee->company_doj = $validatedData['company_doj'];
+    
+        // Handle employmentTypes (array)
+        $employee->employmentTypes = json_encode($validatedData['employmentTypes']);
+    
+        $employee->account_holder_name = $validatedData['account_holder_name'];
+        $employee->account_number = $validatedData['account_number'];
+        $employee->bank_name = $validatedData['bank_name'];
+        $employee->bank_identifier_code = $validatedData['bank_identifier_code'];
+        $employee->branch_location = $validatedData['branch_location'];
+        $employee->ifsc_code = $validatedData['ifsc_code'];
+        $employee->ptax_no = $validatedData['ptax_no'];
+        $employee->pf_no = $validatedData['pf_no'];
+        $employee->pan_no = $validatedData['pan_no'];
+        $employee->aadhar_no = $validatedData['aadhar_no'];
+    
         $employee->created_by = Auth::user()->id;
         $employee->joinning_date = $validatedData['joinning_date'];
         $employee->cv = $cvPath;
         $employee->can_cheque = $chequePath;
         $employee->declaration = $declarationPath;
         $employee->employee = $employeePath;
-
+    
+        // Save employee
         $employee->save();
-
-
+    
         // Redirect with a success message
         return redirect()->route('employees')->with('success', 'Employee created successfully.');
     }
+    
 
     public function screenshot(Request $request)
     {
@@ -418,55 +410,63 @@ class EmployeeController extends Controller
 
 
     public function show($id)
-    {
-        $employee = User::join('employees', 'employees.user_id', '=', 'users.id')->join('departments', 'employees.department_id', '=', 'departments.id')
-            ->join('designations', 'employees.designation_id', '=', 'designations.id')
-            ->join('branches', 'branches.id', '=', 'employees.branch_id')
-            ->select(
-                'employees.phone',
-                'employees.address',
-                'employees.joinning_date',
-                'employees.dob',
-                'users.name',
-                'users.email',
-                'users.id',
-                'users.password',
-                'departments.name as d_name',
-                'designations.name as desig_name',
-                'employees.account_number',
-                'employees.bank_name',
-                'employees.bank_identifier_code',
-                'employees.branch_location',
-                'employees.salary_type',
-                'employees.salary',
-                'employees.is_active',
-                'employees.created_by',
-                'employees.branch_id',
-                'employees.department_id',
-                'employees.designation_id',
-                'employees.company_doj',
-                'employees.documents',
-                'employees.dob',
-                'employees.gender',
-                'employees.basic_salary',
-                'employees.net_salary',
-                'employees.apc_no',
-                'employees.ifsc_code',
-                'employees.ptax_no',
-                'employees.pf_no',
-                'employees.esi_no',
-                'employees.pan_no',
-                'employees.aadhar_no',
-                'employees.cv',
-                'employees.declaration',
-                'employees.can_cheque',
-                'employees.employee',
-                'branches.name as b_name'
-            )->where('users.id', $id)->first();
+{
+    $employee = User::join('employees', 'employees.user_id', '=', 'users.id')
+        ->join('departments', 'employees.department_id', '=', 'departments.id')
+        ->join('designations', 'employees.designation_id', '=', 'designations.id')
+        ->join('branches', 'branches.id', '=', 'employees.branch_id')
+        ->select(
+            'employees.phone',
+            'employees.address',
+            'employees.joinning_date',
+            'employees.dob',
+            'users.name',
+            'users.email',
+            'users.id',
+            'users.password',
+            'departments.name as d_name',
+            'designations.name as desig_name',
+            'employees.account_number',
+            'employees.bank_name',
+            'employees.bank_identifier_code',
+            'employees.branch_location',
+            'employees.salary_type',
+            'employees.salary',
+            'employees.is_active',
+            'employees.created_by',
+            'employees.branch_id',
+            'employees.department_id',
+            'employees.designation_id',
+            'employees.company_doj',
+            'employees.documents',
+            'employees.dob',
+            'employees.gender',
+            'employees.basic_salary',
+            'employees.net_salary',
+            'employees.apc_no',
+            'employees.ifsc_code',
+            'employees.ptax_no',
+            'employees.pf_no',
+            'employees.esi_no',
+            'employees.pan_no',
+            'employees.aadhar_no',
+            'employees.cv',
+            'employees.declaration',
+            'employees.can_cheque',
+            'employees.employee',
+            'branches.name as b_name'
+        )
+        ->where('users.id', $id) // Ensure the user matches the ID
+        ->whereNotNull('employees.user_id') // Ensure the user is in the employees table
+        ->first();
 
-
-        return Inertia::render('employee/show', compact('employee'));
+    if (!$employee) {
+        return redirect()->back()->with('error', 'Employee not found.');
     }
+
+    return Inertia::render('employee/show', compact('employee'));
+}
+
 
 
     public function edit($id)

@@ -14,7 +14,8 @@ class Employee extends Model
     protected $fillable = [
         // 'name', // other fillable fields
         // 'email', // other fillable fields
-        'branch_id', // <-- Add this line
+        'branch_id', // <-- Add this line,
+        'employmentTypes'
       
     ];
 }
