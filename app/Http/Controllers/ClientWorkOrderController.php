@@ -13,10 +13,10 @@ class ClientWorkOrderController extends Controller
      */
     public function index()
     {
-        $clients = clientWO::all(); 
+        $clients = clientWO::all();
         return Inertia::render('clientWork/index', [
             'clients' => $clients,
-        ]); 
+        ]);
     }
 
     /**
@@ -80,10 +80,21 @@ class ClientWorkOrderController extends Controller
     /**
      * Remove the specified client from the database.
      */
-    public function destroy(clientWO $client)
+    public function destroy(Request $request, $id)
     {
-        $client->delete();
 
-        return redirect()->route('clientWork/index')->with('success', 'Client deleted successfully.');
+        $data = clientWO::find($id);
+
+
+        if ($data) {
+            // Delete the record
+            $data->delete();
+
+
+            return back()->with('success', 'Client work order deleted successfully!');
+        } else {
+            // If record not found, return an error message
+            return back()->with('error', 'Client work order not found!');
+        }
     }
 }
