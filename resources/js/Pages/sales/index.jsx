@@ -1,133 +1,190 @@
-// import AdminLayout from '@/Layouts/AdminLayout'
-import { Link, useForm } from "@inertiajs/react";
-import React from "react";
-import { FaPencil } from "react-icons/fa6";
-import { Notyf } from "notyf";
-import "notyf/notyf.min.css";
-import Modal from "@/Components/Modal";
-import Header from "@/Layouts/Header";
-import Nav from "@/Layouts/Nav";
-import { FaPrint } from "react-icons/fa";
+import React, { useState } from 'react';
+import { useForm } from '@inertiajs/react';
 
-const notyf = new Notyf();
-export default function index({ sales }) {
-    const formatLabel = (label) => {
-        return label
-            .split("_") // Split by underscore
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
-            .join(" "); // Join with a space
+const SellerWorkOrderIndex = ({ workOrders }) => {
+    const [editMode, setEditMode] = useState(false);
+
+    const { data, setData, post, put, reset, errors } = useForm({
+        id: null,
+        seller_name: '',
+        seller_address: '',
+        date_of_wo: '',
+        subject: '',
+    });
+
+    // Handle input change
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setData(name, value);
     };
-    const { delete: destroy } = useForm();
-    function handleDelete(id) {
-        event.preventDefault();
-        if (confirm("Are you sure you want to delete this sale?")) {
-            destroy(route("sales.destroy", id), {
-                onSuccess: () => {
-                    notyf.success("Sales deleted successfully!");
-                },
-                onError: () => {
-                    notyf.error("Failed to delete sales.");
-                },
+
+    // Handle form submission
+    const handleSave = (e) => {
+        e.preventDefault();
+
+        if (data.id) {
+            put(`/seller-work-orders/${data.id}`, {
+                onSuccess: () => resetForm(),
+            });
+        } else {
+            post('/seller-work-orders', {
+                onSuccess: () => resetForm(),
             });
         }
-    }
+    };
+
+    // Reset form and close inline form
+    const resetForm = () => {
+        reset();
+        setEditMode(false);
+    };
+
+    // Handle edit button click
+    const handleEdit = (order) => {
+        setData(order); // Populate form with selected work order
+        setEditMode(true);
+    };
+
+    // Handle delete button click
+    const handleDelete = (id) => {
+        if (confirm('Are you sure you want to delete this work order?')) {
+        post(`/seller-work-orders/${id}`);
+        }
+    };
+
     return (
-        <div className="w-[83.2%] ml-[11.5rem] absolute right-0 overflow-hidden">
-            <Header />
-            <Nav />
-            {/* <Modal show={true} maxWidth='2xl'>
-                <div className='flex items-center justify-between p-2 px-5'>
-                    <h1>Sales</h1>
-                    <button>X</button>
-                </div>
-                <div>
-                    <img src="https://equi.org.in/demo/amc/img/setting/logo_1718790982.png" alt="" />
-                    <div>
+        <div className="p-6">
+            <h1 className="text-3xl font-bold mb-6">Manage Work Orders</h1>
+            <button
+                onClick={() => {
+                    resetForm();
+                    setEditMode(true);
+                }}
+                className="bg-green-500 text-white px-4 py-2 rounded-md mb-4"
+            >
+                Create New Work Order
+            </button>
 
-                    </div>
-                </div>
-            </Modal> */}
-            <div className="p-6 bg-white rounded-lg shadow">
-                <div className="flex justify-between mb-4">
-                    <input
-                        type="text"
-                        placeholder="Search data..."
-                        className="w-[60%] p-2 border border-gray-300 rounded-md"
-                    />
-                    <Link
-                        href="sales/add"
-                        className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
-                    >
-                        Generate Invoice
-                    </Link>
-                </div>
-
-                <table className="w-full border border-collapse table-auto">
-                    <thead className="text-white bg-gray-700">
-                        <tr>
-                            <th className="p-3 text-left border">Bill No.</th>
-                            <th className="p-3 text-left border">
-                                Customer Name
-                            </th>
-                            <th className="p-3 text-left border">Date</th>
-                            <th className="p-3 text-left border">
-                                Billing Address
-                            </th>
-                            <th className="p-3 text-left border">Status</th>
-                            <th className="p-3 text-left border">Type</th>
-                            <th className="p-3 text-center border">Actions</th>
+            {/* Table */}
+            <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr>
+                        <th className="border border-gray-300 p-2">Seller Name</th>
+                        <th className="border border-gray-300 p-2">Seller Address</th>
+                        <th className="border border-gray-300 p-2">Date of WO</th>
+                        <th className="border border-gray-300 p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {workOrders.map((order) => (
+                        <tr key={order.id}>
+                            <td className="border border-gray-300 p-2">{order.seller_name}</td>
+                            <td className="border border-gray-300 p-2">{order.seller_address}</td>
+                            <td className="border border-gray-300 p-2">{order.date_of_wo}</td>
+                            <td className="border border-gray-300 p-2">
+                                <button
+                                    onClick={() => handleEdit(order)}
+                                    className="bg-blue-500 text-white px-2 py-1 rounded-md mr-2"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(order.id)}
+                                    className="bg-red-500 text-white px-2 py-1 rounded-md"
+                                >
+                                    Delete
+                                </button>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {sales &&
-                            sales.map((sale, index) => (
-                                <tr>
-                                    <td className="p-3">{sale.bill_no}</td>
-                                    <td className="p-3">{sale.name}</td>
-                                    <td className="p-3">{sale.date}</td>
-                                    <td className="p-3">
-                                        {sale.billing_address}
-                                    </td>
-                                    <td className="p-3">
-                                        {formatLabel(sale.status)}
-                                    </td>
-                                    <td className="p-3">
-                                        {sale.invoice_type === "pi"
-                                            ? "Proforma Invoice"
-                                            : sale.invoice_type === "tax"
-                                            ? "Tax Invoice"
-                                            : "Cash Invoice"}
-                                    </td>
-                                    <td className="flex gap-1 p-3">
-                                        <Link
-                                            href={route("sale.print", sale.id)}
-                                            className="flex items-center gap-1 px-2 py-1 text-sm font-medium text-white rounded bg-emerald-500"
-                                        >
-                                            <span>
-                                                <FaPrint />
-                                            </span>
-                                        </Link>
-                                        <Link
-                                            href={`/sales/${sale.id}/edit`}
-                                            className="flex items-center gap-1 px-2 py-1 text-sm font-medium text-white bg-blue-500 rounded"
-                                        >
-                                            <span>Edit</span>
-                                        </Link>
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                handleDelete(sale.id)
-                                            }
-                                            className="flex items-center gap-1 px-2 py-1 text-sm font-medium text-white bg-red-500 rounded"
-                                        >
-                                            <span>Delete</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                    </tbody>
-                </table>
-            </div>
+                    ))}
+                </tbody>
+            </table>
+
+            {/* Inline Form */}
+            {editMode && (
+                <div className="mt-6 p-4 border border-gray-300 rounded-md">
+                    <h2 className="text-xl font-semibold mb-4">
+                        {data.id ? 'Edit Work Order' : 'Create Work Order'}
+                    </h2>
+                    <form onSubmit={handleSave}>
+                        <div className="grid grid-cols-4 gap-4">
+                            <div className="col-span-1">
+                                <label className="block text-gray-700 mb-2">Seller Name</label>
+                                <input
+                                    type="text"
+                                    name="seller_name"
+                                    className="w-full border border-gray-300 rounded-md p-2"
+                                    value={data.seller_name}
+                                    onChange={handleInputChange}
+                                />
+                                {errors.seller_name && (
+                                    <span className="text-red-500 text-sm">{errors.seller_name}</span>
+                                )}
+                            </div>
+
+                            <div className="col-span-1">
+                                <label className="block text-gray-700 mb-2">Seller Address</label>
+                                <input
+                                    type="text"
+                                    name="seller_address"
+                                    className="w-full border border-gray-300 rounded-md p-2"
+                                    value={data.seller_address}
+                                    onChange={handleInputChange}
+                                />
+                                {errors.seller_address && (
+                                    <span className="text-red-500 text-sm">{errors.seller_address}</span>
+                                )}
+                            </div>
+
+                            <div className="col-span-1">
+                                <label className="block text-gray-700 mb-2">Date of WO</label>
+                                <input
+                                    type="date"
+                                    name="date_of_wo"
+                                    className="w-full border border-gray-300 rounded-md p-2"
+                                    value={data.date_of_wo}
+                                    onChange={handleInputChange}
+                                />
+                                {errors.date_of_wo && (
+                                    <span className="text-red-500 text-sm">{errors.date_of_wo}</span>
+                                )}
+                            </div>
+
+                            <div className="col-span-1">
+                                <label className="block text-gray-700 mb-2">Subject</label>
+                                <input
+                                    type="text"
+                                    name="subject"
+                                    className="w-full border border-gray-300 rounded-md p-2"
+                                    value={data.subject}
+                                    onChange={handleInputChange}
+                                />
+                                {errors.subject && (
+                                    <span className="text-red-500 text-sm">{errors.subject}</span>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-4 mt-4">
+                            <button
+                                type="button"
+                                onClick={resetForm}
+                                className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
         </div>
     );
-}
+};
+
+export default SellerWorkOrderIndex;

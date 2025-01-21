@@ -11,11 +11,55 @@ function WorkOrderPrint({ client }) {
   return (
     <div className="p-6 bg-white border rounded-lg shadow-md">
       {/* Company Header */}
-      <div className="text-center mb-6">
-        <h1 className="text-xl font-bold uppercase">
-        RSP Green Development & Laboratories Pvt. Ltd.</h1>
-        
+      <div className="bg-white p-8 max-w-4xl mx-auto shadow-md border border-gray-300">
+      {/* Header Section */}
+      <div className="flex justify-between items-center mb-6">
+        {/* Left Logo and Title */}
+        <div className="flex items-center space-x-4">
+          <img
+            src="path-to-rsp-logo.png"
+            alt="RSP Logo"
+            className="h-16 w-auto"
+          />
+          <div>
+            <p className="font-bold text-lg">RSP Green Development & Laboratories Pvt. Ltd.</p>
+            <p className="text-sm">An ISO 9001: 2015 & ISO 14001: 2015 Certified Company</p>
+          </div>
+        </div>
+        {/* Right Logo */}
+        <img
+          src="path-to-qci-nabet-logo.png"
+          alt="QCI NABET Logo"
+          className="h-16 w-auto"
+        />
       </div>
+
+      {/* PO Details */}
+      <div className="mb-6">
+        <p className="font-bold text-lg">P.O No: RSP/Admin/24-25/284</p>
+        <p className="font-bold text-lg text-red-600">
+          QCI-NABET ACCREDITED ENVIRONMENTAL CONSULTANT
+        </p>
+        <p className="text-sm">CIN NO: U74999WB2017PTC219565</p>
+      </div>
+
+      {/* Contact Section */}
+      <div className="mb-6">
+        <p className="text-sm">To,</p>
+        <p className="font-bold">Equiconsulting Services Private Limited</p>
+        <p className="text-sm">
+          A.P. Nagar, Sonarpur, Dist. 24 Pgs (s), Sonarpur
+        </p>
+        <p className="text-sm">WB, India PIN Code: 700150</p>
+        <p className="text-sm">Contact no: 9831186569</p>
+        <p className="text-sm">Email ID: provrsp@gmail.com</p>
+      </div>
+
+      {/* Date Section */}
+      <div className="text-right font-bold">
+        <p>Dated: 04.10.2024</p>
+      </div>
+    </div>
 
       {/* Work Order Header */}
       <div className="flex justify-between items-center mb-6 border-b pb-4">

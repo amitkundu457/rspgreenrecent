@@ -1,162 +1,240 @@
-import React, { useState } from 'react';
-import { useForm } from '@inertiajs/react';
+import React, { useEffect, useState } from "react";
+import { FaEdit, FaTrashAlt, FaFilePdf } from "react-icons/fa";
+import Header from "@/Layouts/Header";
+import Nav from "@/Layouts/Nav";
+import axios from "axios";
+import { Link, useForm } from "@inertiajs/react";
 
-const SellerWorkOrderIndex = ({ workOrders }) => {
-    const [editMode, setEditMode] = useState(false);
+const Index = ({ workOrders,user, notif,user_type}) => {
+  const { data, setData, post, put, reset, processing } = useForm({
+    id: null,
+    seller_name: '',
+    seller_address: '',
+    date_of_wo: '',
+    subject: '',
+    contact_person_name: '',
+    job_details: '',
+    task: '',
+    quantity: '',
+    uom: '',
+    rate: '',
+    amount: '',
+  });
 
-    const { data, setData, post, put, reset, errors } = useForm({
-        id: null,
-        seller_name: '',
-        seller_address: '',
-        date_of_wo: '',
-        subject: '',
-        contact_person_name: '',
-        job_details: '',
-        task: '',
-        quantity: '',
-        uom: '',
-        rate: '',
-        amount: '',
-        hsn_code: '',
-        gst_rate: '',
-        total_with_gst: '',
-    });
+  const [isEditing, setIsEditing] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-    // Handle input change
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setData(name, value);
-    };
+  useEffect(() => {
+    fetchWorkOrders();
+  }, []);
 
-    // Handle form submit (create or update)
-    const handleSave = (e) => {
-        e.preventDefault();
+  const fetchWorkOrders = async () => {
+    try {
+      const response = await axios.get("/seller-work-orders");
+      setWorkOrders(response.data);
+    } catch (error) {
+      console.error("Error fetching work orders:", error);
+    }
+  };
 
-        if (data.id) {
-            // Edit mode: Update the work order
-            put(`/seller-work-orders/${data.id}`, {
-                onSuccess: () => {
-                    resetForm();
-                },
-            });
-        } else {
-            // Create mode: Create a new work order
-            post('/seller-work-orders', {
-                onSuccess: () => {
-                    resetForm();
-                },
-            });
-        }
-    };
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
+    if (files) {
+      setData((prevData) => ({
+        ...prevData,
+        [name]: files[0],
+      }));
+    } else {
+      setData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
+  };
 
-    // Reset form and toggle off modal
-    const resetForm = () => {
-        reset();
-        setEditMode(false);
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isEditing) {
+      await updateWorkOrder();
+    } else {
+      await createWorkOrder();
+    }
+  };
 
-    // Handle edit button click
-    const handleEdit = (order) => {
-        setData(order); // Populate form with selected work order
-        setEditMode(true);
-    };
+  const createWorkOrder = async () => {
+    try {
+      const formDataObject = new FormData();
+      Object.keys(data).forEach((key) => {
+        formDataObject.append(key, data[key]);
+      });
 
-    // Handle delete button click
-    const handleDelete = (id) => {
-        if (confirm('Are you sure you want to delete this work order?')) {
-            Inertia.delete(`/seller-work-orders/${id}`);
-        }
-    };
+      const response = await axios.post("/seller-work-orders", formDataObject);
+      setWorkOrders([...workOrders, response.data]);
+      resetForm();
+    } catch (error) {
+      console.error("Error creating work order:", error);
+    }
+  };
 
-    return (
-        <div>
-            <h1>Seller Work Orders</h1>
-            <button onClick={() => setEditMode(true)}>Create New Work Order</button>
+  const updateWorkOrder = async () => {
+    try {
+      const formDataObject = new FormData();
+      Object.keys(data).forEach((key) => {
+        formDataObject.append(key, data[key]);
+      });
 
-            {/* Modal for creating or editing work order */}
-            {editMode && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        padding: '20px',
-                        background: '#fff',
-                        border: '1px solid #ccc',
-                        zIndex: 1000,
-                    }}
-                >
-                    <h2>{data.id ? 'Edit Work Order' : 'Create Work Order'}</h2>
-                    <form onSubmit={handleSave}>
-                        <input
-                            type="text"
-                            name="seller_name"
-                            placeholder="Seller Name"
-                            value={data.seller_name}
-                            onChange={handleInputChange}
-                        />
-                        {errors.seller_name && <div style={{ color: 'red' }}>{errors.seller_name}</div>}
+      const response = await axios.put(
+        `/seller-work-orders/${data.id}`,
+        formDataObject
+      );
 
-                        <input
-                            type="text"
-                            name="seller_address"
-                            placeholder="Seller Address"
-                            value={data.seller_address}
-                            onChange={handleInputChange}
-                        />
-                        {errors.seller_address && <div style={{ color: 'red' }}>{errors.seller_address}</div>}
+      setWorkOrders(
+        workOrders.map((wo) =>
+          wo.id === data.id ? response.data : wo
+        )
+      );
+      resetForm();
+    } catch (error) {
+      console.error("Error updating work order:", error);
+    }
+  };
 
-                        <input
-                            type="date"
-                            name="date_of_wo"
-                            value={data.date_of_wo}
-                            onChange={handleInputChange}
-                        />
-                        {errors.date_of_wo && <div style={{ color: 'red' }}>{errors.date_of_wo}</div>}
+  const resetForm = () => {
+    reset();
+    setIsEditing(false);
+    setShowModal(false);
+  };
 
-                        <input
-                            type="text"
-                            name="subject"
-                            placeholder="Subject"
-                            value={data.subject}
-                            onChange={handleInputChange}
-                        />
-                        {errors.subject && <div style={{ color: 'red' }}>{errors.subject}</div>}
+  const handleEdit = (workOrder) => {
+    setData(workOrder);
+    setIsEditing(true);
+    setShowModal(true);
+  };
 
-                        {/* Additional fields here */}
-                        <button type="submit">Save</button>
-                        <button type="button" onClick={() => resetForm()}>Cancel</button>
-                    </form>
-                </div>
-            )}
+  const deleteWorkOrder = async (id) => {
+    try {
+      await axios.delete(`/seller-work-orders/${id}`);
+      setWorkOrders(workOrders.filter((wo) => wo.id !== id));
+    } catch (error) {
+      console.error("Error deleting work order:", error);
+    }
+  };
 
-            {/* Table displaying work orders */}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Seller Name</th>
-                        <th>Seller Address</th>
-                        <th>Date of WO</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {workOrders.map((order) => (
-                        <tr key={order.id}>
-                            <td>{order.seller_name}</td>
-                            <td>{order.seller_address}</td>
-                            <td>{order.date_of_wo}</td>
-                            <td>
-                                <button onClick={() => handleEdit(order)}>Edit</button>
-                                <button onClick={() => handleDelete(order.id)}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+  return (
+    <div className="w-[85%] absolute right-0 overflow-hidden bg-gray-100 min-h-screen">
+      <Header user={user} notif={notif} />
+      <Nav user_type={user_type} />
+      <div className="p-8 bg-white rounded-b-md">
+        <h1 className="text-xl font-bold mb-4">Manage Work Orders</h1>
+        <button
+          onClick={() => setShowModal(true)}
+          className="mb-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+        >
+          Create Work Order
+        </button>
+
+        {showModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded shadow-md w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <form onSubmit={handleSubmit}>
+        {/* Add all input fields */}
+        {[
+          "seller_name",
+          "seller_address",
+          "date_of_wo",
+          "subject",
+          "contact_person_name",
+          "job_details",
+          "task",
+          "quantity",
+          
+          "rate",
+          "amount",
+        ].map((field, index) => (
+          <div className="mb-4" key={index}>
+            <label className="block mb-2 capitalize">
+              {field.replace(/_/g, " ")}
+            </label>
+            <input
+              type={field === "date_of_wo" ? "date" : "text"}
+              name={field}
+              value={data[field]}
+              onChange={handleInputChange}
+              className="border w-full p-2 rounded"
+              required
+            />
+          </div>
+        ))}
+
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={resetForm}
+            className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+            disabled={processing}
+          >
+            {isEditing ? "Update" : "Create"}
+          </button>
         </div>
-    );
+      </form>
+    </div>
+  </div>
+)}
+
+
+        {/* Table with new fields */}
+        <table className="w-full border text-left bg-white rounded shadow">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border px-4 py-2">Seller Name</th>
+              <th className="border px-4 py-2">Address</th>
+              <th className="border px-4 py-2">Date of WO</th>
+              <th className="border px-4 py-2">Subject</th>
+              <th className="border px-4 py-2">Contact Person</th>
+              <th className="border px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {workOrders.map((workOrder) => (
+              <tr key={workOrder.id} className="hover:bg-gray-50">
+                <td className="border px-4 py-2">{workOrder.seller_name}</td>
+                <td className="border px-4 py-2">{workOrder.seller_address}</td>
+                <td className="border px-4 py-2">{workOrder.date_of_wo}</td>
+                <td className="border px-4 py-2">{workOrder.subject}</td>
+                <td className="border px-4 py-2">{workOrder.contact_person_name}</td>
+                <td className="border px-4 py-2 flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(workOrder)}
+                    className="text-blue-500 hover:text-blue-600"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => deleteWorkOrder(workOrder.id)}
+                    className="text-red-500 hover:text-red-600"
+                  >
+                    <FaTrashAlt />
+                  </button>
+                  <Link
+                    href={`/clients-workOrder/${workOrder.id}/show`}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <FaFilePdf />
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 };
 
-export default SellerWorkOrderIndex;
+export default Index;

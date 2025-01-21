@@ -340,13 +340,10 @@ Route::resource('clients-workOrder', ClientWorkOrderController::class);
 
 Route::get('/clients-workOrder/{id}/show', [ClientWorkOrderController::class, 'showPdf']);
 
-Route::get('/seller-work-orders', [SellerWorkOrderController::class, 'index']);
-Route::post('/seller-work-orders', [SellerWorkOrderController::class, 'store']);
-
-
-Route::put('/seller-work-orders/{id}', [SellerWorkOrderController::class, 'update']);
-Route::delete('/seller-work-orders/{id}', [SellerWorkOrderController::class, 'destroy']);
-
+Route::get('/seller-work-orders', [SellerWorkOrderController::class, 'index'])->name('sallerWork/index');
+Route::post('/seller-work-orders', [SellerWorkOrderController::class, 'store'])->name('sallerWork/index');
+Route::put('/seller-work-orders/{id}', [SellerWorkOrderController::class, 'update'])->name('sallerWork/index');
+Route::post('/seller-work-orders/{id}', [SellerWorkOrderController::class, 'destroy'])->name('sallerWork/index');
 
 
 
