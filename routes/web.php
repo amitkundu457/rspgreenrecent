@@ -53,6 +53,7 @@ use App\Http\Controllers\ClientWorkOrderController;
 use App\Http\Controllers\HolidayLocationController;
 use App\Http\Controllers\LeaveManagementController;
 use App\Http\Controllers\NotificationAllController;
+use App\Http\Controllers\SellerWorkOrderController;
 use App\Http\Controllers\ServiceCategoryController;
 use Flasher\Prime\Test\Constraint\NotificationCount;
 
@@ -338,6 +339,19 @@ Route::resource('enquiry', QuoteRequestController::class);
 Route::resource('clients-workOrder', ClientWorkOrderController::class);
 
 Route::get('/clients-workOrder/{id}/show', [ClientWorkOrderController::class, 'showPdf']);
+
+Route::get('/seller-work-orders', [SellerWorkOrderController::class, 'index']);
+Route::post('/seller-work-orders', [SellerWorkOrderController::class, 'store']);
+
+
+Route::put('/seller-work-orders/{id}', [SellerWorkOrderController::class, 'update']);
+Route::delete('/seller-work-orders/{id}', [SellerWorkOrderController::class, 'destroy']);
+
+
+
+
+
+
 
 Route::get('/Get-Customer/{id}', [QuotationController::class, 'getCustomer']);
 Route::get('/getproduct', [QuotationController::class, 'getproduct']);

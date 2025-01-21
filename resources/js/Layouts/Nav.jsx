@@ -179,6 +179,10 @@ const Nav = ({ user_type, usrrr }) => {
                                     name: "Client Work-Order",
                                     link: "/clients-workOrder",
                                 },
+                                {
+                                    name: "Seller Work-Order",
+                                    link: "/seller-work-orders",
+                                },
                             ]}
                         />
                     )}
