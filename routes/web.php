@@ -337,6 +337,8 @@ Route::resource('/Quotation', QuotationController::class);
 Route::resource('enquiry', QuoteRequestController::class);
 Route::resource('clients-workOrder', ClientWorkOrderController::class);
 
+Route::get('/clients-workOrder/{id}/show', [ClientWorkOrderController::class, 'showPdf']);
+
 Route::get('/Get-Customer/{id}', [QuotationController::class, 'getCustomer']);
 Route::get('/getproduct', [QuotationController::class, 'getproduct']);
 Route::get('/gettaxoptions', [QuotationController::class, 'gettaxoptions']);

@@ -1,285 +1,272 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { FaEdit, FaTrashAlt, FaFilePdf } from "react-icons/fa";
 import Header from "@/Layouts/Header";
 import Nav from "@/Layouts/Nav";
 import axios from "axios";
+import { Link, useForm } from "@inertiajs/react";
 
 const Index = ({ clients, user, notif, user_type }) => {
-    const [workOrders, setWorkOrders] = useState([]);
-    const [formData, setFormData] = useState({
-        id: null,
-        client_name: "",
-        client_address: "",
-        client_phone_no: "",
-        client_work_order: "",
-        work_order_date: "",
-    });
-    const [isEditing, setIsEditing] = useState(false);
-    const [showForm, setShowForm] = useState(false); // State to toggle form visibility
+  const { data, setData, post, put, reset, processing } = useForm({
+    id: null,
+    client_name: "",
+    client_address: "",
+    client_phone_no: "",
+    client_work_order: "",
+    work_order_date: "",
+    document: null,
+  });
 
-    // Fetch data on initial render
-    useEffect(() => {
-        fetchWorkOrders();
-    }, []);
+  const [workOrders, setWorkOrders] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-    const fetchWorkOrders = async () => {
-        try {
-            const response = await axios.get("/clients-workOrder");
-            setWorkOrders(response.data);
-        } catch (error) {
-            console.error("Error fetching work orders:", error);
-        }
-    };
+  useEffect(() => {
+    fetchWorkOrders();
+  }, []);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
+  const fetchWorkOrders = async () => {
+    try {
+      const response = await axios.get("/clients-workOrder");
+      setWorkOrders(response.data);
+    } catch (error) {
+      console.error("Error fetching work orders:", error);
+    }
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (isEditing) {
-            await updateWorkOrder();
-        } else {
-            await createWorkOrder();
-        }
-    };
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
+    if (files) {
+      setData((prevData) => ({
+        ...prevData,
+        [name]: files[0],
+      }));
+    } else {
+      setData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
+  };
 
-    const createWorkOrder = async () => {
-        try {
-            const response = await axios.post("/clients-workOrder", formData);
-            setWorkOrders([...workOrders, response.data]);
-            setFormData({
-                id: null,
-                client_name: "",
-                client_address: "",
-                client_phone_no: "",
-                client_work_order: "",
-                work_order_date: "",
-            });
-            setShowForm(false); // Hide form after submission
-        } catch (error) {
-            console.error("Error creating work order:", error);
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isEditing) {
+      await updateWorkOrder();
+    } else {
+      await createWorkOrder();
+    }
+  };
 
-    const updateWorkOrder = async () => {
-        try {
-            const response = await axios.put(
-                `/clients-workOrder/${formData.id}`,
-                formData
-            );
-            setWorkOrders(
-                workOrders.map((wo) =>
-                    wo.id === formData.id ? response.data : wo
-                )
-            );
-            setFormData({
-                id: null,
-                client_name: "",
-                client_address: "",
-                client_phone_no: "",
-                client_work_order: "",
-                work_order_date: "",
-            });
-            setIsEditing(false);
-            setShowForm(false); // Hide form after update
-        } catch (error) {
-            console.error("Error updating work order:", error);
-        }
-    };
+  const createWorkOrder = async () => {
+    try {
+      const formDataObject = new FormData();
+      Object.keys(data).forEach((key) => {
+        formDataObject.append(key, data[key]);
+      });
 
-    const deleteWorkOrder = async (id) => {
-        try {
-            await axios.delete(`/clients-workOrder/${id}`);
-            setWorkOrders(workOrders.filter((wo) => wo.id !== id));
-        } catch (error) {
-            console.error("Error deleting work order:", error);
-        }
-    };
+      const response = await axios.post("/clients-workOrder", formDataObject);
+      setWorkOrders([...workOrders, response.data]);
+      resetForm();
+    } catch (error) {
+      console.error("Error creating work order:", error);
+    }
+  };
 
-    const handleEdit = (workOrder) => {
-        setFormData(workOrder);
-        setIsEditing(true);
-        setShowForm(true); // Show form when editing
-    };
+  const updateWorkOrder = async () => {
+    try {
+      const formDataObject = new FormData();
+      Object.keys(data).forEach((key) => {
+        formDataObject.append(key, data[key]);
+      });
 
-    return (
-        <div className="w-[85.2%] absolute right-0 overflow-hidden">
-            <Header user={user} notif={notif} />
-            <Nav user_type={user_type} />
-            <div className="p-8 bg-white rounded-b-md">
-                <h1 className="text-xl font-bold mb-4">Manage Work Orders</h1>
+      const response = await axios.put(
+        `/clients-workOrder/${data.id}`,
+        formDataObject
+      );
 
-                {/* Button to toggle form visibility */}
-                <button
-                    onClick={() => setShowForm(!showForm)}
-                    className="mb-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
-                >
-                    {showForm ? "Cancel" : "Create Work Order"}
-                </button>
+      setWorkOrders(
+        workOrders.map((wo) =>
+          wo.id === data.id ? response.data : wo
+        )
+      );
+      resetForm();
+    } catch (error) {
+      console.error("Error updating work order:", error);
+    }
+  };
 
-                {/* Form Section */}
-                {showForm && (
-                    <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-                        {/* Client Name */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Client Name
-                            </label>
-                            <input
-                                type="text"
-                                name="client_name"
-                                value={formData.client_name}
-                                onChange={handleInputChange}
-                                className="border w-full p-2 rounded"
-                                required
-                            />
-                        </div>
+  const resetForm = () => {
+    reset();
+    setIsEditing(false);
+    setShowModal(false);
+  };
 
-                        {/* Client Address */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Client Address
-                            </label>
-                            <input
-                                type="text"
-                                name="client_address"
-                                value={formData.client_address}
-                                onChange={handleInputChange}
-                                className="border w-full p-2 rounded"
-                                required
-                            />
-                        </div>
+  const handleEdit = (workOrder) => {
+    setData(workOrder);
+    setIsEditing(true);
+    setShowModal(true);
+  };
 
-                        {/* Client Phone Number */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Client Phone No
-                            </label>
-                            <input
-                                type="text"
-                                name="client_phone_no"
-                                value={formData.client_phone_no}
-                                onChange={handleInputChange}
-                                className="border w-full p-2 rounded"
-                                maxLength="15"
-                                required
-                            />
-                        </div>
+  const deleteWorkOrder = async (id) => {
+    try {
+      await axios.delete(`/clients-workOrder/${id}`);
+      setWorkOrders(workOrders.filter((wo) => wo.id !== id));
+    } catch (error) {
+      console.error("Error deleting work order:", error);
+    }
+  };
 
-                        {/* Client Work Order */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Client Work Order
-                            </label>
-                            <input
-                                type="text"
-                                name="client_work_order"
-                                value={formData.client_work_order}
-                                onChange={handleInputChange}
-                                className="border w-full p-2 rounded"
-                                maxLength="255"
-                                required
-                            />
-                        </div>
+  return (
+    <div className="w-[85%] absolute right-0 overflow-hidden bg-gray-100 min-h-screen">
+      <Header user={user} notif={notif} />
+      <Nav user_type={user_type} />
+      <div className="p-8 bg-white rounded-b-md">
+        <h1 className="text-xl font-bold mb-4">Manage Work Orders</h1>
+        <button
+          onClick={() => setShowModal(true)}
+          className="mb-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+        >
+          Create Work Order
+        </button>
 
-                        {/* Work Order Date */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Work Order Date
-                            </label>
-                            <input
-                                type="date"
-                                name="work_order_date"
-                                value={formData.work_order_date}
-                                onChange={handleInputChange}
-                                className="border w-full p-2 rounded"
-                                required
-                            />
-                        </div>
-
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-                        >
-                            {isEditing ? "Update" : "Create"} Work Order
-                        </button>
-                    </form>
-                )}
-
-                {/* Table Section */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left border">
-                        <thead className="bg-gray-100">
-                            <tr>
-                                <th className="px-4 py-2 border">ID</th>
-                                <th className="px-4 py-2 border">
-                                    Client Name
-                                </th>
-                                <th className="px-4 py-2 border">
-                                    Client Address
-                                </th>
-                                <th className="px-4 py-2 border">
-                                    Client Phone No
-                                </th>
-                                <th className="px-4 py-2 border">Work Order</th>
-                                <th className="px-4 py-2 border">
-                                    Work Order Date
-                                </th>
-                                <th className="px-4 py-2 border">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {clients.map((workOrder) => (
-                                <tr
-                                    key={workOrder.id}
-                                    className="hover:bg-gray-50"
-                                >
-                                    <td className="px-4 py-2 border">
-                                        {workOrder.id}
-                                    </td>
-                                    <td className="px-4 py-2 border">
-                                        {workOrder.client_name}
-                                    </td>
-                                    <td className="px-4 py-2 border">
-                                        {workOrder.client_address}
-                                    </td>
-                                    <td className="px-4 py-2 border">
-                                        {workOrder.client_phone_no}
-                                    </td>
-                                    <td className="px-4 py-2 border">
-                                        {workOrder.client_work_order}
-                                    </td>
-                                    <td className="px-4 py-2 border">
-                                        {workOrder.work_order_date}
-                                    </td>
-                                    <td className="px-4 py-2 border">
-                                        <button
-                                            onClick={() =>
-                                                handleEdit(workOrder)
-                                            }
-                                            className="text-blue-500 mr-2"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                deleteWorkOrder(workOrder.id)
-                                            }
-                                            className="text-red-500"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
+              <h2 className="text-lg font-bold mb-4">
+                {isEditing ? "" : ""}
+              </h2>
+              <form onSubmit={handleSubmit}>
+                <div className="mb-4">
+                  <label className="block mb-2">Name</label>
+                  <input
+                    type="text"
+                    name="client_name"
+                    value={data.client_name}
+                    onChange={handleInputChange}
+                    className="border w-full p-2 rounded"
+                    required
+                  />
                 </div>
+                <div className="mb-4">
+                  <label className="block mb-2">Address</label>
+                  <input
+                    type="text"
+                    name="client_address"
+                    value={data.client_address}
+                    onChange={handleInputChange}
+                    className="border w-full p-2 rounded"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-2">Phone No</label>
+                  <input
+                    type="text"
+                    name="client_phone_no"
+                    value={data.client_phone_no}
+                    onChange={handleInputChange}
+                    className="border w-full p-2 rounded"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-2">Work Title</label>
+                  <input
+                    type="text"
+                    name="client_work_order"
+                    value={data.client_work_order}
+                    onChange={handleInputChange}
+                    className="border w-full p-2 rounded"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-2">Work Order Date</label>
+                  <input
+                    type="date"
+                    name="work_order_date"
+                    value={data.work_order_date}
+                    onChange={handleInputChange}
+                    className="border w-full p-2 rounded"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-2">Document</label>
+                  <input
+                    type="file"
+                    name="document"
+                    onChange={handleInputChange}
+                    className="border w-full p-2 rounded"
+                  />
+                </div>
+                <div className="flex justify-between">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                    disabled={processing}
+                  >
+                    {isEditing ? "Update" : "Create"}
+                  </button>
+                </div>
+              </form>
             </div>
-        </div>
-    );
+          </div>
+        )}
+
+        <table className="w-full border text-left bg-white rounded shadow">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border px-4 py-2">Name</th>
+              <th className="border px-4 py-2">Address</th>
+              <th className="border px-4 py-2">Phone No</th>
+              <th className="border px-4 py-2">Work Order Title</th>
+              <th className="border px-4 py-2">Work Order Date</th>
+              <th className="border px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {clients.map((workOrder) => (
+              <tr key={workOrder.id} className="hover:bg-gray-50">
+                <td className="border px-4 py-2">{workOrder.client_name}</td>
+                <td className="border px-4 py-2">{workOrder.client_address}</td>
+                <td className="border px-4 py-2">{workOrder.client_phone_no}</td>
+                <td className="border px-4 py-2">{workOrder.client_work_order}</td>
+                <td className="border px-4 py-2">{workOrder.work_order_date}</td>
+                <td className="border px-4 py-2 flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(workOrder)}
+                    className="text-blue-500 hover:text-blue-600"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => deleteWorkOrder(workOrder.id)}
+                    className="text-red-500 hover:text-red-600"
+                  >
+                    <FaTrashAlt />
+                  </button>
+                  <Link
+                    href={`/clients-workOrder/${workOrder.id}/show`}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <FaFilePdf />
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 };
 
 export default Index;

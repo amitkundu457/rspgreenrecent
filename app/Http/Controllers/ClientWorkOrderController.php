@@ -20,81 +20,117 @@ class ClientWorkOrderController extends Controller
     }
 
     /**
-     * Show the form for creating a new client.
-     */
-    public function create()
-    {
-        return Inertia::render('clientWork/index'); // Return Inertia response for creating a client
-    }
-
-    /**
      * Store a newly created client in the database.
      */
     public function store(Request $request)
     {
-        // Validate the input
-        $request->validate([
-            'client_name' => 'required|string|max:255',
-            'client_address' => 'required|string',
-            'client_phone_no' => 'required|string|max:15',
-            'client_work_order' => 'required|string|max:255',
-            'work_order_date' => 'required|date',
+        $validated = $request->validate([
+            'client_name' => 'required',
+            'client_address' => 'required',
+            'client_phone_no' => 'required',
+            'client_work_order' => 'required',
+            'work_order_date' => 'required',
+            'document' => 'nullable', // Only document file validation
         ]);
 
-        // Create a new client
-        clientWO::create($request->all());
+        // Store the document if provided
+        if ($request->hasFile('document')) {
+            $validated['document'] = $request->file('document')->store('work_order_documents', 'public');
+        }
 
-        return redirect()->route('clientWork/index')->with('success', 'Client created successfully.');
-    }
+        clientWO::create($validated);
 
-    /**
-     * Show the form for editing the specified client.
-     */
-    public function edit(clientWO $client)
-    {
-        return Inertia::render('clientWork/index', [
-            'client' => $client,
-        ]); // Return Inertia response for editing the client
-    }
-
-    /**
-     * Update the specified client in the database.
-     */
-    public function update(Request $request, clientWO $client)
-    {
-        // Validate the input
-        $request->validate([
-            'client_name' => 'required|string|max:255',
-            'client_address' => 'required|string',
-            'client_phone_no' => 'required|string|max:15',
-            'client_work_order' => 'required|string|max:255',
-            'work_order_date' => 'required|date',
-        ]);
-
-        // Update the client
-        $client->update($request->all());
-
-        return redirect()->route('clientWork/index')->with('success', 'Client updated successfully.');
+        return redirect()->route('clientWork/index')->with('success', 'Client Work Order created successfully.');
     }
 
     /**
      * Remove the specified client from the database.
      */
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
+        $client = clientWO::find($id);
 
-        $data = clientWO::find($id);
-
-
-        if ($data) {
-            // Delete the record
-            $data->delete();
-
-
-            return back()->with('success', 'Client work order deleted successfully!');
-        } else {
-            // If record not found, return an error message
-            return back()->with('error', 'Client work order not found!');
+        if (!$client) {
+            return back()->with('error', 'Client Work Order not found.');
         }
+
+        // Delete the associated document if it exists
+        if ($client->document) {
+            \Storage::delete('public/' . $client->document);
+        }
+
+        $client->delete();
+
+        return back()->with('success', 'Client Work Order deleted successfully.');
+    }
+
+    /**
+     * Show the form for editing the specified client.
+     */
+    public function edit($id)
+    {
+        $client = clientWO::find($id);
+
+        if (!$client) {
+            return back()->with('error', 'Client Work Order not found.');
+        }
+
+        return Inertia::render('clientWork/index', [
+            'client' => $client,
+        ]);
+    }
+
+    /**
+     * Update the specified client in the database.
+     */
+    public function update(Request $request, $id)
+    {
+        $client = clientWO::find($id);
+
+        if (!$client) {
+            return back()->with('error', 'Client Work Order not found.');
+        }
+
+        $validated = $request->validate([
+            'client_name' => 'required',
+            'client_address' => 'required',
+            'client_phone_no' => 'required',
+            'client_work_order' => 'required',
+            'work_order_date' => 'required',
+            'document' => 'nullable', // Only document file validation
+        ]);
+
+        // Update the document if provided
+        if ($request->hasFile('document')) {
+            // Delete the old document if it exists
+            if ($client->document) {
+                \Storage::delete('public/' . $client->document);
+            }
+            $validated['document'] = $request->file('document')->store('work_order_documents', 'public');
+        }
+
+        $client->update($validated);
+
+        return redirect()->route('clientWork/index')->with('success', 'Client Work Order updated successfully.');
+    }
+
+    /**
+     * Show the PDF of the specified client work order.
+     */
+    public function showPdf($id)
+    {
+        $client = clientWO::find($id);
+
+        if (!$client) {
+            return back()->with('error', 'Client Work Order not found.');
+        }
+
+        // Get the document path if it exists
+        $documentPath = $client->document ? 'storage/' . $client->document : null;
+
+        return Inertia::render('clientWork/pdf', [
+            'client' => $client,
+            'documentPath' => $documentPath,
+        ]);
     }
 }
