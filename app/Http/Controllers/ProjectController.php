@@ -36,6 +36,7 @@ class ProjectController extends Controller
         $projects = Project::all();
         // dd($projects);
         $employees = Employee::all();
+        // dd($employees);
         $notif = Auth::user()->notifications;
         return Inertia::render('projects/projects', compact('projects', 'user', 'employees', 'user_type', 'notif'));
     }
@@ -77,6 +78,7 @@ class ProjectController extends Controller
             // dd($permissions);
         }
         $notif = Auth::user()->notifications;
+
         return Inertia::render('projects/create', compact('employees', 'user_type', 'user', 'notif'));
     }
 
@@ -87,6 +89,7 @@ class ProjectController extends Controller
     {
         // dd($request->all());
         $project = new Project();
+
         $project->title = $request->title;
         $project->estimate_time = $request->estimate_time;
         $project->estimate_budget = $request->estimate_budget;
@@ -213,13 +216,13 @@ class ProjectController extends Controller
         // $task = Project::with(['tasks', 'users'])->get();
         $taskcategory = TaskCategory::all();
         // if(Auth::user()->hasRole('admin')){
-            $tasks = Project::with(['tasks.users' => function ($query) {
-                $query->withPivot('employee_hours');
-            }])->get();
+        $tasks = Project::with(['tasks.users' => function ($query) {
+            $query->withPivot('employee_hours');
+        }])->get();
         // }else{
         //     // $tasks = 
         // }
-            //    dd($tasks);
+        //    dd($tasks);
         $projects = Project::all();
         $notif = Auth::user()->notifications;
         return Inertia::render('projects/task', compact('tasks', 'user', 'user_type', 'notif', 'taskcategory', 'employee', 'projects'));
@@ -227,26 +230,43 @@ class ProjectController extends Controller
     public function taskCreate()
     {
         $projects = Project::all();
-        // dd($projects);
+
+        $allEmployees = Employee::join('users', 'employees.user_id', '=', 'users.id')
+            ->select('employees.*', 'users.name as employee_name')
+            ->get();
+        $employees = User::role('Employee')->get(); // Fetch users with "Employee" role
+
         $taskcategory = TaskCategory::all();
-        $employees = User::role('Employee')->get();
         $tls = User::role('Team Leader')->get();
         $stages = StageOfProject::all();
-        // dd($stages);
+
         $userss = Auth::user();
         $user = Auth::user()->name;
+
         if ($userss) {
             // Ensure permissions are assigned and fetched correctly
             $user_type = $userss->getAllPermissions()->pluck('name')->toArray();
-            // dd($permissions);
         }
+
         $notif = Auth::user()->notifications;
-        return Inertia::render('projects/task-create', compact('tls','employees', 'projects', 'taskcategory', 'user', 'user_type', 'notif','stages'));
+
+        return Inertia::render('projects/task-create', compact(
+            'tls',
+            'employees',
+            'projects',
+            'taskcategory',
+            'user',
+            'user_type',
+            'notif',
+            'stages',
+            'allEmployees'
+        ));
     }
+
 
     public function taskStore(Request $request)
     {
-                // dd($request->all());
+        // dd($request->all());
         $project = new Task();
         $project->task_name = $request->task_name;
         $project->estimate_hours = $request->estimate_hours;
@@ -260,9 +280,9 @@ class ProjectController extends Controller
         $project->status = 0;
         // $project->employee_id = $request->employee_id;
         $project->save();
-        
+
         Notification::send(User::whereIn('id', $request->employee_id)->get(), new NotificationsTaskAssign($project->task_name, 'New Task Assigned'));
-        if(isset($request->employee_id)){
+        if (isset($request->employee_id)) {
             foreach ($request->employee_id as $employee_id) {
                 $assign = new TaskAssign();
                 $assign->task_id = $project->id;
@@ -274,8 +294,8 @@ class ProjectController extends Controller
             }
         }
 
-        if(isset($request->leader_id)){
-            foreach($request->leader_id as $leader){
+        if (isset($request->leader_id)) {
+            foreach ($request->leader_id as $leader) {
                 $tl = new Team();
                 $tl->task_id = $project->id;
                 $tl->user_id = $leader;
@@ -344,7 +364,7 @@ class ProjectController extends Controller
 
     public function Taskedit(Project $project, $id)
     {
-        $project = Task::with(['assignments.employee','team'])->findOrFail($id);
+        $project = Task::with(['assignments.employee', 'team'])->findOrFail($id);
         $userss = Auth::user();
         $user = Auth::user()->name;
         if ($userss) {
@@ -357,7 +377,7 @@ class ProjectController extends Controller
         $tls = User::role('Team Leader')->get();
         $notif = Auth::user()->notifications;
         return Inertia::render('projects/task-edit', [
-            'tls'=>$tls,
+            'tls' => $tls,
             'project' => $project,
             'employees' => $employees,
             'projects' => $projects,
@@ -386,7 +406,7 @@ class ProjectController extends Controller
         // First, delete the existing assignments
         TaskAssign::where('task_id', $id)->delete();
 
-        Team::where('task_id',$id)->delete();
+        Team::where('task_id', $id)->delete();
         // Then, create new assignments based on the updated employee IDs
         foreach ($request->employee_id as $employee_id) {
             $assign = new TaskAssign();
@@ -394,10 +414,10 @@ class ProjectController extends Controller
             $assign->employee_id = $employee_id;
             $assign->employee_hours = $request->employee_hours[$employee_id] ?? 0;
             $assign->save();
-            //            dd($assign);
+            // dd($assign);
         }
 
-        foreach($request->leader_id as $leader){
+        foreach ($request->leader_id as $leader) {
             $tl = new Team();
             $tl->task_id = $task->id;
             $tl->user_id = $leader;
@@ -565,10 +585,11 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function taskcalendar(){
-        $events = Project::join('tasks','tasks.project_id','=','projects.id')->get();
-       return Inertia::render('projects/taskcalendar',[
-        'events'=>$events
-       ]);
+    public function taskcalendar()
+    {
+        $events = Project::join('tasks', 'tasks.project_id', '=', 'projects.id')->get();
+        return Inertia::render('projects/taskcalendar', [
+            'events' => $events
+        ]);
     }
 }

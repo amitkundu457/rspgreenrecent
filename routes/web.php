@@ -56,6 +56,7 @@ use App\Http\Controllers\NotificationAllController;
 use App\Http\Controllers\SellerWorkOrderController;
 use App\Http\Controllers\ServiceCategoryController;
 use Flasher\Prime\Test\Constraint\NotificationCount;
+use App\Http\Controllers\TermsAndConditionsController;
 
 
 // Route::get('/', function () {
@@ -345,8 +346,11 @@ Route::post('/seller-work-orders', [SellerWorkOrderController::class, 'store'])-
 Route::put('/seller-work-orders/{id}', [SellerWorkOrderController::class, 'update'])->name('sallerWork/index');
 Route::post('/seller-work-orders/{id}', [SellerWorkOrderController::class, 'destroy'])->name('sallerWork/index');
 
+Route::get('/seller-workOrder/{id}/show', [SellerWorkOrderController::class, 'showPdf']);
 
-
+Route::get('/terms', [TermsAndConditionsController::class, 'index'])->name('terms.index');
+Route::post('/terms', [TermsAndConditionsController::class, 'store'])->name('terms.store');
+Route::delete('/terms/{id}', [TermsAndConditionsController::class, 'destroy'])->name('terms.destroy');
 
 
 

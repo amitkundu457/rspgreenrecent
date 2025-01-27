@@ -43,7 +43,7 @@ class SellerWorkOrderController extends Controller
             // 'hsn_code' => 'required',
             // 'gst_rate' => 'required|numeric',
             // 'total_with_gst' => 'required|numeric',
-        
+
         ]);
 
         // Create a new work order
@@ -97,7 +97,7 @@ class SellerWorkOrderController extends Controller
         $workOrder->update($request->all());
 
         // Redirect to the index page with a success message
-        return redirect()->route('sallerWork/index')->with('message', 'Work Order updated successfully');
+        return redirect()->route('sallerWork/index')->with('');
     }
 
     /**
@@ -112,6 +112,22 @@ class SellerWorkOrderController extends Controller
         $workOrder->delete();
 
         // Redirect to the index page with a success message
-        return redirect()->route('sallerWork/index')->with('message', 'Work Order deleted successfully');
+        return redirect()->route('sallerWork/index')->with('message', '');
+    }
+    public function showPdf($id)
+    {
+        $client = SellerWorkOrder::find($id);
+
+        if (!$client) {
+            return back()->with('error', '');
+        }
+
+        // Get the document path if it exists
+        $documentPath = $client->document ? 'storage/' . $client->document : null;
+
+        return Inertia::render('sallerWork/pdf', [
+            'client' => $client,
+            'documentPath' => $documentPath,
+        ]);
     }
 }

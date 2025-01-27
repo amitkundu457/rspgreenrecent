@@ -19,11 +19,11 @@ const Task = ({
     taskcategory,
     employee,
     projects,
-    
 }) => {
     const [query, setQuery] = useState("");
     const [filteredTasks, setFilteredTasks] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+
     const [itemsPerPage] = useState(10);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProjectName, setSelectedProjectName] = useState("");
@@ -35,10 +35,11 @@ const Task = ({
         edate: "",
         employee_id: [], // Initialize as an array
         status: "",
-        rate:'',
+        rate: "",
         project_id: projects.length > 0 ? projects[0].id : "",
     });
-    const { props } = usePage()
+    const { props } = usePage();
+
     useEffect(() => {
         const allTasks = tasks.flatMap((project) => project.tasks);
         const filtered = allTasks.filter(
@@ -70,7 +71,6 @@ const Task = ({
             [name]: value,
         }));
     };
-
 
     const handleDelete = (e, id) => {
         e.preventDefault();
@@ -114,7 +114,7 @@ const Task = ({
     const indexOfLastTask = currentPage * itemsPerPage;
     const indexOfFirstTask = indexOfLastTask - itemsPerPage;
     const currentTasks = filteredTasks.slice(indexOfFirstTask, indexOfLastTask);
-console.log("fghj",currentTasks)
+
     const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
     const pageNumbers = Array.from(
         { length: totalPages },
@@ -238,12 +238,11 @@ console.log("fghj",currentTasks)
                         />
                     </div>
                     <div className="flex">
-                        {
-                            props.permission.includes("create_task") &&
+                        {props.permission.includes("create_task") && (
                             <div className="grid p-2 mt-2 text-black underline rounded-lg place-items-center">
                                 <Link href="task-create">Add New</Link>
                             </div>
-                        }
+                        )}
                         {/* <div className='grid p-2 mt-2 text-black underline rounded-lg place-items-center'>
                             <Link href='task-category'>Add Task type</Link>
                         </div> */}
@@ -266,12 +265,11 @@ console.log("fghj",currentTasks)
                             <th className="px-4 py-2 border border-gray-300">
                                 End Date
                             </th>
-                            {
-                                props.auth.user.roles[0]?.name === 'admin' &&
+                            {props.auth.user.roles[0]?.name === "admin" && (
                                 <th className="px-4 py-2 border border-gray-300">
                                     Assigned Users
                                 </th>
-                            }
+                            )}
                             <th className="px-4 py-2 border border-gray-300">
                                 Priority
                             </th>
@@ -287,6 +285,7 @@ console.log("fghj",currentTasks)
                                     tasks.find((project) =>
                                         project.tasks.includes(task)
                                     )?.title || "Unknown Project";
+                                console.log("Logging task data:", task);
                                 return (
                                     <tr key={index}>
                                         {/* <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">{projectName}</td> */}
@@ -302,8 +301,8 @@ console.log("fghj",currentTasks)
                                         <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
                                             {task.edate}
                                         </td>
-                                        {
-                                            props.auth.user.roles[0]?.name === 'admin' &&
+                                        {props.auth.user.roles[0]?.name ===
+                                            "admin" && (
                                             <td className="px-4 py-2 border border-gray-300">
                                                 {task.users.map(
                                                     (user, userIndex) => (
@@ -318,47 +317,53 @@ console.log("fghj",currentTasks)
                                                             }{" "}
                                                             hours
                                                             {userIndex <
-                                                                task.users.length -
-                                                                1 && ", "}
+                                                                task.users
+                                                                    .length -
+                                                                    1 && ", "}
                                                         </span>
                                                     )
                                                 )}
                                             </td>
-                                        }
+                                        )}
                                         <td
-                                            className={`px-4 py-2 font-semibold border border-gray-300 text-[0.9rem] ${task.priority === 0
-                                                ? "text-green-600"
-                                                : task.priority === 1
+                                            className={`px-4 py-2 font-semibold border border-gray-300 text-[0.9rem] ${
+                                                task.priority === 0
+                                                    ? "text-green-600"
+                                                    : task.priority === 1
                                                     ? "text-amber-600"
                                                     : "text-red-500"
-                                                }`}
+                                            }`}
                                         >
                                             {task.priority === 0
                                                 ? "Low"
                                                 : task.priority == 1
-                                                    ? "Medium"
-                                                    : "High"}
+                                                ? "Medium"
+                                                : "High"}
                                         </td>
                                         <td className="border border-gray-300">
                                             <div className="flex px-4 py-2 space-x-2 ">
-
-                                                {
-                                                    props.permission.includes('edit_task') &&
+                                                {props.permission.includes(
+                                                    "edit_task"
+                                                ) && (
                                                     <Link
                                                         href={`/task-edit/${task.id}`}
                                                     >
                                                         <FaEdit className="text-blue-500 cursor-pointer hover:text-blue-700" />
                                                     </Link>
-                                                }
-                                                {
-                                                    props.permission.includes('delete_task') &&
+                                                )}
+                                                {props.permission.includes(
+                                                    "delete_task"
+                                                ) && (
                                                     <RiDeleteBinLine
                                                         className="text-red-500 cursor-pointer hover:text-red-700"
                                                         onClick={(e) =>
-                                                            handleDelete(e, task.id)
+                                                            handleDelete(
+                                                                e,
+                                                                task.id
+                                                            )
                                                         }
                                                     />
-                                                }
+                                                )}
                                                 {/* {
                                                     props.permission.includes('edit_task') &&
                                                     <button
@@ -389,10 +394,11 @@ console.log("fghj",currentTasks)
                         <button
                             key={number}
                             onClick={() => setCurrentPage(number)}
-                            className={`px-4 py-2 mx-1 rounded ${currentPage === number
-                                ? "bg-blue-500 text-white"
-                                : "bg-gray-200"
-                                }`}
+                            className={`px-4 py-2 mx-1 rounded ${
+                                currentPage === number
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-gray-200"
+                            }`}
                         >
                             {number}
                         </button>

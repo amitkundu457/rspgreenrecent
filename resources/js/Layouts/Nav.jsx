@@ -200,10 +200,11 @@ const Nav = ({ user_type, usrrr }) => {
                                 name: "Timesheet",
                                 link: "/daily-status",
                                 perm: "view_timsheet",
-                                hide:
-                                    props.auth.user.roles[0]?.name ===
-                                        "admin" || false,
+                                hide: !(
+                                    props.auth.user.roles[0]?.name === "admin"
+                                ), // Will hide unless the role is "admin"
                             },
+
                             {
                                 name: "Projects",
                                 link: "/projects-task",
