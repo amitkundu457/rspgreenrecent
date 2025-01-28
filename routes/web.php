@@ -294,6 +294,8 @@ Route::post('/account/category/store', [AccountController::class, 'Accountstore'
 Route::post('/account/category/update/{accountCategory}', [AccountController::class, 'Accountupdate']);
 Route::delete('/account/category/delete/{accountCategory}', [AccountController::class, 'Accountdestroy']);
 Route::resource('loans', LoanController::class);
+
+Route::get('/loan-details/{id}',[LoanController::class, 'show']);
 Route::get('account/unit', [AccountController::class, 'unit']);
 Route::post('account/unit/store', [AccountController::class, 'unitstore']);
 Route::post('account/unit/update/{unit}', [AccountController::class, 'unitupdate']);

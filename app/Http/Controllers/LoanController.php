@@ -146,4 +146,15 @@ class LoanController extends Controller
             'loans' => Loan::all(),
         ]);
     }
+    public function show(Request $request, $id)
+    {
+        // Fetch the loan by ID along with the related user (if needed)
+        $loan = Loan::with('user')->findOrFail($id);
+    
+        return Inertia::render('Loan/show', [
+            'loan' => $loan, // Pass the loan details to the view
+        ]);
+    }
+    
+
 }
