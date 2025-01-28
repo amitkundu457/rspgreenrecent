@@ -38,6 +38,7 @@ const Nav = ({ user_type, usrrr }) => {
 
         { name: "leave management", link: "/leave-index", perm: "view_leave" },
         { name: "Loan Management", link: "/loans", perm: "view_leave" },
+        { name: "Advancce-Salary Management", link: "/advanceloan", perm: "view_leave" },
         { name: "employee setup", link: "/branches", perm: "view_employee" },
         // { name: "attendance", link: "/attendance", perm: "view_attendance" },
         { name: "Salary generate", link: "/salaries", perm: "view_salary" },

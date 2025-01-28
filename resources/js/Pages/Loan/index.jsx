@@ -6,6 +6,8 @@ import Nav from "@/Layouts/Nav";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCheck, FaTimes, FaSpinner } from "react-icons/fa";
+import { FaEye } from 'react-icons/fa';
+
 
 const LoanManagement = ({ user, user_type, notif, loans, us }) => {
     const [loanData, setLoanData] = useState([]);
@@ -125,7 +127,7 @@ const LoanManagement = ({ user, user_type, notif, loans, us }) => {
                     Loan Management Portal
                 </h1>
 
-                {us === 1 ? (
+                {us !== 1 ? (
                     <div className="bg-white p-6 rounded-lg shadow-md space-y-6">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
@@ -402,42 +404,42 @@ const LoanManagement = ({ user, user_type, notif, loans, us }) => {
                                         </td>
                                         {/* Only show the "Actions" column for pending loans */}
                                         {loans.some(
-                                            (loan) =>
-                                                loan.status?.toLowerCase() ===
-                                                "pending"
-                                        ) && (
-                                            <td className="px-6 py-4 flex justify-center items-center space-x-2">
-                                                {loan.status?.toLowerCase() ===
-                                                    "pending" && (
-                                                    <>
-                                                        <button
-                                                            onClick={() =>
-                                                                handleStatusUpdate(
-                                                                    loan.id,
-                                                                    "Approved"
-                                                                )
-                                                            }
-                                                            className="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700"
-                                                            title="Approve"
-                                                        >
-                                                            <FaCheck />
-                                                        </button>
-                                                        <button
-                                                            onClick={() =>
-                                                                handleStatusUpdate(
-                                                                    loan.id,
-                                                                    "Rejected"
-                                                                )
-                                                            }
-                                                            className="flex items-center justify-center w-8 h-8 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700"
-                                                            title="Reject"
-                                                        >
-                                                            <FaTimes />
-                                                        </button>
-                                                    </>
-                                                )}
-                                            </td>
-                                        )}
+    (loan) => loan.status?.toLowerCase() === "pending"
+) && (
+    <td className="px-6 py-4 flex justify-center items-center space-x-2">
+        {loan.status?.toLowerCase() === "pending" && (
+            <>
+                <button
+                    onClick={() =>
+                        handleStatusUpdate(loan.id, "Approved")
+                    }
+                    className="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700"
+                    title="Approve"
+                >
+                    <FaCheck />
+                </button>
+                <button
+                    onClick={() =>
+                        handleStatusUpdate(loan.id, "Rejected")
+                    }
+                    className="flex items-center justify-center w-8 h-8 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700"
+                    title="Reject"
+                >
+                    <FaTimes />
+                </button>
+                {/* New View Button */}
+                <Link
+            to={`/loan-details/${loan.id}`}  // Use Link for navigation
+            className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700"
+            title="View Details"
+          >
+            <FaEye />
+          </Link>
+            </>
+        )}
+    </td>
+)}
+
                                     </tr>
                                 ))}
                             </tbody>

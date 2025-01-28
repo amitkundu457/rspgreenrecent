@@ -41,6 +41,7 @@ use App\Http\Controllers\DesignatonController;
 use App\Http\Controllers\LeadSourceController;
 use App\Http\Controllers\OfficeHourController;
 use App\Http\Controllers\OfficeTimeController;
+use App\Http\Controllers\AdvanceloanController;
 use App\Http\Controllers\DailyStatusController;
 use App\Http\Controllers\HolidayWorkController;
 use App\Http\Controllers\ChartAccountController;
@@ -404,3 +405,7 @@ Route::post('/deductions', [DeductionController::class, 'store'])->name('deducti
 Route::put('/deductions/{id}', [DeductionController::class, 'update'])->name('deductions.update');
 Route::delete('/deductions/{id}', [DeductionController::class, 'destroy'])->name('deductions.destroy');
 Route::resource('titles', TitleController::class);
+
+
+Route::resource('advanceloan', AdvanceloanController::class);
+
