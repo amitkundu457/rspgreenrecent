@@ -173,7 +173,7 @@ const LoanManagement = ({ user, user_type, notif, loans, us, advanceloans,employ
       <DatePicker
         selected={data.loan_date}
         onChange={(date) => setData("loan_date", date)}
-        dateFormat="yyyy-MM-dd HH:mm:ss"
+        dateFormat="yyyy-MM-dd"
         className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
       />
     </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm } from "@inertiajs/react";
+import { Link, useForm } from "@inertiajs/react";
 import axios from "axios";
 import Header from "@/Layouts/Header";
 import Nav from "@/Layouts/Nav";
@@ -11,6 +11,7 @@ import { FaEye } from 'react-icons/fa';
 
 const LoanManagement = ({ user, user_type, notif, loans, us }) => {
     const [loanData, setLoanData] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const { data, setData, post, reset } = useForm({
         employee_name: "",
@@ -55,6 +56,19 @@ const LoanManagement = ({ user, user_type, notif, loans, us }) => {
             setLoading(false);
         }
     };
+    const handleSearchChange = (event) => {
+        setSearchQuery(event.target.value);
+      };
+    
+      // Filter loans based on search query (search by Employee Name or Employee ID)
+      const filteredLoans = loans.filter((loan) =>
+        loan.employee_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        loan.employee_id?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    
+      if (loading) {
+        return <div>Loading...</div>; // Show loading indicator while fetching data
+      }
 
     const handleRepaymentChange = (e) => {
         const repaymentType = e.target.value;
@@ -127,7 +141,7 @@ const LoanManagement = ({ user, user_type, notif, loans, us }) => {
                     Loan Management Portal
                 </h1>
 
-                {us !== 1 ? (
+                {us === 1 ? (
                     <div className="bg-white p-6 rounded-lg shadow-md space-y-6">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
@@ -322,130 +336,217 @@ const LoanManagement = ({ user, user_type, notif, loans, us }) => {
                             ) : null}
                             Submit Loan
                         </button>
-                    </div>
-                ) : null}
-                <div className="mt-8">
-                    <h2 className="text-xl font-bold text-gray-800 mb-4">
-                        Existing Loans
-                    </h2>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-300 bg-white shadow-lg rounded-lg overflow-hidden">
-                            <thead className="bg-blue-600">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-                                        Employee Name
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-                                        Designation
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-                                        Amount
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-                                        Start Date
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-                                        End Date
-                                    </th>
-                                    <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
-                                        Status
-                                    </th>
-                                    {/* Only show the "Actions" column if there's at least one pending loan */}
-                                    {loans.some(
-                                        (loan) =>
-                                            loan.status?.toLowerCase() ===
-                                            "pending"
-                                    ) && (
-                                        <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
-                                            Actions
-                                        </th>
-                                    )}
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                {loans.map((loan) => (
-                                    <tr
-                                        key={loan.id}
-                                        className="hover:bg-gray-50"
-                                    >
-                                        <td className="px-6 py-4 text-sm text-gray-700">
-                                            {loan.employee_name}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-700">
-                                            {loan.registration}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-700">
-                                            {loan.amount}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-700">
-                                            {new Date(
-                                                loan.start_date
-                                            ).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-700">
-                                            {new Date(
-                                                loan.end_date
-                                            ).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <span
-                                                className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
-                                                    loan.status?.toLowerCase() ===
-                                                    "approved"
-                                                        ? "bg-blue-600"
-                                                        : loan.status?.toLowerCase() ===
-                                                          "rejected"
-                                                        ? "bg-gray-600"
-                                                        : "bg-orange-500"
-                                                }`}
-                                            >
-                                                {loan.status}
-                                            </span>
-                                        </td>
-                                        {/* Only show the "Actions" column for pending loans */}
-                                        {loans.some(
-    (loan) => loan.status?.toLowerCase() === "pending"
-) && (
-    <td className="px-6 py-4 flex justify-center items-center space-x-2">
-        {loan.status?.toLowerCase() === "pending" && (
-            <>
-                <button
-                    onClick={() =>
-                        handleStatusUpdate(loan.id, "Approved")
-                    }
-                    className="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700"
-                    title="Approve"
-                >
-                    <FaCheck />
-                </button>
-                <button
-                    onClick={() =>
-                        handleStatusUpdate(loan.id, "Rejected")
-                    }
-                    className="flex items-center justify-center w-8 h-8 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700"
-                    title="Reject"
-                >
-                    <FaTimes />
-                </button>
-                {/* New View Button */}
-                <Link
-            to={`/loan-details/${loan.id}`}  // Use Link for navigation
-            className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700"
-            title="View Details"
-          >
-            <FaEye />
-          </Link>
-            </>
-        )}
-    </td>
-)}
+                        <div className="overflow-x-auto">
+                            <h2 className="text-xl font-bold text-gray-800 mb-4">Employee Loan Details</h2>
+        <table className="min-w-full divide-y divide-gray-300 bg-white shadow-lg rounded-lg overflow-hidden">
+          <thead className="bg-blue-600">
+            <tr>
+              {/* <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                Employee Name
+              </th> */}
+              {/* <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                Employee ID
+              </th> */}
+              {/* <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                Designation
+              </th> */}
+              <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                Amount
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                Start Date
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                End Date
+              </th>
+              <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
+                Status
+              </th>
+              {/* Only show the "Actions" column if there's at least one pending loan */}
+              {loans.some((loan) => loan.status?.toLowerCase() === 'pending') && (
+                <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
+                  Actions
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {loans.map((loan) => (
+              <tr key={loan.id} className="hover:bg-gray-50">
+                {/* <td className="px-6 py-4 text-sm text-gray-700">{loan.employee_name}</td> */}
+                {/* <td className="px-6 py-4 text-sm text-gray-700">{loan.id}</td>  */}
+                {/* <td className="px-6 py-4 text-sm text-gray-700">{loan.registration}</td> */}
+                <td className="px-6 py-4 text-sm text-gray-700">{loan.amount}</td>
+                <td className="px-6 py-4 text-sm text-gray-700">
+                  {new Date(loan.start_date).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-700">
+                  {new Date(loan.end_date).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
+                      loan.status?.toLowerCase() === 'approved'
+                        ? 'bg-green-600'
+                        : loan.status?.toLowerCase() === 'rejected'
+                        ? 'bg-red-600'
+                        : 'bg-orange-500'
+                    }`}
+                  >
+                    {loan.status}
+                  </span>
+                </td>
+                {/* Only show the "Actions" column for pending loans */}
+                {loan.status?.toLowerCase() === 'pending' && (
+                  <td className="px-6 py-4 flex justify-center items-center space-x-2">
+                    <button
+                      onClick={() => handleStatusUpdate(loan.id, 'Approved')}
+                      className="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700"
+                      title="Approve"
+                    >
+                      <FaCheck />
+                    </button>
+                    <button
+                      onClick={() => handleStatusUpdate(loan.id, 'Rejected')}
+                      className="flex items-center justify-center w-8 h-8 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700"
+                      title="Reject"
+                    >
+                      <FaTimes />
+                    </button>
+                    <Link
+                      to={`/loan-details/${loan.id}`} // Use Link for navigation
+                      className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700"
+                      title="View Details"
+                    >
+                      <FaEye />
+                    </Link>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+
+
+
+
+
+
+
+
+
+
+
                     </div>
-                </div>
+                    
+                )
+                 : null}
+                <div className="mt-8">
+      <h2 className="text-xl font-bold text-gray-800 mb-4">Existing Loans</h2>
+
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search by Employee Name or ID"
+          className="p-2 border border-gray-300 rounded-lg w-full"
+          value={searchQuery}
+          onChange={handleSearchChange}
+        />
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-300 bg-white shadow-lg rounded-lg overflow-hidden">
+          <thead className="bg-blue-600">
+            <tr>
+              <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                Employee Name
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                Employee ID
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                Designation
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                Amount
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                Start Date
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                End Date
+              </th>
+              <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
+                Status
+              </th>
+              {/* Only show the "Actions" column if there's at least one pending loan */}
+              {loans.some((loan) => loan.status?.toLowerCase() === 'pending') && (
+                <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
+                  Actions
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {filteredLoans.map((loan) => (
+              <tr key={loan.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 text-sm text-gray-700">{loan.employee_name}</td>
+                <td className="px-6 py-4 text-sm text-gray-700">{loan.id}</td> {/* Employee ID column */}
+                <td className="px-6 py-4 text-sm text-gray-700">{loan.registration}</td>
+                <td className="px-6 py-4 text-sm text-gray-700">{loan.amount}</td>
+                <td className="px-6 py-4 text-sm text-gray-700">
+                  {new Date(loan.start_date).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-700">
+                  {new Date(loan.end_date).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
+                      loan.status?.toLowerCase() === 'approved'
+                        ? 'bg-green-600'
+                        : loan.status?.toLowerCase() === 'rejected'
+                        ? 'bg-red-600'
+                        : 'bg-orange-500'
+                    }`}
+                  >
+                    {loan.status}
+                  </span>
+                </td>
+                {/* Only show the "Actions" column for pending loans */}
+                {loan.status?.toLowerCase() === 'pending' && (
+                  <td className="px-6 py-4 flex justify-center items-center space-x-2">
+                    <button
+                      onClick={() => handleStatusUpdate(loan.id, 'Approved')}
+                      className="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700"
+                      title="Approve"
+                    >
+                      <FaCheck />
+                    </button>
+                    <button
+                      onClick={() => handleStatusUpdate(loan.id, 'Rejected')}
+                      className="flex items-center justify-center w-8 h-8 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700"
+                      title="Reject"
+                    >
+                      <FaTimes />
+                    </button>
+                    <Link
+                      to={`/loan-details/${loan.id}`} // Use Link for navigation
+                      className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700"
+                      title="View Details"
+                    >
+                      <FaEye />
+                    </Link>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
             </div>
         </div>
     );
