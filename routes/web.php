@@ -56,6 +56,7 @@ use App\Http\Controllers\LeaveManagementController;
 use App\Http\Controllers\NotificationAllController;
 use App\Http\Controllers\SellerWorkOrderController;
 use App\Http\Controllers\ServiceCategoryController;
+use App\Http\Controllers\TravelAllowanceController;
 use Flasher\Prime\Test\Constraint\NotificationCount;
 use App\Http\Controllers\TermsAndConditionsController;
 
@@ -415,4 +416,5 @@ Route::resource('advanceloan', AdvanceloanController::class);
 Route::get('/task-assingbyadmin', [ProjectController::class, 'taskEmployee']);
 
 Route::get('/task-assing-all/{id}', [ProjectController::class, 'Taskassinged']);
+Route::resource('/allowance/travel', TravelAllowanceController::class);
 

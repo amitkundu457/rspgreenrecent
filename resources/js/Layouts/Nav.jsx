@@ -56,6 +56,7 @@ const Nav = ({ user_type, usrrr }) => {
             link: "/deductions",
             perm: "view_employee",
         },
+       
         // {
         //     name: "office time",
         //     link: "/office-hours",
@@ -187,6 +188,23 @@ const Nav = ({ user_type, usrrr }) => {
                             ]}
                         />
                     )}
+                    {props.auth.user.roles[0]?.name === "admin" && (
+    <DropdownMenu
+        icon={<FaUsers />}
+        name={"Allowance"}
+        items={[
+            {
+                name: "Travel Allowance",
+                link: "/travel-allowance",
+            },
+            {
+                name: "Food Allowance",
+                link: "/food-allowance",
+            },
+        ]}
+    />
+)}
+
 
                     <DropdownMenu
                         icon={<FaFolderClosed />}
