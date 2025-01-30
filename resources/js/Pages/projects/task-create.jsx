@@ -8,6 +8,8 @@ import { Notyf } from "notyf";
 import "notyf/notyf.min.css"; // Import Notyf styles
 import { FaRupeeSign, FaTrash, FaWallet } from "react-icons/fa";
 import { Fragment } from "react";
+import { Button } from "@headlessui/react";
+import { AiOutlinePlus } from "react-icons/ai";
 
 const notyf = new Notyf();
 
@@ -21,6 +23,7 @@ const TaskCreate = ({
     stages,
     tls,
     allEmployees,
+    designation
 }) => {
     const { data, setData, post, errors } = useForm({
         task_name: "",
@@ -35,12 +38,42 @@ const TaskCreate = ({
         rate: "",
         project_id: projects.length > 0 ? projects[0].id : "",
     });
-    console.log("kjhbgv", stages);
-    console.log("aaaaa", allEmployees);
+    // console.log("ygtfdghjk", tls);
+    console.log("employee details", allEmployees);
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedEmployees, setSelectedEmployees] = useState([]); // Stores multiple employees
+    const [selectedEmployee, setSelectedEmployee] = useState("");
+    const [selectedTime, setSelectedTime] = useState("");
+    const totalHoursLimit = 12;
+    const timeOptions = [1, 2, 3, 4, 5, 6,7,8,9,10,11,12];
+  
+    const addEmployee = () => {
+        const time = parseInt(selectedTime, 10);
+        const newTotalHours = selectedEmployees.reduce((sum, emp) => sum + emp.time, 0) + time;
+        
+        if (newTotalHours > totalHoursLimit) {
+          alert(`Total hours exceeded! Assigned: ${newTotalHours} hours, Limit: ${totalHoursLimit} hours`);
+          return;
+        }
+    
+        const newEmployee = {
+          id: selectedEmployee,
+          name: allEmployees.find((emp) => emp.id === parseInt(selectedEmployee))?.employee_name,
+          time,
+        };
+        
+        setSelectedEmployees([...selectedEmployees, newEmployee]);
+        setIsOpen(false);
+        setSelectedEmployee("");
+        setSelectedTime("");
+      };
 
     const [rows, setRows] = useState([
         { name: "", description: "", ammount: 0 },
     ]); // Initial row
+    // const [isOpen, setIsOpen] = useState(false);
+    // const [selectedEmployee, setSelectedEmployee] = useState("");
+    // const [selectedTime, setSelectedTime] = useState("");
 
     const handleAddRow = () => {
         setRows([...rows, { name: "", description: "", ammount: 0 }]); // Add a new row
@@ -62,6 +95,17 @@ const TaskCreate = ({
         }
         setRows(newRows);
     };
+    const [formData, setFormData] = useState({
+        employee_id: [], // Must be an array
+        time_allocation: ""
+    });
+    
+    const handleMultipleSelectChanges = (e) => {
+        const selectedValues = Array.from(e.target.selectedOptions, (option) => option.value);
+        setFormData((prev) => ({ ...prev, employee_id: selectedValues }));
+    };
+    const employeeName = allEmployees.find((emp) => emp.id === selectedEmployee)?.employee_name;
+    
 
     const { props } = usePage();
 
@@ -77,18 +121,18 @@ const TaskCreate = ({
                 }
             );
 
-            const employeeChoicesInstance = new Choices(
-                employeeSelectRef.current,
-                {
-                    removeItemButton: true,
-                    searchEnabled: true,
-                }
-            );
+            // const employeeChoicesInstance = new Choices(
+            //     employeeSelectRef.current,
+            //     {
+            //         removeItemButton: true,
+            //         searchEnabled: true,
+            //     }
+            // );
 
             // Cleanup on unmount
             return () => {
                 projectChoicesInstance.destroy();
-                employeeChoicesInstance.destroy();
+                // employeeChoicesInstance.destroy();
             };
         }, []);
     }
@@ -327,7 +371,7 @@ const TaskCreate = ({
                         {normalizedTaskName !== "NON-BILLABLE" && (
                             <>
                                 <label htmlFor="estimate_hours">
-                                    Estimate Hours
+                                Project Allocation Time
                                 </label>
                                 <input
                                     className="w-full rounded-lg"
@@ -362,30 +406,9 @@ const TaskCreate = ({
                                     ))}
                                 </select>
                             </div>
-                            <div className="w-1/2 p-2">
-                                <label htmlFor="employee_id">
-                                    Employee Assign
-                                </label>
-                                <select
-                                    ref={employeeSelectRef}
-                                    multiple
-                                    name="employee_id"
-                                    id="employee_id"
-                                    value={data.employee_id}
-                                    onChange={handleMultipleSelectChange}
-                                    className="w-full rounded-lg"
-                                >
-                                    <option value="">Select Employee</option>
-                                    {allEmployees.map((employee) => (
-                                        <option
-                                            key={employee.id}
-                                            value={employee.id}
-                                        >
-                                            {employee.employee_name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                          
+       
+
                         </Fragment>
                     )}
 
@@ -467,6 +490,69 @@ const TaskCreate = ({
                             <option value="2">High</option>
                         </select>
                     </div>
+                    <div className="w-1/2 p-2">
+      <div className="w-full max-w-md p-4 bg-blue-50 rounded-lg shadow-md">
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-lg font-semibold text-blue-800">Employee Assign</label>
+          <button onClick={() => setIsOpen(true)} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            Add Employee
+          </button>
+        </div>
+      </div>
+      
+      {isOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-lg font-semibold mb-4">Assign Employee</h2>
+            <label className="block text-sm font-medium">Select Employee</label>
+            <select 
+  value={selectedEmployee} 
+  onChange={(e) => setSelectedEmployee(e.target.value)} 
+  className="w-full p-2 border rounded-md mt-1"
+>
+  <option value="" disabled>Choose an Employee</option>
+  {allEmployees.map((emp) => (
+    <option key={emp.id} value={emp.id}>
+      {emp.employee_name} - Dept: {emp.designation_name}
+    </option>
+  ))}
+</select>
+
+            
+            <label className="block text-sm font-medium mt-4">Select Time (Hours)</label>
+            <select value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)} className="w-full p-2 border rounded-md mt-1">
+              <option value="" disabled>Choose Duration</option>
+              {timeOptions.map((time, index) => (
+                <option key={index} value={time}>{time}</option>
+              ))}
+            </select>
+            
+            <div className="flex justify-end gap-2 mt-4">
+              <button onClick={() => setIsOpen(false)} className="px-4 py-2 border rounded-md hover:bg-gray-100">Cancel</button>
+              <button onClick={addEmployee} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {selectedEmployees.length > 0 && (
+        <div className="mt-4 p-2 border rounded-md bg-gray-50">
+          <p className="font-medium">Assigned Employees:</p>
+          <ul>
+            {selectedEmployees.map((emp, index) => (
+              <li key={index} className="flex justify-between p-2 border-b">
+                <span>{emp.name}</span>
+                <span className="text-sm text-gray-600">{emp.time} hrs</span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-red-600 font-bold mt-2">
+            Total Assigned Hours: {selectedEmployees.reduce((sum, emp) => sum + emp.time, 0)} / {totalHoursLimit} hours
+          </p>
+        </div>
+      )}
+    </div>
+
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <div className="w-full p-2">
                             <div className="flex justify-between items-center">

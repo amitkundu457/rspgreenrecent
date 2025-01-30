@@ -451,9 +451,9 @@ const LoanManagement = ({ user, user_type, notif, loans, us }) => {
         <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
           End Date
         </th>
-        {/* <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
+        <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
           Status
-        </th> */}
+        </th>
         {/* Always show the "Actions" column */}
         <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
           Actions
@@ -473,7 +473,7 @@ const LoanManagement = ({ user, user_type, notif, loans, us }) => {
           <td className="px-6 py-4 text-sm text-gray-700">
             {new Date(loan.end_date).toLocaleDateString()}
           </td>
-          {/* <td className="px-6 py-4 text-center">
+          <td className="px-6 py-4 text-center">
             <span
               className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
                 loan.status?.toLowerCase() === 'approved'
@@ -485,35 +485,57 @@ const LoanManagement = ({ user, user_type, notif, loans, us }) => {
             >
               {loan.status}
             </span>
-          </td> */}
-          <td className="px-6 py-4 flex justify-center items-center space-x-2">
-            {loan.status?.toLowerCase() === 'pending' && (
-              <>
-                <button
-                  onClick={() => handleStatusUpdate(loan.id, 'Approved')}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-all duration-200"
-                  title="Approve"
-                >
-                  Approve
-                </button>
-                <button
-                  onClick={() => handleStatusUpdate(loan.id, 'Rejected')}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-all duration-200"
-                  title="Reject"
-                >
-                  Reject
-                </button>
-              </>
-            )}
-            <Link
-              href={`/loan-details/${loan.id}`} // Use Link for navigation
-              className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-all duration-200"
-              title="View Details"
-              onClick={() => console.log(`Navigating to loan details of loan ID: ${loan.id}`)} // Log to console
-            >
-              View Details
-            </Link>
           </td>
+          <td className="px-6 py-4 flex justify-center items-center space-x-2">
+  {loan.status?.toLowerCase() === 'pending' && (
+    <>
+      <button
+        onClick={() => handleStatusUpdate(loan.id, 'Approved')}
+        className="px-3 py-1 text-sm bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-all duration-200"
+        title="Approve"
+      >
+        Approve
+      </button>
+      <button
+        onClick={() => handleStatusUpdate(loan.id, 'Rejected')}
+        className="px-3 py-1 text-sm bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-all duration-200"
+        title="Reject"
+      >
+        Reject
+      </button>
+    </>
+  )}
+
+  {loan.status?.toLowerCase() === 'approved' && (
+    <button
+      onClick={() => handleStatusUpdate(loan.id, 'Rejected')}
+      className="px-3 py-1 text-sm bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-all duration-200"
+      title="Reject"
+    >
+      Reject
+    </button>
+  )}
+
+  {loan.status?.toLowerCase() === 'rejected' && (
+    <button
+      onClick={() => handleStatusUpdate(loan.id, 'Approved')}
+      className="px-3 py-1 text-sm bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-all duration-200"
+      title="Approve"
+    >
+      Approve
+    </button>
+  )}
+
+  <Link
+    href={`/loan-details/${loan.id}`}
+    className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-all duration-200"
+    title="View Details"
+    onClick={() => console.log(`Navigating to loan details of loan ID: ${loan.id}`)}
+  >
+    View Details
+  </Link>
+</td>
+
         </tr>
       ))}
     </tbody>

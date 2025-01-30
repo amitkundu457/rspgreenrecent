@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -16,12 +15,12 @@ class AdvanceloanController extends Controller
     {
         $advanceloans = Advanceloan::all();
         $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
-            ->select('users.name', 'users.id','employees.basic_salary','employees.employee_id')->get();
-            // dd($employees);
+            ->select('users.name', 'users.id', 'employees.basic_salary', 'employees.employee_id')
+            ->get();
 
         return Inertia::render('adv/index', [
             'advanceloans' => $advanceloans,
-            'employees'=> $employees
+            'employees' => $employees,
         ]);
     }
 
@@ -31,15 +30,14 @@ class AdvanceloanController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // 'borrower_name' => 'required|string|max:255',
             'loan_amount' => 'required|numeric',
             'remarks' => 'nullable|string',
         ]);
 
         Advanceloan::create($validated);
 
+        // Redirect back with success message
         return back()->with('success', 'Advance Loan created successfully.');
-
     }
 
     /**
@@ -50,9 +48,8 @@ class AdvanceloanController extends Controller
         $advanceloan = Advanceloan::findOrFail($id);
 
         // Return a detailed view for a single record
-        return Inertia::render('adv/index', [
-            'advanceloan' => $advanceloan,
-        ]);
+        return back()->with('success', 'Advance Loan details displayed successfully.')
+            ->with('advanceloan', $advanceloan);
     }
 
     /**
@@ -63,15 +60,14 @@ class AdvanceloanController extends Controller
         $advanceloan = Advanceloan::findOrFail($id);
 
         $validated = $request->validate([
-            // 'borrower_name' => 'required|string|max:255',
             'loan_amount' => 'required|numeric',
             'remarks' => 'nullable|string',
         ]);
 
         $advanceloan->update($validated);
 
-        // Redirect back to the index page
-        return redirect()->route('adv.index')->with('success', 'Advance Loan updated successfully.');
+        // Redirect back with success message
+        return back()->with('success', 'Advance Loan updated successfully.');
     }
 
     /**
@@ -81,7 +77,7 @@ class AdvanceloanController extends Controller
     {
         Advanceloan::destroy($id);
 
-        // Redirect back to the index page
-        return redirect()->route('adv.index')->with('success', 'Advance Loan deleted successfully.');
+        // Redirect back with success message
+        return back()->with('success', 'Advance Loan deleted successfully.');
     }
 }

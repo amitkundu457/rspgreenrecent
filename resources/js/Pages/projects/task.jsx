@@ -265,11 +265,11 @@ const Task = ({
                             <th className="px-4 py-2 border border-gray-300">
                                 End Date
                             </th>
-                            {props.auth.user.roles[0]?.name === "admin" && (
+                            {/* {props.auth.user.roles[0]?.name === "admin" && (
                                 <th className="px-4 py-2 border border-gray-300">
                                     Assigned Users
                                 </th>
-                            )}
+                            )} */}
                             <th className="px-4 py-2 border border-gray-300">
                                 Priority
                             </th>
@@ -301,7 +301,7 @@ const Task = ({
                                         <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
                                             {task.edate}
                                         </td>
-                                        {props.auth.user.roles[0]?.name ===
+                                        {/* {props.auth.user.roles[0]?.name ===
                                             "admin" && (
                                             <td className="px-4 py-2 border border-gray-300">
                                                 {task.users.map(
@@ -324,7 +324,7 @@ const Task = ({
                                                     )
                                                 )}
                                             </td>
-                                        )}
+                                        )} */}
                                         <td
                                             className={`px-4 py-2 font-semibold border border-gray-300 text-[0.9rem] ${
                                                 task.priority === 0

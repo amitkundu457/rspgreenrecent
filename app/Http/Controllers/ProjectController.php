@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\Models\Employee;
 use App\Models\TaskAssign;
 use App\Models\TaskStatus;
+use App\Models\Designation;
 use App\Models\TaskCategory;
 use Illuminate\Http\Request;
 use App\Models\ProjectAssign;
@@ -230,10 +231,13 @@ class ProjectController extends Controller
     public function taskCreate()
     {
         $projects = Project::all();
+        $designation = Designation::all();
 
-        $allEmployees = Employee::join('users', 'employees.user_id', '=', 'users.id')
-            ->select('employees.*', 'users.name as employee_name')
+       $allEmployees = Employee::join('users', 'employees.user_id', '=', 'users.id')
+            ->join('designations', 'employees.designation_id', '=', 'designations.id') // join the designations table
+            ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name') // select designation name
             ->get();
+        // dd($allEmployees);
         $employees = User::role('Employee')->get(); // Fetch users with "Employee" role
 
         $taskcategory = TaskCategory::all();
@@ -259,7 +263,8 @@ class ProjectController extends Controller
             'user_type',
             'notif',
             'stages',
-            'allEmployees'
+            'allEmployees',
+            'designation'
         ));
     }
 
