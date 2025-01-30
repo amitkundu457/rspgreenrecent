@@ -238,15 +238,11 @@ const Task = ({
                         />
                     </div>
                     <div className="flex">
-                        {props.permission.includes("create_task") && (
-                            <div className="grid p-2 mt-2 text-black underline rounded-lg place-items-center">
-                                <Link href="task-create">Add New</Link>
-                            </div>
-                        )}
+                        
                        
-                            <div className="grid p-2 mt-2 text-black underline rounded-lg place-items-center">
+                            {/* <div className="grid p-2 mt-2 text-black underline rounded-lg place-items-center">
                                 <Link href="task-employee">Add Employee</Link>
-                            </div>
+                            </div> */}
                        
                         {/* <div className='grid p-2 mt-2 text-black underline rounded-lg place-items-center'>
                             <Link href='task-category'>Add Task type</Link>
@@ -285,6 +281,7 @@ const Task = ({
                             <th className="px-4 py-2 border border-gray-300">
                                 Actions
                             </th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -359,11 +356,26 @@ const Task = ({
                                                     "edit_task"
                                                 ) && (
                                                     <Link
+                                                        href={`/task-assing-all/${task.id}`}
+                                                    >
+                                                        <FaEdit className="text-blue-500 cursor-pointer hover:text-blue-700" />
+                                                    </Link>
+                                                )}
+                                                 {props.permission.includes(
+                                                    "edit_task"
+                                                ) && (
+                                                    <Link
                                                         href={`/task-edit/${task.id}`}
                                                     >
                                                         <FaEdit className="text-blue-500 cursor-pointer hover:text-blue-700" />
                                                     </Link>
                                                 )}
+
+
+
+
+
+
                                                 {props.permission.includes(
                                                     "delete_task"
                                                 ) && (

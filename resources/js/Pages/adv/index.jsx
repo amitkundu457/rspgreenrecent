@@ -241,12 +241,13 @@ const LoanManagement = ({ user, user_type, notif, loans, us, advanceloans, emplo
                         <table className="min-w-full divide-y divide-gray-300 bg-white shadow-lg rounded-lg overflow-hidden">
                             <thead className="bg-blue-600">
                                 <tr>
+                                <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                                        Employee ID
+                                    </th>
                                     <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
                                         Employee Name
                                     </th>
-                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-                                        Employee ID
-                                    </th>
+                                   
                                     <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
                                         Payable Amount
                                     </th>
@@ -261,8 +262,9 @@ const LoanManagement = ({ user, user_type, notif, loans, us, advanceloans, emplo
                             <tbody className="divide-y divide-gray-200">
                                 {advanceloans.map((loan) => (
                                     <tr key={loan.id} className="hover:bg-gray-50">
+                                           <td className="px-6 py-4 text-sm text-gray-700">EMP00000{loan.id}</td>
                                         <td className="px-6 py-4 text-sm text-gray-700">{loan.borrower_name}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-700">EMP00000{loan.id}</td>
+                                   
                                         <td className="px-6 py-4 text-sm text-gray-700">{loan.loan_amount}</td>
                                         <td className="px-6 py-4 text-sm text-gray-700">{loan.remarks}</td>
                                         <td className="px-6 py-4 text-sm text-gray-700">

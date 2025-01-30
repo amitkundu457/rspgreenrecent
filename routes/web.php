@@ -124,6 +124,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/projects-task', [ProjectController::class, 'Task']);
         Route::get('/task-create', [ProjectController::class, 'taskCreate']);
+       
+
 
         Route::get('/task-category', [ProjectController::class, 'Tskcategory']);
 
@@ -410,4 +412,7 @@ Route::resource('titles', TitleController::class);
 
 
 Route::resource('advanceloan', AdvanceloanController::class);
+Route::get('/task-assingbyadmin', [ProjectController::class, 'taskEmployee']);
+
+Route::get('/task-assing-all/{id}', [ProjectController::class, 'Taskassinged']);
 

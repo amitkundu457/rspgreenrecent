@@ -211,6 +211,12 @@ const Nav = ({ user_type, usrrr }) => {
                                 link: "/projects-task",
                                 perm: "view_project",
                             },
+                            {
+                                name: "Add Employee",
+                                link: "/task-assingbyadmin",
+                                perm: "view_project",
+                            },
+                            //  <Link href="task-employee">Add Employee</Link>
                             // {
                             //     name: "Task Calendar",
                             //     link: "/taskcalendar",

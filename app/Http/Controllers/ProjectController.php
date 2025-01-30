@@ -268,6 +268,36 @@ class ProjectController extends Controller
         ));
     }
 
+    //task assing
+    public function taskEmployee()
+    {
+        $userss = Auth::user();
+        $user = Auth::user()->name;
+        if ($userss) {
+            // Ensure permissions are assigned and fetched correctly
+            $user_type = $userss->getAllPermissions()->pluck('name')->toArray();
+            // dd($permissions);
+        }
+        $employee = User::join('employees', 'employees.user_id', '=', 'users.id')
+            ->select('employees.phone', 'employees.address', 'employees.joinning_date', 'users.name', 'users.email', 'users.id')->get();
+        // $task = Project::with(['tasks', 'users'])->get();
+        $taskcategory = TaskCategory::all();
+        // if(Auth::user()->hasRole('admin')){
+        $tasks = Project::with(['tasks.users' => function ($query) {
+            $query->withPivot('employee_hours');
+        }])->get();
+        // }else{
+        //     // $tasks = 
+        // }
+        //    dd($tasks);
+        $projects = Project::all();
+        $notif = Auth::user()->notifications;
+
+        return Inertia::render('projects/task-employee', compact(
+           'tasks', 'user', 'user_type', 'notif', 'taskcategory', 'employee', 'projects'
+        ));
+    }
+
 
     public function taskStore(Request $request)
     {
@@ -389,6 +419,37 @@ class ProjectController extends Controller
             'user' => $user,
             'user_type' => $user_type,
             'notif' => $notif,
+        ]);
+    }
+
+    public function Taskassinged(Project $project, $id)
+    {
+        $project = Task::with(['assignments.employee', 'team'])->findOrFail($id);
+        $allEmployees = Employee::join('users', 'employees.user_id', '=', 'users.id')
+        ->join('designations', 'employees.designation_id', '=', 'designations.id') // join the designations table
+        ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name') // select designation name
+        ->get();
+        // dd($allEmployees);
+        $userss = Auth::user();
+        $user = Auth::user()->name;
+        if ($userss) {
+            // Ensure permissions are assigned and fetched correctly
+            $user_type = $userss->getAllPermissions()->pluck('name')->toArray();
+            // dd($permissions);
+        }
+        $projects = Project::all();
+        $employees = User::role('Employee')->get();
+        $tls = User::role('Team Leader')->get();
+        $notif = Auth::user()->notifications;
+        return Inertia::render('projects/task-allview', [
+            'tls' => $tls,
+            'project' => $project,
+            'employees' => $employees,
+            'projects' => $projects,
+            'user' => $user,
+            'user_type' => $user_type,
+            'notif' => $notif,
+            'allEmployees' =>$allEmployees
         ]);
     }
 

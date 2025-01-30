@@ -371,7 +371,7 @@ const TaskCreate = ({
                         {normalizedTaskName !== "NON-BILLABLE" && (
                             <>
                                 <label htmlFor="estimate_hours">
-                                Project Allocation Time
+                                Estimate Hours
                                 </label>
                                 <input
                                     className="w-full rounded-lg"
@@ -490,69 +490,7 @@ const TaskCreate = ({
                             <option value="2">High</option>
                         </select>
                     </div>
-                    <div className="w-1/2 p-2">
-      <div className="w-full max-w-md p-4 bg-blue-50 rounded-lg shadow-md">
-        <div className="flex items-center justify-between mb-3">
-          <label className="text-lg font-semibold text-blue-800">Employee Assign</label>
-          <button onClick={() => setIsOpen(true)} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-            Add Employee
-          </button>
-        </div>
-      </div>
-      
-      {isOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-lg font-semibold mb-4">Assign Employee</h2>
-            <label className="block text-sm font-medium">Select Employee</label>
-            <select 
-  value={selectedEmployee} 
-  onChange={(e) => setSelectedEmployee(e.target.value)} 
-  className="w-full p-2 border rounded-md mt-1"
->
-  <option value="" disabled>Choose an Employee</option>
-  {allEmployees.map((emp) => (
-    <option key={emp.id} value={emp.id}>
-      {emp.employee_name} - Dept: {emp.designation_name}
-    </option>
-  ))}
-</select>
-
-            
-            <label className="block text-sm font-medium mt-4">Select Time (Hours)</label>
-            <select value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)} className="w-full p-2 border rounded-md mt-1">
-              <option value="" disabled>Choose Duration</option>
-              {timeOptions.map((time, index) => (
-                <option key={index} value={time}>{time}</option>
-              ))}
-            </select>
-            
-            <div className="flex justify-end gap-2 mt-4">
-              <button onClick={() => setIsOpen(false)} className="px-4 py-2 border rounded-md hover:bg-gray-100">Cancel</button>
-              <button onClick={addEmployee} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {selectedEmployees.length > 0 && (
-        <div className="mt-4 p-2 border rounded-md bg-gray-50">
-          <p className="font-medium">Assigned Employees:</p>
-          <ul>
-            {selectedEmployees.map((emp, index) => (
-              <li key={index} className="flex justify-between p-2 border-b">
-                <span>{emp.name}</span>
-                <span className="text-sm text-gray-600">{emp.time} hrs</span>
-              </li>
-            ))}
-          </ul>
-          <p className="text-red-600 font-bold mt-2">
-            Total Assigned Hours: {selectedEmployees.reduce((sum, emp) => sum + emp.time, 0)} / {totalHoursLimit} hours
-          </p>
-        </div>
-      )}
-    </div>
-
+                  
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <div className="w-full p-2">
                             <div className="flex justify-between items-center">
