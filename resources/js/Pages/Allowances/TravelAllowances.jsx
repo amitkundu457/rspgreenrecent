@@ -4,10 +4,10 @@ import Nav from "@/Layouts/Nav";
 import Header from "@/Layouts/Header";
 
 export default function TravelAllowances({ user, notif, user_type }) {
-    const { travelAllowances } = usePage().props; // Fetch data from Laravel
+    const { travelAllowances } = usePage().props;
     const [editing, setEditing] = useState(null);
+    const [showExtraPayment, setShowExtraPayment] = useState(false); // State for extra payment
 
-    // Inertia form handler
     const {
         data,
         setData,
@@ -24,9 +24,11 @@ export default function TravelAllowances({ user, notif, user_type }) {
         travel_date: "",
         reason: "",
         document: null,
+        payment_by: "",
+        payment_mode: "Cash", // Default payment mode
+        extra_payment: "",
     });
 
-    // Handle Create & Update
     const handleSubmit = (e) => {
         e.preventDefault();
         if (editing) {
@@ -34,18 +36,22 @@ export default function TravelAllowances({ user, notif, user_type }) {
                 onSuccess: () => {
                     reset();
                     setEditing(null);
+                    setShowExtraPayment(false);
                 },
             });
         } else {
             post(route("travel-allowances.store"), {
-                onSuccess: () => reset(),
+                onSuccess: () => {
+                    reset();
+                    setShowExtraPayment(false);
+                },
             });
         }
     };
 
-    // Handle Edit
     const handleEdit = (allowance) => {
         setEditing(allowance.id);
+        setShowExtraPayment(!!allowance.extra_payment);
         setData({
             id: allowance.id,
             employee_name: allowance.employee_name,
@@ -54,10 +60,12 @@ export default function TravelAllowances({ user, notif, user_type }) {
             travel_date: allowance.travel_date,
             reason: allowance.reason,
             document: null,
+            payment_by: allowance.payment_by,
+            payment_mode: "Cash",
+            extra_payment: allowance.extra_payment || "",
         });
     };
 
-    // Handle Delete
     const handleDelete = (id) => {
         if (confirm("Are you sure you want to delete this allowance?")) {
             destroy(route("travel-allowances.destroy", id));
@@ -73,7 +81,6 @@ export default function TravelAllowances({ user, notif, user_type }) {
                     Travel Allowances Advance
                 </h1>
 
-                {/* Create & Edit Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <input
                         type="text"
@@ -115,6 +122,56 @@ export default function TravelAllowances({ user, notif, user_type }) {
                         className="w-full p-2 border rounded-md"
                     />
                     <input
+                        type="text"
+                        placeholder="Payment By"
+                        value={data.payment_by}
+                        onChange={(e) => setData("payment_by", e.target.value)}
+                        className="w-full p-2 border rounded-md"
+                    />
+
+                    {/* Extra Payment Toggle */}
+                    <div className="flex items-center space-x-4">
+                        <label className="font-medium">Extra Payment?</label>
+                        <input
+                            type="radio"
+                            id="extra-payment-yes"
+                            name="extra_payment"
+                            checked={showExtraPayment}
+                            onChange={() => {
+                                setShowExtraPayment(true);
+                                setData("payment_mode", "Cash"); // Always cash
+                            }}
+                        />
+                        <label htmlFor="extra-payment-yes">Yes</label>
+
+                        <input
+                            type="radio"
+                            id="extra-payment-no"
+                            name="extra_payment"
+                            checked={!showExtraPayment}
+                            onChange={() => {
+                                setShowExtraPayment(false);
+                                setData("extra_payment", ""); // Reset extra payment
+                            }}
+                        />
+                        <label htmlFor="extra-payment-no">No</label>
+                    </div>
+
+                    {/* Extra Payment Input (Conditional) */}
+                    {showExtraPayment && (
+                        <input
+                            type="number"
+                            placeholder="Extra Payment"
+                            value={data.extra_payment}
+                            onChange={(e) =>
+                                setData("extra_payment", e.target.value)
+                            }
+                            className="w-full p-2 border rounded-md"
+                        />
+                    )}
+
+                    {/* File Upload */}
+                    <input
                         type="file"
                         onChange={(e) => setData("document", e.target.files[0])}
                         className="w-full p-2 border rounded-md"
@@ -131,13 +188,13 @@ export default function TravelAllowances({ user, notif, user_type }) {
                     >
                         {editing ? "Update" : "Create"}
                     </button>
-
                     {editing && (
                         <button
                             type="button"
                             onClick={() => {
                                 reset();
                                 setEditing(null);
+                                setShowExtraPayment(false);
                             }}
                             className="w-full p-2 bg-gray-500 text-white rounded-md"
                         >
@@ -146,7 +203,6 @@ export default function TravelAllowances({ user, notif, user_type }) {
                     )}
                 </form>
 
-                {/* Table Display */}
                 <table className="w-full mt-6 border-collapse border border-gray-300">
                     <thead>
                         <tr className="bg-gray-100">
@@ -155,6 +211,9 @@ export default function TravelAllowances({ user, notif, user_type }) {
                             <th className="border px-4 py-2">Destination</th>
                             <th className="border px-4 py-2">Travel Date</th>
                             <th className="border px-4 py-2">Reason</th>
+                            <th className="border px-4 py-2">Payment By</th>
+                            <th className="border px-4 py-2">Payment Mode</th>
+                            <th className="border px-4 py-2">Extra Payment</th>
                             <th className="border px-4 py-2">Document</th>
                             <th className="border px-4 py-2">Actions</th>
                         </tr>
@@ -179,29 +238,23 @@ export default function TravelAllowances({ user, notif, user_type }) {
                                         {ta.reason}
                                     </td>
                                     <td className="border px-4 py-2">
-                                        {ta.document_path ? (
-                                            <a
-                                                href={`/storage/${ta.document_path}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-500 hover:underline"
-                                            >
-                                                View Document
-                                            </a>
-                                        ) : (
-                                            "No Document"
-                                        )}
+                                        {ta.payment_by}
+                                    </td>
+                                    <td className="border px-4 py-2">Cash</td>
+                                    <td className="border px-4 py-2">
+                                        {ta.extra_payment || "N/A"}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {ta.document_path
+                                            ? "View"
+                                            : "No Document"}
                                     </td>
                                     <td className="border px-4 py-2 flex justify-center space-x-4">
-                                        <button
-                                            onClick={() => handleEdit(ta)}
-                                            className="text-blue-500 hover:underline"
-                                        >
+                                        <button onClick={() => handleEdit(ta)}>
                                             Edit
                                         </button>
                                         <button
                                             onClick={() => handleDelete(ta.id)}
-                                            className="text-red-500 hover:underline"
                                         >
                                             Delete
                                         </button>
@@ -210,7 +263,7 @@ export default function TravelAllowances({ user, notif, user_type }) {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="7" className="text-center py-4">
+                                <td colSpan="10" className="text-center py-4">
                                     No travel allowances found.
                                 </td>
                             </tr>
