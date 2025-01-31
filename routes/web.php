@@ -48,6 +48,7 @@ use App\Http\Controllers\ChartAccountController;
 use App\Http\Controllers\JournalEntryController;
 use App\Http\Controllers\QuoteRequestController;
 use App\Http\Controllers\EmpolyeeSetupController;
+use App\Http\Controllers\FoodAllowanceController;
 use App\Http\Controllers\ProductServiceController;
 use App\Http\Controllers\StageOfProjectController;
 use App\Http\Controllers\ClientWorkOrderController;
@@ -56,6 +57,7 @@ use App\Http\Controllers\LeaveManagementController;
 use App\Http\Controllers\NotificationAllController;
 use App\Http\Controllers\SellerWorkOrderController;
 use App\Http\Controllers\ServiceCategoryController;
+use App\Http\Controllers\TravelAllowanceController;
 use Flasher\Prime\Test\Constraint\NotificationCount;
 use App\Http\Controllers\TermsAndConditionsController;
 
@@ -124,7 +126,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/projects-task', [ProjectController::class, 'Task']);
         Route::get('/task-create', [ProjectController::class, 'taskCreate']);
-       
+
 
 
         Route::get('/task-category', [ProjectController::class, 'Tskcategory']);
@@ -297,7 +299,7 @@ Route::post('/account/category/update/{accountCategory}', [AccountController::cl
 Route::delete('/account/category/delete/{accountCategory}', [AccountController::class, 'Accountdestroy']);
 Route::resource('loans', LoanController::class);
 
-Route::get('/loan-details/{id}',[LoanController::class, 'show']);
+Route::get('/loan-details/{id}', [LoanController::class, 'show']);
 Route::get('account/unit', [AccountController::class, 'unit']);
 Route::post('account/unit/store', [AccountController::class, 'unitstore']);
 Route::post('account/unit/update/{unit}', [AccountController::class, 'unitupdate']);
@@ -416,3 +418,13 @@ Route::get('/task-assingbyadmin', [ProjectController::class, 'taskEmployee']);
 
 Route::get('/task-assing-all/{id}', [ProjectController::class, 'Taskassinged']);
 
+Route::get('/travel-allowances', [TravelAllowanceController::class, 'index'])->name('travel-allowances.index');
+Route::post('/travel-allowances', [TravelAllowanceController::class, 'store'])->name('travel-allowances.store');
+Route::put('/travel-allowances/{id}', [TravelAllowanceController::class, 'update'])->name('travel-allowances.update');
+Route::delete('/travel-allowances/{id}', [TravelAllowanceController::class, 'destroy'])->name('travel-allowances.destroy');
+
+
+Route::get('/food-allowances', [FoodAllowanceController::class, 'index'])->name('food-allowances.index');
+Route::post('/food-allowances', [FoodAllowanceController::class, 'store'])->name('food-allowances.store');
+Route::put('/food-allowances/{id}', [FoodAllowanceController::class, 'update'])->name('food-allowances.update');
+Route::delete('/food-allowances/{id}', [FoodAllowanceController::class, 'destroy'])->name('food-allowances.destroy');

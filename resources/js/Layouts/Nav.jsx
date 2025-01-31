@@ -38,7 +38,11 @@ const Nav = ({ user_type, usrrr }) => {
 
         { name: "leave management", link: "/leave-index", perm: "view_leave" },
         { name: "Loan Management", link: "/loans", perm: "view_leave" },
-        { name: "Advancce-Salary Management", link: "/advanceloan", perm: "view_leave" },
+        {
+            name: "Advancce-Salary Management",
+            link: "/advanceloan",
+            perm: "view_leave",
+        },
         { name: "employee setup", link: "/branches", perm: "view_employee" },
         // { name: "attendance", link: "/attendance", perm: "view_attendance" },
         { name: "Salary generate", link: "/salaries", perm: "view_salary" },
@@ -87,7 +91,6 @@ const Nav = ({ user_type, usrrr }) => {
                             className="w-[85%]"
                         />
                     </div>
-
                     <li
                         className={
                             url === "/dashboard"
@@ -187,7 +190,6 @@ const Nav = ({ user_type, usrrr }) => {
                             ]}
                         />
                     )}
-
                     <DropdownMenu
                         icon={<FaFolderClosed />}
                         name={"Project Management"}
@@ -231,20 +233,21 @@ const Nav = ({ user_type, usrrr }) => {
                     />
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <DropdownMenu
-                            icon={<FaEye />}
-                            name={"Monitoring"}
+                            icon={<MdHolidayVillage />}
+                            name={"Allowance"}
                             items={[
                                 {
-                                    name: "Employee Screenshot",
-                                    link: "/screenshot/employee",
+                                    name: "Travel Allowance",
+                                    link: "/travel-allowances",
                                 },
                                 {
-                                    name: "Productive Time",
-                                    link: "/workhours/employee",
+                                    name: "Food Allowance",
+                                    link: "/food-allowances",
                                 },
                             ]}
                         />
                     )}
+
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <DropdownMenu
                             icon={<MdHolidayVillage />}
@@ -265,7 +268,6 @@ const Nav = ({ user_type, usrrr }) => {
                             ]}
                         />
                     )}
-
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <DropdownMenu
                             icon={<FaFolderClosed />}
