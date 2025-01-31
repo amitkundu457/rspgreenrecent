@@ -14,6 +14,7 @@ import { MdOutlineReport } from "react-icons/md";
 import { FcLeave } from "react-icons/fc";
 import { MdHolidayVillage } from "react-icons/md";
 import { FaHandPaper } from "react-icons/fa";
+import { MdAddTask } from "react-icons/md";
 // import { MdHolidayVillage } from "react-icons/md";
 import { LuLogOut } from "react-icons/lu";
 import { FaHome } from "react-icons/fa";
@@ -233,7 +234,7 @@ const Nav = ({ user_type, usrrr }) => {
                     />
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <DropdownMenu
-                            icon={<MdHolidayVillage />}
+                            icon={<MdAddTask />}
                             name={"Allowance"}
                             items={[
                                 {

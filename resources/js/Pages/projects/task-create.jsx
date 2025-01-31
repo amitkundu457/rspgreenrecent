@@ -23,7 +23,7 @@ const TaskCreate = ({
     stages,
     tls,
     allEmployees,
-    designation
+    designation,
 }) => {
     const { data, setData, post, errors } = useForm({
         task_name: "",
@@ -45,28 +45,33 @@ const TaskCreate = ({
     const [selectedEmployee, setSelectedEmployee] = useState("");
     const [selectedTime, setSelectedTime] = useState("");
     const totalHoursLimit = 12;
-    const timeOptions = [1, 2, 3, 4, 5, 6,7,8,9,10,11,12];
-  
+    const timeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
     const addEmployee = () => {
         const time = parseInt(selectedTime, 10);
-        const newTotalHours = selectedEmployees.reduce((sum, emp) => sum + emp.time, 0) + time;
-        
+        const newTotalHours =
+            selectedEmployees.reduce((sum, emp) => sum + emp.time, 0) + time;
+
         if (newTotalHours > totalHoursLimit) {
-          alert(`Total hours exceeded! Assigned: ${newTotalHours} hours, Limit: ${totalHoursLimit} hours`);
-          return;
+            alert(
+                `Total hours exceeded! Assigned: ${newTotalHours} hours, Limit: ${totalHoursLimit} hours`
+            );
+            return;
         }
-    
+
         const newEmployee = {
-          id: selectedEmployee,
-          name: allEmployees.find((emp) => emp.id === parseInt(selectedEmployee))?.employee_name,
-          time,
+            id: selectedEmployee,
+            name: allEmployees.find(
+                (emp) => emp.id === parseInt(selectedEmployee)
+            )?.employee_name,
+            time,
         };
-        
+
         setSelectedEmployees([...selectedEmployees, newEmployee]);
         setIsOpen(false);
         setSelectedEmployee("");
         setSelectedTime("");
-      };
+    };
 
     const [rows, setRows] = useState([
         { name: "", description: "", ammount: 0 },
@@ -97,15 +102,19 @@ const TaskCreate = ({
     };
     const [formData, setFormData] = useState({
         employee_id: [], // Must be an array
-        time_allocation: ""
+        time_allocation: "",
     });
-    
+
     const handleMultipleSelectChanges = (e) => {
-        const selectedValues = Array.from(e.target.selectedOptions, (option) => option.value);
+        const selectedValues = Array.from(
+            e.target.selectedOptions,
+            (option) => option.value
+        );
         setFormData((prev) => ({ ...prev, employee_id: selectedValues }));
     };
-    const employeeName = allEmployees.find((emp) => emp.id === selectedEmployee)?.employee_name;
-    
+    const employeeName = allEmployees.find(
+        (emp) => emp.id === selectedEmployee
+    )?.employee_name;
 
     const { props } = usePage();
 
@@ -113,14 +122,6 @@ const TaskCreate = ({
     const employeeSelectRef = useRef(null); // Ref for employee select
     if (props.auth.user.roles[0]?.name === "admin") {
         useEffect(() => {
-            const projectChoicesInstance = new Choices(
-                projectSelectRef.current,
-                {
-                    removeItemButton: true,
-                    searchEnabled: true,
-                }
-            );
-
             // const employeeChoicesInstance = new Choices(
             //     employeeSelectRef.current,
             //     {
@@ -371,7 +372,7 @@ const TaskCreate = ({
                         {normalizedTaskName !== "NON-BILLABLE" && (
                             <>
                                 <label htmlFor="estimate_hours">
-                                Estimate Hours
+                                    Estimate Hours
                                 </label>
                                 <input
                                     className="w-full rounded-lg"
@@ -387,7 +388,7 @@ const TaskCreate = ({
 
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <Fragment>
-                            <div className="w-1/2 p-2">
+                            {/* <div className="w-1/2 p-2">
                                 <label htmlFor="employee_id">Team Leader</label>
                                 <select
                                     ref={projectSelectRef}
@@ -405,10 +406,7 @@ const TaskCreate = ({
                                         </option>
                                     ))}
                                 </select>
-                            </div>
-                          
-       
-
+                            </div> */}
                         </Fragment>
                     )}
 
@@ -490,7 +488,7 @@ const TaskCreate = ({
                             <option value="2">High</option>
                         </select>
                     </div>
-                  
+
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <div className="w-full p-2">
                             <div className="flex justify-between items-center">

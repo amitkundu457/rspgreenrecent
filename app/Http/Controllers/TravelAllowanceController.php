@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TravelAllowance;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use App\Models\Employee;
+use Illuminate\Http\Request;
+use App\Models\TravelAllowance;
+use Illuminate\Support\Facades\Storage;
 
 class TravelAllowanceController extends Controller
 {
@@ -18,6 +19,10 @@ class TravelAllowanceController extends Controller
 
     public function store(Request $request)
     {
+        $allEmployees = Employee::join('users', 'employees.user_id', '=', 'users.id')
+            ->join('designations', 'employees.designation_id', '=', 'designations.id') // join the designations table
+            ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name') // select designation name
+            ->get();
         $validated = $request->validate([
             'employee_name' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
@@ -25,6 +30,7 @@ class TravelAllowanceController extends Controller
             'travel_date' => 'required|date',
             'reason' => 'nullable|string',
             'document' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            ''
         ]);
 
         $documentPath = null;

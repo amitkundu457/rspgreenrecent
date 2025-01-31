@@ -233,7 +233,7 @@ class ProjectController extends Controller
         $projects = Project::all();
         $designation = Designation::all();
 
-       $allEmployees = Employee::join('users', 'employees.user_id', '=', 'users.id')
+        $allEmployees = Employee::join('users', 'employees.user_id', '=', 'users.id')
             ->join('designations', 'employees.designation_id', '=', 'designations.id') // join the designations table
             ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name') // select designation name
             ->get();
@@ -280,8 +280,11 @@ class ProjectController extends Controller
         }
         $employee = User::join('employees', 'employees.user_id', '=', 'users.id')
             ->select('employees.phone', 'employees.address', 'employees.joinning_date', 'users.name', 'users.email', 'users.id')->get();
+
+        // dd($employee);
         // $task = Project::with(['tasks', 'users'])->get();
         $taskcategory = TaskCategory::all();
+        // dd($taskcategory);
         // if(Auth::user()->hasRole('admin')){
         $tasks = Project::with(['tasks.users' => function ($query) {
             $query->withPivot('employee_hours');
@@ -289,12 +292,19 @@ class ProjectController extends Controller
         // }else{
         //     // $tasks = 
         // }
-        //    dd($tasks);
+        // dd($tasks);
         $projects = Project::all();
+        // dd($projects);
         $notif = Auth::user()->notifications;
 
         return Inertia::render('projects/task-employee', compact(
-           'tasks', 'user', 'user_type', 'notif', 'taskcategory', 'employee', 'projects'
+            'tasks',
+            'user',
+            'user_type',
+            'notif',
+            'taskcategory',
+            'employee',
+            'projects'
         ));
     }
 
@@ -424,23 +434,48 @@ class ProjectController extends Controller
 
     public function Taskassinged(Project $project, $id)
     {
+        // Fetch project along with assignments and team relationships
         $project = Task::with(['assignments.employee', 'team'])->findOrFail($id);
+
+        // Get all employees with their name and designation
         $allEmployees = Employee::join('users', 'employees.user_id', '=', 'users.id')
-        ->join('designations', 'employees.designation_id', '=', 'designations.id') // join the designations table
-        ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name') // select designation name
-        ->get();
-        // dd($allEmployees);
+            ->join('designations', 'employees.designation_id', '=', 'designations.id')
+            ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name')
+            ->get();
+
+        // Get the logged-in user
         $userss = Auth::user();
         $user = Auth::user()->name;
+
         if ($userss) {
             // Ensure permissions are assigned and fetched correctly
             $user_type = $userss->getAllPermissions()->pluck('name')->toArray();
-            // dd($permissions);
         }
+
+        // Fetch all projects and tasks
         $projects = Project::all();
+        $tasksss = Task::find($id);
+        // dd($task);
+
+        // Check if task ID matches and fetch the estimate_hours
+        $taskId = $id; // Assuming task ID is passed in the route or as a parameter
+        $matchedTask = Task::find($taskId);
+
+        if ($matchedTask) {
+            $estimateHours = $matchedTask->estimate_hours;
+        } else {
+            $estimateHours = 'Task not found';
+        }
+        // dd($matchedTask);
+
+        // Fetch employees with role 'Employee' and 'Team Leader'
         $employees = User::role('Employee')->get();
         $tls = User::role('Team Leader')->get();
+
+        // Get user notifications
         $notif = Auth::user()->notifications;
+
+        // Return data to the frontend
         return Inertia::render('projects/task-allview', [
             'tls' => $tls,
             'project' => $project,
@@ -449,7 +484,9 @@ class ProjectController extends Controller
             'user' => $user,
             'user_type' => $user_type,
             'notif' => $notif,
-            'allEmployees' =>$allEmployees
+            'allEmployees' => $allEmployees,
+            'tasksss' => $tasksss,
+            'estimate_hours' => $estimateHours, // Add estimate hours to the response
         ]);
     }
 

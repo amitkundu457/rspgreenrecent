@@ -243,16 +243,15 @@ const Task = ({
                                 <Link href="task-create">Add New</Link>
                             </div>
                         )}
-                       
-                            <div className="grid p-2 mt-2 text-black underline rounded-lg place-items-center">
+
+                        {/* <div className="grid p-2 mt-2 text-black underline rounded-lg place-items-center">
                                 <Link href="task-employee">Add Employee</Link>
-                            </div>
-                       
+                            </div> */}
+
                         {/* <div className='grid p-2 mt-2 text-black underline rounded-lg place-items-center'>
                             <Link href='task-category'>Add Task type</Link>
                         </div> */}
                     </div>
-                    
                 </div>
                 <br />
                 <table className="w-full border border-collapse border-gray-200 table-auto">
@@ -277,7 +276,7 @@ const Task = ({
                                 </th>
                             )} */}
                             <th className="px-4 py-2 border border-gray-300">
-                            Estimate Time hours
+                                Estimate Time hours
                             </th>
                             <th className="px-4 py-2 border border-gray-300">
                                 Priority
@@ -313,7 +312,7 @@ const Task = ({
                                         <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
                                             {task.estimate_hours}
                                         </td>
-                                       
+
                                         {/* {props.auth.user.roles[0]?.name ===
                                             "admin" && (
                                             <td className="px-4 py-2 border border-gray-300">

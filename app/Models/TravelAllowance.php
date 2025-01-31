@@ -17,6 +17,11 @@ class TravelAllowance extends Model
         'destination',
         'travel_date',
         'reason',
-        'document_path'
+        'document_path',
+        'status',
+        'payment_by',
+        'payment_mode',
+        'extra_payment'
+
     ];
 }

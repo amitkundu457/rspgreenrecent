@@ -3,7 +3,7 @@ import { useForm, usePage } from "@inertiajs/react";
 import Nav from "@/Layouts/Nav";
 import Header from "@/Layouts/Header";
 
-export default function TravelAllowances() {
+export default function TravelAllowances({ user, notif, user_type }) {
     const { travelAllowances } = usePage().props; // Fetch data from Laravel
     const [editing, setEditing] = useState(null);
 
@@ -66,10 +66,12 @@ export default function TravelAllowances() {
 
     return (
         <div className="w-[85%] absolute right-0 overflow-hidden bg-gray-100 min-h-screen">
-            <Header />
-            <Nav />
+            <Header user={user} notif={notif} />
+            <Nav user_type={user_type} />
             <div className="p-8 bg-white rounded-b-md">
-                <h1 className="text-2xl font-bold mb-6">Travel Allowances</h1>
+                <h1 className="text-2xl font-bold mb-6">
+                    Travel Allowances Advance
+                </h1>
 
                 {/* Create & Edit Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
