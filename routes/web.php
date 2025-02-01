@@ -424,6 +424,9 @@ Route::post('/travel-allowances', [TravelAllowanceController::class, 'store'])->
 Route::put('/travel-allowances/{id}', [TravelAllowanceController::class, 'update'])->name('travel-allowances.update');
 Route::delete('/travel-allowances/{id}', [TravelAllowanceController::class, 'destroy'])->name('travel-allowances.destroy');
 
+Route::get('/travelreq', [TravelAllowanceController::class, 'show'])->name('travel-allowances.show');
+Route::put('/travel-allowances/{id}/status', [TravelAllowanceController::class, 'updateStatus']);
+
 
 Route::get('/food-allowances', [FoodAllowanceController::class, 'index'])->name('food-allowances.index');
 Route::post('/food-allowances', [FoodAllowanceController::class, 'store'])->name('food-allowances.store');
