@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm, usePage } from "@inertiajs/react";
 import Header from "@/Layouts/Header";
 import Nav from "@/Layouts/Nav";
+import { Link} from "@inertiajs/react";
 
 export default function TravelAllowances() {
     const { travelAllowances } = usePage().props;
@@ -22,6 +23,9 @@ export default function TravelAllowances() {
         travel_date: "",
         reason: "",
         destination: "",
+        payment_by: "",  // New field for Payment By
+        payment_mode: "Cash", // New field for Payment Mode
+        extra_payment: "", // New field for Extra Payment
         document: null,
         status: "Pending", // New status field
     });
@@ -35,6 +39,9 @@ export default function TravelAllowances() {
         formData.append("travel_date", data.travel_date);
         formData.append("reason", data.reason);
         formData.append("destination", data.destination);
+        formData.append("payment_by", data.payment_by); // Append Payment By field
+        formData.append("payment_mode", data.payment_mode); // Append Payment Mode field
+        formData.append("extra_payment", data.extra_payment); // Append Extra Payment field
         formData.append("status", data.status);
         if (data.document) {
             formData.append("document", data.document);
@@ -82,14 +89,14 @@ export default function TravelAllowances() {
                         required
                         className="w-full p-2 border rounded-md"
                     />
-                    <input
+                    {/* <input
                         type="number"
-                        placeholder="Amount"
+                        placeholder="Advance Payment"
                         value={data.amount}
                         onChange={(e) => setData("amount", e.target.value)}
                         required
                         className="w-full p-2 border rounded-md"
-                    />
+                    /> */}
                     <input
                         type="date"
                         value={data.travel_date}
@@ -111,6 +118,27 @@ export default function TravelAllowances() {
                         required
                         className="w-full p-2 border rounded-md"
                     />
+                    {/* <input
+                        type="text"
+                        placeholder="Payment By"
+                        value={data.payment_by}
+                        onChange={(e) => setData("payment_by", e.target.value)}
+                        className="w-full p-2 border rounded-md"
+                    /> */}
+                    {/* <input
+                        type="text"
+                        placeholder="Payment Mode"
+                        value={data.payment_mode}
+                        onChange={(e) => setData("payment_mode", e.target.value)}
+                        className="w-full p-2 border rounded-md"
+                    /> */}
+                    {/* <input
+                        type="number"
+                        placeholder="Extra Payment"
+                        value={data.extra_payment}
+                        onChange={(e) => setData("extra_payment", e.target.value)}
+                        className="w-full p-2 border rounded-md"
+                    /> */}
                     <input
                         type="file"
                         onChange={(e) => setData("document", e.target.files[0])}
@@ -130,12 +158,13 @@ export default function TravelAllowances() {
                             <tr className="bg-gray-100">
                                 <th className="border px-4 py-2">Employee Id</th>
                                 <th className="border px-4 py-2">Employee Name</th>
-                                <th className="border px-4 py-2">Amount</th>
+                                <th className="border px-4 py-2">Advance payment</th>
                                 <th className="border px-4 py-2">Date</th>
                                 <th className="border px-4 py-2">Reason</th>
                                 <th className="border px-4 py-2">Destination</th>
-                                <th className="border px-4 py-2">Payment Mode</th>
-                                <th className="border px-4 py-2">Extra Payment</th>
+                                <th className="border px-4 py-2">Payment By</th> {/* New Column */}
+                                <th className="border px-4 py-2">Payment Mode</th> {/* New Column */}
+                                <th className="border px-4 py-2">Extra Payment</th> {/* New Column */}
                                 <th className="border px-4 py-2">Document</th>
                                 <th className="border px-4 py-2">Status</th>
                                 <th className="border px-4 py-2">Actions</th>
@@ -149,17 +178,23 @@ export default function TravelAllowances() {
                                         <td className="border px-4 py-2">{ta.employee_name}</td>
                                         <td className="border px-4 py-2">Rs{ta.amount}</td>
                                         <td className="border px-4 py-2">{ta.travel_date}</td>
-                                        <td className="border px-4 py-2">{ta.travel_date}</td>
-                                        <td className="border px-4 py-2">{ta.travel_date}</td>
                                         <td className="border px-4 py-2">{ta.reason}</td>
                                         <td className="border px-4 py-2">{ta.destination}</td>
+                                        <td className="border px-4 py-2">{ta.payment_by}</td> {/* Show Payment By */}
+                                        <td className="border px-4 py-2">Cash</td> {/* Show Payment Mode */}
+                                        <td className="border px-4 py-2">{ta.extra_payment}</td> {/* Show Extra Payment */}
                                         <td className="border px-4 py-2">
-                                            {ta.document ? (
-                                                <a href={ta.document} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                                            {ta.document_path ? (
+                                                <a
+                                                    href={`/storage/${ta.document_path}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-500 underline"
+                                                >
                                                     View Document
                                                 </a>
                                             ) : (
-                                                "View Document"
+                                                "No Document"
                                             )}
                                         </td>
                                         <td className="border px-4 py-2">
@@ -180,12 +215,20 @@ export default function TravelAllowances() {
                                             >
                                                 Reject
                                             </button>
+                                            <Link
+    href={`/view-all-document/${ta.id}`}
+    className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-all duration-200"
+    title="View Details"
+    onClick={() => console.log(`Navigating to loan details of loan ID: ${ta.id}`)}
+  >
+    View Details
+  </Link>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="9" className="text-center py-4">No travel allowances found.</td>
+                                    <td colSpan="11" className="text-center py-4">No travel allowances found.</td>
                                 </tr>
                             )}
                         </tbody>

@@ -4,11 +4,11 @@ import Nav from "@/Layouts/Nav";
 import Header from "@/Layouts/Header";
 import { Link } from "@inertiajs/react";
 
-export default function TravelAllowances({ user, notif }) {
+export default function TravelAllowances({ user, notif , allEmployees}) {
     const { travelAllowances } = usePage().props;
     const [editing, setEditing] = useState(null);
     const [showExtraPayment, setShowExtraPayment] = useState(false);
-
+   console.log("ggggg",allEmployees)
     const {
         data,
         setData,
@@ -32,31 +32,7 @@ export default function TravelAllowances({ user, notif }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
-        // Find an existing allowance by employee name
-        const existingAllowance = travelAllowances.find(
-            (allowance) => allowance.employee_name === data.employee_name
-        );
-    
-        // Calculate totalAmount (advance + extra payment)
-        let totalAmount = parseFloat(data.amount);
-        if (existingAllowance) {
-            // Sum the extra payment with the existing allowance amount
-            totalAmount += parseFloat(data.extra_payment || 0);
-            setData(prevData => ({
-                ...prevData,
-                amount: totalAmount, // Update the amount with the sum
-            }));
-        } else {
-            // Calculate the amount as original + extra payment
-            totalAmount = parseFloat(data.amount) + parseFloat(data.extra_payment || 0);
-            setData(prevData => ({
-                ...prevData,
-                amount: totalAmount, // Set the total amount
-            }));
-        }
-    
-        // Handle form submission (either edit or create)
+
         if (editing) {
             put(route("travel-allowances.update", data.id), {
                 onSuccess: () => {
@@ -74,69 +50,51 @@ export default function TravelAllowances({ user, notif }) {
             });
         }
     };
-    
-    
-
-    const handleEdit = (allowance) => {
-        setEditing(allowance.id);
-        setShowExtraPayment(!!allowance.extra_payment);
-        setData({
-            id: allowance.id,
-            employee_name: allowance.employee_name,
-            amount: allowance.amount, // Only advance payment
-            destination: allowance.destination,
-            travel_date: allowance.travel_date,
-            reason: allowance.reason,
-            document: null,
-            payment_by: allowance.payment_by,
-            payment_mode: "Cash",
-            extra_payment: allowance.extra_payment || "", // Extra payment
-        });
-    };
-
-    const handleDelete = (id) => {
-        if (confirm("Are you sure you want to delete this allowance?")) {
-            destroy(route("travel-allowances.destroy", id));
-        }
-    };
-
-    const updateStatus = (id, status) => {
-        post(route("travel-allowances.updateStatus", { id, status }), {
-            onSuccess: () => {},
-        });
-    };
 
     return (
         <div className="w-[85%] absolute right-0 overflow-hidden bg-gray-100 min-h-screen">
             <Header user={user} notif={notif} />
             <Nav />
             <div className="p-8 bg-white rounded-b-md">
-                <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-2xl font-bold">Travel Allowances Advance</h1>
-                    <Link href="/travelreq">
-                        <button className="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
-                            <span className="text-lg mr-2">+</span> Add Request for Payment
-                        </button>
-                    </Link>
-                </div>
+             
+<div className="flex items-center justify-between mb-6">
+<h1 className="text-2xl font-bold">Travel Allowances Advance</h1>
+<Link href="/travelreq">
+    <button className="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
+        <span className="text-lg mr-2">+</span> Add Request for Payment
+    </button>
+</Link>
+</div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <input
-                        type="text"
-                        placeholder="Employee Name"
-                        value={data.employee_name}
-                        onChange={(e) => setData("employee_name", e.target.value)}
-                        required
-                        className="w-full p-2 border rounded-md"
-                    />
-                    <input
-                        type="number"
-                        placeholder="Advance Payment"
-                        value={data.amount}
-                        onChange={(e) => setData("amount", e.target.value)}
-                        required
-                        className="w-full p-2 border rounded-md"
-                    />
+                <select
+    value={data.employee_name}
+    onChange={(e) => setData("employee_name", e.target.value)}
+    required
+    className="w-full p-2 border rounded-md"
+>
+    <option value="">Select Employee</option>
+    {allEmployees?.map((employee, index) => (
+        <option key={index} value={employee.name}>
+            {employee.employee_name
+            }
+        </option>
+    ))}
+</select>
+
+
+                    {/* Hide Advance Payment when Extra Payment is selected */}
+                    {!showExtraPayment && (
+                        <input
+                            type="number"
+                            placeholder="Advance Payment"
+                            value={data.amount}
+                            onChange={(e) => setData("amount", e.target.value)}
+                            required
+                            className="w-full p-2 border rounded-md"
+                        />
+                    )}
+
                     <input
                         type="text"
                         placeholder="Destination"
@@ -174,12 +132,9 @@ export default function TravelAllowances({ user, notif }) {
                             id="extra-payment-yes"
                             name="extra_payment"
                             checked={showExtraPayment}
-                            onChange={() => {
-                                setShowExtraPayment(true);
-                            }}
+                            onChange={() => setShowExtraPayment(true)}
                         />
                         <label htmlFor="extra-payment-yes">Yes</label>
-
                         <input
                             type="radio"
                             id="extra-payment-no"
@@ -187,7 +142,7 @@ export default function TravelAllowances({ user, notif }) {
                             checked={!showExtraPayment}
                             onChange={() => {
                                 setShowExtraPayment(false);
-                                setData("extra_payment", ""); // Reset extra payment
+                                setData("extra_payment", "");
                             }}
                         />
                         <label htmlFor="extra-payment-no">No</label>
@@ -195,18 +150,13 @@ export default function TravelAllowances({ user, notif }) {
 
                     {/* Extra Payment Input (Conditional) */}
                     {showExtraPayment && (
-                        <>
-                            <input
-                                type="number"
-                                placeholder="Extra Payment"
-                                value={data.extra_payment}
-                                onChange={(e) => setData("extra_payment", e.target.value)}
-                                className="w-full p-2 border rounded-md"
-                            />
-                            <div className="mt-2">
-                                <strong>Total Amount: </strong> Rs {parseFloat(data.amount) + parseFloat(data.extra_payment || 0)}
-                            </div>
-                        </>
+                        <input
+                            type="number"
+                            placeholder="Extra Payment"
+                            value={data.extra_payment}
+                            onChange={(e) => setData("extra_payment", e.target.value)}
+                            className="w-full p-2 border rounded-md"
+                        />
                     )}
 
                     {/* File Upload */}
@@ -219,31 +169,18 @@ export default function TravelAllowances({ user, notif }) {
                     <button
                         type="submit"
                         className={`w-full p-2 text-white rounded-md ${
-                            processing
-                                ? "bg-gray-400"
-                                : "bg-blue-500 hover:bg-blue-600"
+                            processing ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
                         }`}
                         disabled={processing}
                     >
                         {editing ? "Update" : "Create"}
                     </button>
-                    {editing && (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                reset();
-                                setEditing(null);
-                                setShowExtraPayment(false);
-                            }}
-                            className="w-full p-2 bg-gray-500 text-white rounded-md"
-                        >
-                            Cancel
-                        </button>
-                    )}
                 </form>
+           
+  
 
                 {/* Travel Allowances Table */}
-                <table className="w-full mt-6 border-collapse border border-gray-300">
+                {/* <table className="w-full mt-6 border-collapse border border-gray-300">
                     <thead>
                         <tr className="bg-gray-100">
                             <th className="border px-4 py-2">Employee Name</th>
@@ -271,7 +208,21 @@ export default function TravelAllowances({ user, notif }) {
                                     <td className="border px-4 py-2">{ta.payment_by}</td>
                                     <td className="border px-4 py-2">{ta.payment_mode}</td>
                                     <td className="border px-4 py-2">{ta.extra_payment || "N/A"}</td>
-                                    <td className="border px-4 py-2">{ta.document_path ? "View" : "No Document"}</td>
+                                    <td className="border px-4 py-2">
+  {ta.document_path ? (
+    <a
+      href={`/storage/${ta.document_path}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-500 underline"
+    >
+      View Document
+    </a>
+  ) : (
+    "No Document"
+  )}
+</td>
+
                                     <td className="border px-4 py-2 text-center">
                                         {ta.status === "approved" && (
                                             <span className="text-green-600">Approved</span>
@@ -310,7 +261,7 @@ export default function TravelAllowances({ user, notif }) {
                             </tr>
                         )}
                     </tbody>
-                </table>
+                </table> */}
             </div>
         </div>
     );
