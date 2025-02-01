@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('documents_byemployee', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('employee_id'); 
-            $table->string('document_name'); 
-            $table->string('document_path'); 
-            $table->timestamps(); 
-        
-            // Define the foreign key constraint
-            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
+    $table->foreignId('employee_id')->constrained('users');
+    $table->string('document_name');
+    $table->string('document_path');
+    $table->foreignId('travel_allowance_id')->constrained('travel_allowances');
+    $table->timestamps();
+
         });
     }
 

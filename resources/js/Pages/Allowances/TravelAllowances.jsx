@@ -4,7 +4,7 @@ import Nav from "@/Layouts/Nav";
 import Header from "@/Layouts/Header";
 import { Link } from "@inertiajs/react";
 
-export default function TravelAllowances({ user, notif , allEmployees }) {
+export default function TravelAllowances({ user, notif, allEmployees }) {
     const { travelAllowances } = usePage().props;
     const [editing, setEditing] = useState(null);
     const [showExtraPayment, setShowExtraPayment] = useState(false);
@@ -23,7 +23,8 @@ export default function TravelAllowances({ user, notif , allEmployees }) {
         reset,
     } = useForm({
         id: "",
-        employee_name: "",
+        employee_id: "",
+        employee_name: "", // Store employee name too
         amount: "", // Advance Payment
         destination: "",
         travel_date: "",
@@ -71,15 +72,25 @@ export default function TravelAllowances({ user, notif , allEmployees }) {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Employee Selection */}
                     <select
-                        value={data.employee_name} 
-                        onChange={(e) => setData("employee_name", e.target.value)} 
-                        required 
+                        value={data.employee_id}
+                        onChange={(e) => {
+                            const selectedEmployee = allEmployees.find(
+                                (emp) => emp.id === parseInt(e.target.value)
+                            );
+                            setData({
+                                ...data,
+                                employee_id: selectedEmployee?.id || "",
+                                employee_name: selectedEmployee?.employee_name || "" // Store employee_name too
+                            });
+                        }}
+                        required
                         className="w-full p-2 border rounded-md"
                     >
                         <option value="">Select Employee</option>
-                        {allEmployees?.map((employee, index) => (
-                            <option key={index} value={employee.id}> {/* Using employee ID here */}
+                        {allEmployees?.map((employee) => (
+                            <option key={employee.id} value={employee.id}>
                                 {employee.employee_name}
                             </option>
                         ))}
@@ -179,91 +190,90 @@ export default function TravelAllowances({ user, notif , allEmployees }) {
                     </button>
                 </form>
 
-  
-
                 {/* Travel Allowances Table */}
-                {/* <table className="w-full mt-6 border-collapse border border-gray-300">
-                    <thead>
-                        <tr className="bg-gray-100">
-                            <th className="border px-4 py-2">Employee Name</th>
-                            <th className="border px-4 py-2">Advance Payment</th>
-                            <th className="border px-4 py-2">Destination</th>
-                            <th className="border px-4 py-2">Travel Date</th>
-                            <th className="border px-4 py-2">Reason</th>
-                            <th className="border px-4 py-2">Payment By</th>
-                            <th className="border px-4 py-2">Payment Mode</th>
-                            <th className="border px-4 py-2">Extra Payment</th>
-                            <th className="border px-4 py-2">Document</th>
-                            <th className="border px-4 py-2">Status</th>
-                            <th className="border px-4 py-2">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {travelAllowances.length > 0 ? (
-                            travelAllowances.map((ta) => (
-                                <tr key={ta.id} className="border">
-                                    <td className="border px-4 py-2">{ta.employee_name}</td>
-                                    <td className="border px-4 py-2">Rs {ta.amount}</td>
-                                    <td className="border px-4 py-2">{ta.destination}</td>
-                                    <td className="border px-4 py-2">{ta.travel_date}</td>
-                                    <td className="border px-4 py-2">{ta.reason}</td>
-                                    <td className="border px-4 py-2">{ta.payment_by}</td>
-                                    <td className="border px-4 py-2">{ta.payment_mode}</td>
-                                    <td className="border px-4 py-2">{ta.extra_payment || "N/A"}</td>
-                                    <td className="border px-4 py-2">
-  {ta.document_path ? (
-    <a
-      href={`/storage/${ta.document_path}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-500 underline"
-    >
-      View Document
-    </a>
-  ) : (
-    "No Document"
-  )}
-</td>
-
-                                    <td className="border px-4 py-2 text-center">
-                                        {ta.status === "approved" && (
-                                            <span className="text-green-600">Approved</span>
-                                        )}
-                                        {ta.status === "rejected" && (
-                                            <span className="text-red-600">Rejected</span>
-                                        )}
-                                        {ta.status === "pending" && (
-                                            <div className="flex justify-center space-x-2">
-                                                <button
-                                                    className="bg-green-500 text-white px-2 py-1 rounded"
-                                                    onClick={() => updateStatus(ta.id, "approved")}
+                {/* 
+                    <table className="w-full mt-6 border-collapse border border-gray-300">
+                        <thead>
+                            <tr className="bg-gray-100">
+                                <th className="border px-4 py-2">Employee Name</th>
+                                <th className="border px-4 py-2">Advance Payment</th>
+                                <th className="border px-4 py-2">Destination</th>
+                                <th className="border px-4 py-2">Travel Date</th>
+                                <th className="border px-4 py-2">Reason</th>
+                                <th className="border px-4 py-2">Payment By</th>
+                                <th className="border px-4 py-2">Payment Mode</th>
+                                <th className="border px-4 py-2">Extra Payment</th>
+                                <th className="border px-4 py-2">Document</th>
+                                <th className="border px-4 py-2">Status</th>
+                                <th className="border px-4 py-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {travelAllowances.length > 0 ? (
+                                travelAllowances.map((ta) => (
+                                    <tr key={ta.id} className="border">
+                                        <td className="border px-4 py-2">{ta.employee_name}</td>
+                                        <td className="border px-4 py-2">Rs {ta.amount}</td>
+                                        <td className="border px-4 py-2">{ta.destination}</td>
+                                        <td className="border px-4 py-2">{ta.travel_date}</td>
+                                        <td className="border px-4 py-2">{ta.reason}</td>
+                                        <td className="border px-4 py-2">{ta.payment_by}</td>
+                                        <td className="border px-4 py-2">{ta.payment_mode}</td>
+                                        <td className="border px-4 py-2">{ta.extra_payment || "N/A"}</td>
+                                        <td className="border px-4 py-2">
+                                            {ta.document_path ? (
+                                                <a
+                                                    href={`/storage/${ta.document_path}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-500 underline"
                                                 >
-                                                    Approve
-                                                </button>
-                                                <button
-                                                    className="bg-red-500 text-white px-2 py-1 rounded"
-                                                    onClick={() => updateStatus(ta.id, "rejected")}
-                                                >
-                                                    Reject
-                                                </button>
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td className="border px-4 py-2 flex justify-center space-x-4">
-                                        <button onClick={() => handleEdit(ta)}>Edit</button>
-                                        <button onClick={() => handleDelete(ta.id)}>Delete</button>
+                                                    View Document
+                                                </a>
+                                            ) : (
+                                                "No Document"
+                                            )}
+                                        </td>
+                                        <td className="border px-4 py-2 text-center">
+                                            {ta.status === "approved" && (
+                                                <span className="text-green-600">Approved</span>
+                                            )}
+                                            {ta.status === "rejected" && (
+                                                <span className="text-red-600">Rejected</span>
+                                            )}
+                                            {ta.status === "pending" && (
+                                                <div className="flex justify-center space-x-2">
+                                                    <button
+                                                        className="bg-green-500 text-white px-2 py-1 rounded"
+                                                        onClick={() => updateStatus(ta.id, "approved")}
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                    <button
+                                                        className="bg-red-500 text-white px-2 py-1 rounded"
+                                                        onClick={() => updateStatus(ta.id, "rejected")}
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="border px-4 py-2 flex justify-center space-x-4">
+                                            <button onClick={() => handleEdit(ta)}>Edit</button>
+                                            <button onClick={() => handleDelete(ta.id)}>Delete</button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="11" className="text-center py-4">
+                                        No travel allowances found.
                                     </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="11" className="text-center py-4">
-                                    No travel allowances found.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table> */}
+                            )}
+                        </tbody>
+                    </table>
+                */}
             </div>
         </div>
     );
