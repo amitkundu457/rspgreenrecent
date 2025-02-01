@@ -1,10 +1,12 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Models\TravelAllowance;
+use App\Models\DocumentByEmployee;
 use Illuminate\Support\Facades\Storage;
 
 class TravelAllowanceController extends Controller
@@ -23,41 +25,66 @@ class TravelAllowanceController extends Controller
 
     public function store(Request $request)
     {
-        // Validate the incoming data without 'employee_id'
+    // dd();
+        // Validate the incoming data
         $validated = $request->validate([
             'employee_name' => 'required|string|max:255', // Employee name is required
             'amount' => 'required|numeric|min:0',  // Amount is required
             'destination' => 'nullable|string|max:255', // Optional destination field
             'travel_date' => 'required|date', // Travel date is required
             'reason' => 'nullable|string', // Optional reason field
-            'document' => 'nullable|file|mimes:pdf,jpg,png|max:2048', // Optional file upload
+            'documents' => 'nullable|array', // Multiple file upload field
+            'documents.*' => 'file|mimes:pdf,jpg,png,jpeg|max:2048', // Validate each document file
             'payment_by' => 'nullable|string|max:255', // Optional payment_by field
             'payment_mode' => 'nullable|string|max:255', // Optional payment_mode field
             'extra_payment' => 'nullable|numeric|min:0', // Optional extra payment
         ]);
     
-        // Handle document upload if present
-        $documentPath = null;
-        if ($request->hasFile('document')) {
-            $documentPath = $request->file('document')->store('travel_documents', 'public');
-        }
-    
-        // Save the allowance to the database
-        TravelAllowance::create([
-            'employee_name' => $validated['employee_name'],  // Store the employee name
-            'amount' => $validated['amount'] + ($validated['extra_payment'] ?? 0),  // Sum the amounts
+        // Save the travel allowance to the database
+        $travelAllowance = TravelAllowance::create([
+            'employee_name' => $validated['employee_name'],
+            'amount' => $validated['amount'] + ($validated['extra_payment'] ?? 0),
             'destination' => $validated['destination'] ?? null,
             'travel_date' => $validated['travel_date'],
             'reason' => $validated['reason'] ?? null,
-            'document_path' => $documentPath,
             'payment_by' => $validated['payment_by'] ?? null,
             'payment_mode' => $validated['payment_mode'] ?? null,
             'extra_payment' => $validated['extra_payment'] ?? 0,
         ]);
     
+       
+        $employee = User::where('name', $validated['employee_name'])->first(); // Adjust this line as necessary
+    
+        if ($employee) {
+            $employee_id = $employee->id; // Get the employee_id
+        } else {
+            // Handle case if employee doesn't exist
+            return redirect()->back()->withErrors('Employee not found.');
+        }
+    
+        // Handle document uploads and store them in the documents_byemployee table
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $document) {
+                // Store the document with its original name
+                $documentPath = $document->storeAs('travel_documents', $document->getClientOriginalName(), 'public');
+    
+                // Save each document to the documents_byemployee table
+                DocumentByEmployee::create([
+                    'employee_id' => $employee_id,  // Link the document to the employee
+                    'document_name' => $document->getClientOriginalName(),
+                    'document_path' => $documentPath,
+                ]);
+            }
+        }
+    
         // Redirect to the index route with a success message
-        return redirect()->route('travel-allowances.index')->with('success', 'Travel Allowance created successfully.');
+        return redirect()->route('travel-allowances.index')->with('success', 'Travel Allowance and Documents created successfully.');
     }
+    
+    
+    
+    
+    
     
     
 

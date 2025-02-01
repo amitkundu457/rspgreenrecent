@@ -4,11 +4,15 @@ import Nav from "@/Layouts/Nav";
 import Header from "@/Layouts/Header";
 import { Link } from "@inertiajs/react";
 
-export default function TravelAllowances({ user, notif , allEmployees}) {
+export default function TravelAllowances({ user, notif , allEmployees }) {
     const { travelAllowances } = usePage().props;
     const [editing, setEditing] = useState(null);
     const [showExtraPayment, setShowExtraPayment] = useState(false);
-   console.log("ggggg",allEmployees)
+
+    // Console log to check allEmployees data
+    console.log("Employees:", allEmployees);
+
+    // Setting up the form data
     const {
         data,
         setData,
@@ -30,6 +34,7 @@ export default function TravelAllowances({ user, notif , allEmployees}) {
         extra_payment: "", // Extra Payment
     });
 
+    // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -56,32 +61,29 @@ export default function TravelAllowances({ user, notif , allEmployees}) {
             <Header user={user} notif={notif} />
             <Nav />
             <div className="p-8 bg-white rounded-b-md">
-             
-<div className="flex items-center justify-between mb-6">
-<h1 className="text-2xl font-bold">Travel Allowances Advance</h1>
-<Link href="/travelreq">
-    <button className="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
-        <span className="text-lg mr-2">+</span> Add Request for Payment
-    </button>
-</Link>
-</div>
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-2xl font-bold">Travel Allowances Advance</h1>
+                    <Link href="/travelreq">
+                        <button className="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
+                            <span className="text-lg mr-2">+</span> Add Request for Payment
+                        </button>
+                    </Link>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                <select
-    value={data.employee_name}
-    onChange={(e) => setData("employee_name", e.target.value)}
-    required
-    className="w-full p-2 border rounded-md"
->
-    <option value="">Select Employee</option>
-    {allEmployees?.map((employee, index) => (
-        <option key={index} value={employee.name}>
-            {employee.employee_name
-            }
-        </option>
-    ))}
-</select>
-
+                    <select
+                        value={data.employee_name} 
+                        onChange={(e) => setData("employee_name", e.target.value)} 
+                        required 
+                        className="w-full p-2 border rounded-md"
+                    >
+                        <option value="">Select Employee</option>
+                        {allEmployees?.map((employee, index) => (
+                            <option key={index} value={employee.id}> {/* Using employee ID here */}
+                                {employee.employee_name}
+                            </option>
+                        ))}
+                    </select>
 
                     {/* Hide Advance Payment when Extra Payment is selected */}
                     {!showExtraPayment && (
@@ -176,7 +178,7 @@ export default function TravelAllowances({ user, notif , allEmployees}) {
                         {editing ? "Update" : "Create"}
                     </button>
                 </form>
-           
+
   
 
                 {/* Travel Allowances Table */}
