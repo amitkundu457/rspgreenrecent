@@ -1,144 +1,128 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\TravelAllowance;
 use Inertia\Inertia;
+use App\Models\Employee;
 use Illuminate\Http\Request;
+use App\Models\TravelAllowance;
 use Illuminate\Support\Facades\Storage;
 
 class TravelAllowanceController extends Controller
 {
-    /**
-     * Display a listing of the travel allowances.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        // Fetch all travel allowances from the database
-        $allowances = TravelAllowance::all();
-
-        // Return the data to the React frontend using Inertia
-        return Inertia::render('TravelAllowance/Index', [
-            'allowances' => $allowances
+        return Inertia::render('Allowances/TravelAllowances', [
+            'travelAllowances' => TravelAllowance::all(),
         ]);
     }
 
-    /**
-     * Store a newly created travel allowance.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        // Validate the incoming request
-        $request->validate([
-            'employee_name' => 'required|string',
-            'amount' => 'required|numeric',
-            'destination' => 'required|string',
+        $validated = $request->validate([
+            'employee_name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'destination' => 'nullable|string|max:255',
             'travel_date' => 'required|date',
-            'reason' => 'required|string',
-            'document' => 'nullable|file|mimes:pdf,jpg,png',
+            'reason' => 'nullable|string',
+            'document' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'payment_by' => 'nullable|string|max:255',
+            'payment_mode' => 'nullable|string|max:255',
+            'extra_payment' => 'nullable|numeric|min:0',
         ]);
-
-        // Handle file upload
+    
+        $documentPath = null;
         if ($request->hasFile('document')) {
-            $file = $request->file('document');
-            $documentPath = $file->store('travel_documents');
+            $documentPath = $request->file('document')->store('travel_documents', 'public');
         }
-
-        // Create the travel allowance entry
-        $allowance = TravelAllowance::create([
-            'employee_name' => $request->employee_name,
-            'amount' => $request->amount,
-            'destination' => $request->destination,
-            'travel_date' => $request->travel_date,
-            'reason' => $request->reason,
-            'document_path' => $documentPath ?? '',
+    
+        // Save the allowance to the database
+        TravelAllowance::create([
+            'employee_name' => $validated['employee_name'],
+            'amount' => $validated['amount'] + ($validated['extra_payment'] ?? 0),  // Sum the amounts
+            'destination' => $validated['destination'] ?? null,
+            'travel_date' => $validated['travel_date'],
+            'reason' => $validated['reason'] ?? null,
+            'document_path' => $documentPath,
+            'payment_by' => $validated['payment_by'] ?? null,
+            'payment_mode' => $validated['payment_mode'] ?? null,
+            'extra_payment' => $validated['extra_payment'] ?? 0,
         ]);
-
-        // Redirect back to the index page
-        return redirect()->route('allowances.index');
+    
+        return redirect()->route('travel-allowances.index')->with('success', 'Travel Allowance created successfully.');
     }
+    
 
-    /**
-     * Show the form for editing the specified travel allowance.
-     *
-     * @param \App\Models\TravelAllowance $travelAllowance
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(TravelAllowance $travelAllowance)
+    public function update(Request $request, $id)
     {
-        // Return the edit view with the allowance data
-        return Inertia::render('TravelAllowance/Edit', [
-            'allowance' => $travelAllowance
-        ]);
-    }
+        $travelAllowance = TravelAllowance::findOrFail($id);
 
-    /**
-     * Update the specified travel allowance.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\TravelAllowance $travelAllowance
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, TravelAllowance $travelAllowance)
-    {
-        // Validate the incoming request
-        $request->validate([
-            'employee_name' => 'required|string',
-            'amount' => 'required|numeric',
-            'destination' => 'required|string',
+        $validated = $request->validate([
+            'employee_name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'destination' => 'nullable|string|max:255', // Ensure this field can be nullable
             'travel_date' => 'required|date',
-            'reason' => 'required|string',
-            'document' => 'nullable|file|mimes:pdf,jpg,png',
+            'reason' => 'nullable|string',
+            'document' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'payment_by' => 'required|string|max:255',
+            'payment_mode' => 'required|string|max:255',
+            'extra_payment' => 'nullable|numeric|min:0',
         ]);
 
-        // Handle file upload for updates
         if ($request->hasFile('document')) {
-            // Delete the old file if it exists
             if ($travelAllowance->document_path) {
-                Storage::delete($travelAllowance->document_path);
+                Storage::disk('public')->delete($travelAllowance->document_path);
             }
-
-            // Store the new file
-            $file = $request->file('document');
-            $documentPath = $file->store('travel_documents');
+            $validated['document_path'] = $request->file('document')->store('travel_documents', 'public');
         }
 
-        // Update the travel allowance entry
-        $travelAllowance->update([
-            'employee_name' => $request->employee_name,
-            'amount' => $request->amount,
-            'destination' => $request->destination,
-            'travel_date' => $request->travel_date,
-            'reason' => $request->reason,
-            'document_path' => $documentPath ?? $travelAllowance->document_path, // Retain old document path if no new file uploaded
-        ]);
+        $travelAllowance->update($validated);
 
-        // Redirect back to the index page
-        return redirect()->route('allowances.index');
+        return redirect()->route('travel-allowances.index')->with('success', 'Travel Allowance updated successfully.');
     }
 
-    /**
-     * Remove the specified travel allowance from storage.
-     *
-     * @param \App\Models\TravelAllowance $travelAllowance
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(TravelAllowance $travelAllowance)
+    public function show()
     {
-        // Delete the document file if it exists
+        return Inertia::render('Allowances/TravelRequest', [
+            'travelAllowances' => TravelAllowance::all()->map(function ($ta) {
+                return [
+                    'id' => $ta->id,
+                    'employee_name' => $ta->employee_name,
+                    'amount' => $ta->amount,
+                    'destination' => $ta->destination,
+                    'travel_date' => $ta->travel_date,
+                    'reason' => $ta->reason,
+                    'payment_by' => $ta->payment_by,
+                    'extra_payment' => $ta->extra_payment,
+                    'document_path' => $ta->document_path,
+                    'status' => $ta->status, // Approved, Rejected, or Pending
+                ];
+            }),
+        ]);
+    }
+    public function updateStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:approved,rejected',
+    ]);
+
+    $travelAllowance = TravelAllowance::findOrFail($id);
+    $travelAllowance->status = $request->status;
+    $travelAllowance->save();
+
+    return response()->json(['message' => 'Status updated successfully']);
+}
+
+
+    public function destroy($id)
+    {
+        $travelAllowance = TravelAllowance::findOrFail($id);
+
         if ($travelAllowance->document_path) {
-            Storage::delete($travelAllowance->document_path);
+            Storage::disk('public')->delete($travelAllowance->document_path);
         }
 
-        // Delete the travel allowance record
         $travelAllowance->delete();
 
-        // Redirect back to the index page
-        return redirect()->route('allowances.index');
+        return redirect()->route('travel-allowances.index')->with('success', 'Travel Allowance deleted successfully.');
     }
 }

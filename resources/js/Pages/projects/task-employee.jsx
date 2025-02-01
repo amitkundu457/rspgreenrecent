@@ -220,7 +220,7 @@ const Task = ({
             <Nav user_type={user_type} />
             <div className="px-8 table-section">
                 <div className="flex justify-between">
-                    <div className="w-[40%] flex space-x-2">
+                    {/* <div className="w-[40%] flex space-x-2">
                         <input
                             type="text"
                             value={projectQuery}
@@ -236,19 +236,16 @@ const Task = ({
                             placeholder="Search tasks..."
                             className="w-full p-2 border rounded-md"
                         />
-                    </div>
+                    </div> */}
                     <div className="flex">
-                        
-                       
-                            {/* <div className="grid p-2 mt-2 text-black underline rounded-lg place-items-center">
+                        {/* <div className="grid p-2 mt-2 text-black underline rounded-lg place-items-center">
                                 <Link href="task-employee">Add Employee</Link>
                             </div> */}
-                       
+
                         {/* <div className='grid p-2 mt-2 text-black underline rounded-lg place-items-center'>
                             <Link href='task-category'>Add Task type</Link>
                         </div> */}
                     </div>
-                    
                 </div>
                 <br />
                 <table className="w-full border border-collapse border-gray-200 table-auto">
@@ -273,7 +270,7 @@ const Task = ({
                                 </th>
                             )} */}
                             <th className="px-4 py-2 border border-gray-300">
-                            Estimate Time hours
+                                Estimate Time hours
                             </th>
                             <th className="px-4 py-2 border border-gray-300">
                                 Priority
@@ -281,7 +278,6 @@ const Task = ({
                             <th className="px-4 py-2 border border-gray-300">
                                 Actions
                             </th>
-
                         </tr>
                     </thead>
                     <tbody>
@@ -310,7 +306,7 @@ const Task = ({
                                         <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
                                             {task.estimate_hours}
                                         </td>
-                                       
+
                                         {/* {props.auth.user.roles[0]?.name ===
                                             "admin" && (
                                             <td className="px-4 py-2 border border-gray-300">
@@ -358,10 +354,13 @@ const Task = ({
                                                     <Link
                                                         href={`/task-assing-all/${task.id}`}
                                                     >
-                                                        <FaEdit className="text-blue-500 cursor-pointer hover:text-blue-700" />
+                                                        <span className="text-blue-500 cursor-pointer hover:text-blue-700">
+                                                            Assing Employee
+                                                        </span>
                                                     </Link>
                                                 )}
-                                                 {props.permission.includes(
+
+                                                {/* {props.permission.includes(
                                                     "edit_task"
                                                 ) && (
                                                     <Link
@@ -369,14 +368,9 @@ const Task = ({
                                                     >
                                                         <FaEdit className="text-blue-500 cursor-pointer hover:text-blue-700" />
                                                     </Link>
-                                                )}
+                                                )} */}
 
-
-
-
-
-
-                                                {props.permission.includes(
+                                                {/* {props.permission.includes(
                                                     "delete_task"
                                                 ) && (
                                                     <RiDeleteBinLine
@@ -388,7 +382,7 @@ const Task = ({
                                                             )
                                                         }
                                                     />
-                                                )}
+                                                )} */}
                                                 {/* {
                                                     props.permission.includes('edit_task') &&
                                                     <button
