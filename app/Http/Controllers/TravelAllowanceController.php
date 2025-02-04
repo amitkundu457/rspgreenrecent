@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -14,104 +15,60 @@ class TravelAllowanceController extends Controller
     public function index()
     {
         $allEmployees = Employee::join('users', 'employees.user_id', '=', 'users.id')
-        ->join('designations', 'employees.designation_id', '=', 'designations.id')
-        ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name')
-        ->get();
+            ->join('designations', 'employees.designation_id', '=', 'designations.id')
+            ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name')
+            ->get();
         return Inertia::render('Allowances/TravelAllowances', [
             'travelAllowances' => TravelAllowance::all(),
-            'allEmployees'=>  $allEmployees
+            'allEmployees' =>  $allEmployees
         ]);
     }
 
     public function store(Request $request)
     {
-        // Validate the incoming data
-        $validated = $request->validate([
-            'employee_name' => 'required|string|max:255|not_in:null',
-            'amount' => 'required|numeric|min:0',
-            'destination' => 'nullable|string|max:255',
+        // Validate the request, including the file upload
+        $request->validate([
+            'employee_id' => 'required|exists:employees,id', // Assuming employees table exists
+            'amount' => 'required|numeric',
+            'destination' => 'required|string',
             'travel_date' => 'required|date',
-            'reason' => 'nullable|string',
-            'documents' => 'nullable|array',
-            'documents.*' => 'file|mimes:pdf,jpg,png,jpeg|max:2048',
-            'payment_by' => 'nullable|string|max:255',
-            'payment_mode' => 'nullable|string|max:255',
-            'extra_payment' => 'nullable|numeric|min:0',
+            'reason' => 'required|string',
+            'payment_by' => 'required|string',
+            'extra_payment' => 'nullable|numeric',
+            'status' => 'nullable|string',
+            'document_name' => 'nullable|string',
+            'document_path' => 'required|file|mimes:pdf,jpg,png,docx|max:10240', // Validation for file upload
         ]);
-    
-        // Check if employee exists
-        $employee = User::whereRaw('LOWER(name) = ?', [strtolower(trim($validated['employee_name']))])->first();
-    
-        if (!$employee) {
-            return response()->json(['error' => 'Employee not found'], 404);
-        }
-    
-        // Get the extra payment value, if any
-        $extraPayment = $validated['extra_payment'] ?? 0;
-    
-        // Check if there is an existing travel allowance entry for the employee
-        $existingTravelAllowances = TravelAllowance::where('employee_id', $employee->id)->get();
-    
-        // Sum the existing extra payments
-        $existingExtraPayment = $existingTravelAllowances->sum('extra_payment');
-    
-        // Add the new extra payment to the sum of the existing extra payments
-        $totalExtraPayment = $existingExtraPayment + $extraPayment;
-    
-        // Create a new travel allowance entry
-        $travelAllowance = TravelAllowance::create([
-            'employee_id' => $employee->id,
-            'employee_name' => $validated['employee_name'],
-            'amount' => $validated['amount'],  // Base amount remains the same
-            'destination' => $validated['destination'] ?? null,
-            'travel_date' => $validated['travel_date'],
-            'reason' => $validated['reason'] ?? null,
-            'payment_by' => $validated['payment_by'] ?? null,
-            'payment_mode' => $validated['payment_mode'] ?? null,
-            'extra_payment' => $totalExtraPayment,  // Store the accumulated extra payment
+
+        // Store the travel allowance
+        $TravelAllowance = TravelAllowance::create([
+            'employee_id' => $request->employee_id,
+            'amount' => $request->amount,
+            'destination' => $request->destination,
+            'travel_date' => $request->travel_date,
+            'reason' => $request->reason,
+            'payment_by' => $request->payment_by,
+            'extra_payment' => $request->extra_payment,
+            'status' => $request->status,
         ]);
-    
-        // Handle document uploads if any
-        if ($request->hasFile('documents')) {
-            $uploadedFiles = [];
-            foreach ($request->file('documents') as $document) {
-                // Store the document in 'public/travel_documents'
-                $documentPath = $document->storeAs('travel_documents', $document->getClientOriginalName(), 'public');
-    
-                // Save document details in the documents_byemployee table
-                $savedDocument = DocumentByEmployee::create([
-                    'employee_id' => $employee->id,
-                    'document_name' => $document->getClientOriginalName(),
-                    'document_path' => $documentPath,
-                ]);
-    
-                // Check if the document was saved successfully
-                if ($savedDocument) {
-                    $uploadedFiles[] = [
-                        'document_name' => $document->getClientOriginalName(),
-                        'document_path' => $documentPath,
-                        'saved' => true
-                    ];
-                } else {
-                    $uploadedFiles[] = [
-                        'document_name' => $document->getClientOriginalName(),
-                        'document_path' => $documentPath,
-                        'saved' => false
-                    ];
-                }
-            }
-    
-            // Return response with uploaded files info
-            return response()->json([
-                'message' => 'Documents uploaded successfully',
-                'uploaded_files' => $uploadedFiles
-            ]);
+
+        // Handle file upload and store it in the 'documents' folder
+        if ($request->hasFile('document_path')) {
+            $filePath = $request->file('document_path')->store('documents', 'public');
         }
-    
-        // Return response for travel allowance creation
-        return redirect()->route('travel-allowances.index')->with('success', 'Travel Allowance and Documents created successfully.');
+
+        // Create the document record in the database
+        $abc = DocumentByEmployee::create([
+            'travel_allowance_id' => $TravelAllowance->id,
+            'employee_id' => $TravelAllowance->employee_id,
+            'document_name' => $request->document_name,
+            'document_path' => $filePath ?? null, // Store the file path in the database
+        ]);
+
+        return back()->with('success', 'Travel allowance and document uploaded successfully');
     }
-    
+
+
 
     public function update(Request $request, $id)
     {
@@ -143,38 +100,45 @@ class TravelAllowanceController extends Controller
 
     public function show()
     {
+        $travelAllowances = TravelAllowance::with('documentsByEmployee')->get()->map(function ($ta) {
+            return [
+                'id' => $ta->id,
+                'employee_name' => $ta->employee_name,
+                'amount' => $ta->amount,
+                'destination' => $ta->destination,
+                'travel_date' => $ta->travel_date,
+                'reason' => $ta->reason,
+                'payment_by' => $ta->payment_by,
+                'extra_payment' => $ta->extra_payment,
+                'document_paths' => $ta->documentsByEmployee->pluck('file_path'),
+                'status' => $ta->status,
+            ];
+        });
+
+
+        // dd($travelAllowances);
+
         return Inertia::render('Allowances/TravelRequest', [
-            'travelAllowances' => TravelAllowance::all()->map(function ($ta) {
-                return [
-                    'id' => $ta->id,
-                    'employee_name' => $ta->employee_name,
-                    'amount' => $ta->amount,
-                    'destination' => $ta->destination,
-                    'travel_date' => $ta->travel_date,
-                    'reason' => $ta->reason,
-                    'payment_by' => $ta->payment_by,
-                    'extra_payment' => $ta->extra_payment,
-                    'document_path' => $ta->document_path,
-                    'status' => $ta->status, // Approved, Rejected, or Pending
-                ];
-            }),
+            'travelAllowances' => $travelAllowances,
         ]);
     }
+
+
     public function showdoc($id)
     {
         $travelAllowance = TravelAllowance::find($id);
-    
+
         if (!$travelAllowance) {
             return abort(404, 'Travel Allowance not found');
         }
-    
+
         // Get any existing travel allowance with the same ID and add the extra payment
         $existingAllowance = TravelAllowance::where('id', $id)->first();
         if ($existingAllowance) {
             $existingAllowance->extra_payment += $travelAllowance->extra_payment;
             $existingAllowance->save();
         }
-    
+
         return Inertia::render('Allowances/Travelview', [
             'travelAllowance' => [
                 'id' => $travelAllowance->id,
@@ -190,24 +154,24 @@ class TravelAllowanceController extends Controller
             ]
         ]);
     }
-    
-    
+
+
 
 
 
 
     public function updateStatus(Request $request, $id)
-{
-    $request->validate([
-        'status' => 'required|in:approved,rejected',
-    ]);
+    {
+        $request->validate([
+            'status' => 'required|in:approved,rejected',
+        ]);
 
-    $travelAllowance = TravelAllowance::findOrFail($id);
-    $travelAllowance->status = $request->status;
-    $travelAllowance->save();
+        $travelAllowance = TravelAllowance::findOrFail($id);
+        $travelAllowance->status = $request->status;
+        $travelAllowance->save();
 
-    return response()->json(['message' => 'Status updated successfully']);
-}
+        return response()->json(['message' => 'Status updated successfully']);
+    }
 
 
     public function destroy($id)

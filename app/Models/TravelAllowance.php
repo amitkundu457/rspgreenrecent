@@ -9,19 +9,21 @@ class TravelAllowance extends Model
 {
     use HasFactory;
 
-    protected $table = 'travel_allowances';
-
+    // Allow mass assignment
     protected $fillable = [
-        'employee_name',
+        'employee_id',
         'amount',
         'destination',
         'travel_date',
         'reason',
-        'document_path',
-        'status',
         'payment_by',
-        'payment_mode',
-        'extra_payment'
-
+        'extra_payment',
+        'status',
     ];
+
+    // Define relationship with DocumentByEmployee
+    public function documentsByEmployee()
+    {
+        return $this->hasMany(DocumentByEmployee::class, 'travel_allowance_id');
+    }
 }

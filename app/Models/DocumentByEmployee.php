@@ -1,7 +1,7 @@
 <?php
+
 namespace App\Models;
 
-use App\Models\TravelAllowance;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -9,19 +9,20 @@ class DocumentByEmployee extends Model
 {
     use HasFactory;
 
-    // Specify the table name if it's not the plural form of the model
+    // Specify the table name explicitly
     protected $table = 'documents_byemployee';
 
-    // Specify the fillable attributes to protect against mass assignment
+    // Allow mass assignment for these fields
     protected $fillable = [
+        'travel_allowance_id', // Foreign key reference to TravelAllowance
         'employee_id',
-        'document_name',
+
         'document_path',
     ];
 
-    // Define relationships if needed
+    // Define relationship with TravelAllowance
     public function travelAllowance()
     {
-        return $this->belongsTo(TravelAllowance::class);
+        return $this->belongsTo(TravelAllowance::class, 'travel_allowance_id');
     }
 }

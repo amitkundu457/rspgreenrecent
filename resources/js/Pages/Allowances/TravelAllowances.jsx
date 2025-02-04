@@ -24,12 +24,12 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
     } = useForm({
         id: "",
         employee_id: "",
-        employee_name: "", // Store employee name too
+        employee_id: "", // Store employee name too
         amount: "", // Advance Payment
         destination: "",
         travel_date: "",
         reason: "",
-        document: null,
+        document_path: null,
         payment_by: "",
         payment_mode: "Cash",
         extra_payment: "", // Extra Payment
@@ -63,10 +63,13 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
             <Nav />
             <div className="p-8 bg-white rounded-b-md">
                 <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-2xl font-bold">Travel Allowances Advance</h1>
+                    <h1 className="text-2xl font-bold">
+                        Travel Allowances Advance
+                    </h1>
                     <Link href="/travelreq">
                         <button className="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
-                            <span className="text-lg mr-2">+</span> Add Request for Payment
+                            <span className="text-lg mr-2">+</span> Add Request
+                            for Payment
                         </button>
                     </Link>
                 </div>
@@ -81,8 +84,7 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
                             );
                             setData({
                                 ...data,
-                                employee_id: selectedEmployee?.id || "",
-                                employee_name: selectedEmployee?.employee_name || "" // Store employee_name too
+                                employee_id: selectedEmployee?.id || "", // Ensure this is a valid user ID
                             });
                         }}
                         required
@@ -91,7 +93,8 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
                         <option value="">Select Employee</option>
                         {allEmployees?.map((employee) => (
                             <option key={employee.id} value={employee.id}>
-                                {employee.employee_name}
+                                {employee.employee_name}{" "}
+                                {/* Ensure this field exists */}
                             </option>
                         ))}
                     </select>
@@ -167,7 +170,9 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
                             type="number"
                             placeholder="Extra Payment"
                             value={data.extra_payment}
-                            onChange={(e) => setData("extra_payment", e.target.value)}
+                            onChange={(e) =>
+                                setData("extra_payment", e.target.value)
+                            }
                             className="w-full p-2 border rounded-md"
                         />
                     )}
@@ -175,14 +180,18 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
                     {/* File Upload */}
                     <input
                         type="file"
-                        onChange={(e) => setData("document", e.target.files[0])}
+                        onChange={(e) =>
+                            setData("document_path", e.target.files[0])
+                        }
                         className="w-full p-2 border rounded-md"
                     />
 
                     <button
                         type="submit"
                         className={`w-full p-2 text-white rounded-md ${
-                            processing ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
+                            processing
+                                ? "bg-gray-400"
+                                : "bg-blue-500 hover:bg-blue-600"
                         }`}
                         disabled={processing}
                     >
@@ -203,7 +212,7 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
                                 <th className="border px-4 py-2">Payment By</th>
                                 <th className="border px-4 py-2">Payment Mode</th>
                                 <th className="border px-4 py-2">Extra Payment</th>
-                                <th className="border px-4 py-2">Document</th>
+                                <th className="border px-4 py-2">document_path</th>
                                 <th className="border px-4 py-2">Status</th>
                                 <th className="border px-4 py-2">Actions</th>
                             </tr>
@@ -212,7 +221,7 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
                             {travelAllowances.length > 0 ? (
                                 travelAllowances.map((ta) => (
                                     <tr key={ta.id} className="border">
-                                        <td className="border px-4 py-2">{ta.employee_name}</td>
+                                        <td className="border px-4 py-2">{ta.employee_id}</td>
                                         <td className="border px-4 py-2">Rs {ta.amount}</td>
                                         <td className="border px-4 py-2">{ta.destination}</td>
                                         <td className="border px-4 py-2">{ta.travel_date}</td>
@@ -221,17 +230,17 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
                                         <td className="border px-4 py-2">{ta.payment_mode}</td>
                                         <td className="border px-4 py-2">{ta.extra_payment || "N/A"}</td>
                                         <td className="border px-4 py-2">
-                                            {ta.document_path ? (
+                                            {ta.document_path_path ? (
                                                 <a
-                                                    href={`/storage/${ta.document_path}`}
+                                                    href={`/storage/${ta.document_path_path}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-blue-500 underline"
                                                 >
-                                                    View Document
+                                                    View document_path
                                                 </a>
                                             ) : (
-                                                "No Document"
+                                                "No document_path"
                                             )}
                                         </td>
                                         <td className="border px-4 py-2 text-center">
