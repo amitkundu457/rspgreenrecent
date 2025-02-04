@@ -28,6 +28,7 @@ export default function TravelAllowances() {
         extra_payment: "", // New field for Extra Payment
         document: null,
         status: "Pending", // New status field
+        Destination_amount: "",
     });
 
     const handleSubmit = (e) => {
@@ -41,6 +42,8 @@ export default function TravelAllowances() {
         formData.append("destination", data.destination);
         formData.append("payment_by", data.payment_by); // Append Payment By field
         formData.append("payment_mode", data.payment_mode); // Append Payment Mode field
+
+        formData.append("payment_mode", data.Destination_amount);
         formData.append("extra_payment", data.extra_payment); // Append Extra Payment field
         formData.append("status", data.status);
         if (data.document) {
@@ -116,6 +119,16 @@ export default function TravelAllowances() {
                         placeholder="Destination"
                         value={data.destination}
                         onChange={(e) => setData("destination", e.target.value)}
+                        required
+                        className="w-full p-2 border rounded-md"
+                    />
+                    <input
+                        type="number"
+                        placeholder="Enter Your Amount"
+                        value={data.destination}
+                        onChange={(e) =>
+                            setData("Destination_amount", e.target.value)
+                        }
                         required
                         className="w-full p-2 border rounded-md"
                     />

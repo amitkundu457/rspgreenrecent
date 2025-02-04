@@ -8,10 +8,13 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Models\TravelAllowance;
 use App\Models\DocumentByEmployee;
+
+use App\Models\DestinationAmount;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-class TravelAllowanceController extends Controller
+
+class TravelAllowanceController
 {
     public function index()
     {
@@ -101,11 +104,12 @@ class TravelAllowanceController extends Controller
 
     public function show()
     {
-        $travelAllowances = TravelAllowance::with('documentsByEmployee')->get()->map(function ($ta) {
+
+        $travelAllowances = TravelAllowance::with(['documentsByEmployee', 'destinationAmount'])->get()->map(function ($ta) {
             return [
                 'id' => $ta->id,
                 'employee_name' => $ta->employee_name,
-                'amount' => $ta->amount,
+                'amount' => optional($ta->destinationAmount)->amount, // Fetch amount from destination_amounts table
                 'destination' => $ta->destination,
                 'travel_date' => $ta->travel_date,
                 'reason' => $ta->reason,
@@ -116,13 +120,13 @@ class TravelAllowanceController extends Controller
             ];
         });
 
-
-        // dd($travelAllowances);
+        dd($travelAllowances);
 
         return Inertia::render('Allowances/TravelRequest', [
             'travelAllowances' => $travelAllowances,
         ]);
     }
+
 
 
     public function showdoc($id)
