@@ -4,10 +4,10 @@ import Header from "@/Layouts/Header";
 import Nav from "@/Layouts/Nav";
 import { Link } from "@inertiajs/react";
 
-export default function TravelAllowances() {
-    const { travelAllowances } = usePage().props;
+export default function FoodAllowances() {
+    const { foodAllowances } = usePage().props;
     const [editing, setEditing] = useState(null);
-    console.log("aakkhh", travelAllowances);
+    console.log("aakkhh", foodAllowances);
     const {
         data,
         setData,
@@ -22,7 +22,6 @@ export default function TravelAllowances() {
         amount: "",
         travel_date: "",
         reason: "",
-        destination: "",
         payment_by: "", // New field for Payment By
         payment_mode: "Cash", // New field for Payment Mode
         extra_payment: "", // New field for Extra Payment
@@ -38,7 +37,6 @@ export default function TravelAllowances() {
         formData.append("amount", data.amount);
         formData.append("travel_date", data.travel_date);
         formData.append("reason", data.reason);
-        formData.append("destination", data.destination);
         formData.append("payment_by", data.payment_by); // Append Payment By field
         formData.append("payment_mode", data.payment_mode); // Append Payment Mode field
         formData.append("extra_payment", data.extra_payment); // Append Extra Payment field
@@ -48,7 +46,7 @@ export default function TravelAllowances() {
         }
 
         if (editing) {
-            put(route("travel-allowances.update", data.id), {
+            put(route("food-allowances.update", data.id), {
                 data: formData,
                 onSuccess: () => {
                     reset();
@@ -56,7 +54,7 @@ export default function TravelAllowances() {
                 },
             });
         } else {
-            post(route("travel-allowances.store"), {
+            post(route("food-allowances.store"), {
                 data: formData,
                 onSuccess: () => {
                     reset();
@@ -66,12 +64,38 @@ export default function TravelAllowances() {
     };
 
     const handleStatusChange = (id, status) => {
-        put(route("travel-allowances.update", id), {
+        put(route("food-allowances.update", id), {
             data: { status },
             onSuccess: () => {
                 console.log(`Status updated to ${status}`);
             },
         });
+    };
+
+    const handleEdit = (fa) => {
+        setEditing(fa.id);
+        setData({
+            id: fa.id,
+            employee_name: fa.employee_name,
+            amount: fa.amount,
+            travel_date: fa.travel_date,
+            reason: fa.reason,
+            payment_by: fa.payment_by,
+            payment_mode: fa.payment_mode,
+            extra_payment: fa.extra_payment,
+            document: null,
+            status: fa.status,
+        });
+    };
+
+    const handleDelete = (id) => {
+        if (confirm("Are you sure you want to delete this item?")) {
+            destroy(route("food-allowances.destroy", id), {
+                onSuccess: () => {
+                    console.log("Deleted successfully.");
+                },
+            });
+        }
     };
 
     return (
@@ -80,7 +104,7 @@ export default function TravelAllowances() {
             <Nav />
             <div className="p-8 bg-white rounded-b-md">
                 <h1 className="text-2xl font-bold mb-6">
-                    Extra Travel Allowances
+                    Extra Food Allowances
                 </h1>
                 <form
                     onSubmit={handleSubmit}
@@ -113,10 +137,29 @@ export default function TravelAllowances() {
                     />
                     <input
                         type="text"
-                        placeholder="Destination"
-                        value={data.destination}
-                        onChange={(e) => setData("destination", e.target.value)}
+                        placeholder="Payment By"
+                        value={data.payment_by}
+                        onChange={(e) => setData("payment_by", e.target.value)}
                         required
+                        className="w-full p-2 border rounded-md"
+                    />
+                    <select
+                        value={data.payment_mode}
+                        onChange={(e) =>
+                            setData("payment_mode", e.target.value)
+                        }
+                        className="w-full p-2 border rounded-md"
+                    >
+                        <option value="Cash">Cash</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                    <input
+                        type="text"
+                        placeholder="Extra Payment"
+                        value={data.extra_payment}
+                        onChange={(e) =>
+                            setData("extra_payment", e.target.value)
+                        }
                         className="w-full p-2 border rounded-md"
                     />
                     <input
@@ -136,6 +179,7 @@ export default function TravelAllowances() {
                         {editing ? "Update" : "Create"}
                     </button>
                 </form>
+
                 <div className="overflow-y-auto max-h-[400px] mt-6">
                     <table className="w-full border-collapse border border-gray-300">
                         <thead>
@@ -143,68 +187,52 @@ export default function TravelAllowances() {
                                 <th className="border px-4 py-2">
                                     Employee Id
                                 </th>
-                                {/* <th className="border px-4 py-2">Employee Name</th> */}
                                 <th className="border px-4 py-2">
                                     Advance payment
                                 </th>
                                 <th className="border px-4 py-2">Date</th>
                                 <th className="border px-4 py-2">Reason</th>
-                                <th className="border px-4 py-2">
-                                    Destination
-                                </th>
-                                <th className="border px-4 py-2">Payment By</th>{" "}
-                                {/* New Column */}
+                                <th className="border px-4 py-2">Payment By</th>
                                 <th className="border px-4 py-2">
                                     Payment Mode
-                                </th>{" "}
-                                {/* New Column */}
+                                </th>
                                 <th className="border px-4 py-2">
                                     Extra Payment
-                                </th>{" "}
-                                {/* New Column */}
+                                </th>
                                 <th className="border px-4 py-2">Document</th>
                                 <th className="border px-4 py-2">Status</th>
                                 <th className="border px-4 py-2">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {travelAllowances.length > 0 ? (
-                                travelAllowances.map((ta) => (
-                                    <tr key={ta.id} className="border">
+                            {foodAllowances?.length > 0 ? (
+                                foodAllowances.map((fa) => (
+                                    <tr key={fa.id} className="border">
                                         <td className="border px-4 py-2">
-                                            EMP0000{ta.id}
-                                        </td>
-                                        {/* <td className="border px-4 py-2">
-                                            {ta.employee_name}
-                                        </td> */}
-                                        <td className="border px-4 py-2">
-                                            Rs{ta.amount}
+                                            EMP0000{fa.id}
                                         </td>
                                         <td className="border px-4 py-2">
-                                            {ta.travel_date}
+                                            Rs{fa.amount}
                                         </td>
                                         <td className="border px-4 py-2">
-                                            {ta.reason}
+                                            {fa.travel_date}
                                         </td>
                                         <td className="border px-4 py-2">
-                                            {ta.destination}
+                                            {fa.reason}
                                         </td>
                                         <td className="border px-4 py-2">
-                                            {ta.payment_by}
-                                        </td>{" "}
-                                        {/* Show Payment By */}
+                                            {fa.payment_by}
+                                        </td>
                                         <td className="border px-4 py-2">
-                                            Cash
-                                        </td>{" "}
-                                        {/* Show Payment Mode */}
+                                            {fa.payment_mode}
+                                        </td>
                                         <td className="border px-4 py-2">
-                                            {ta.extra_payment}
-                                        </td>{" "}
-                                        {/* Show Extra Payment */}
+                                            {fa.extra_payment}
+                                        </td>
                                         <td className="border px-4 py-2">
-                                            {ta.document_path ? (
+                                            {fa.document_path ? (
                                                 <a
-                                                    href={`/storage/${ta.document_path}`}
+                                                    href={`/storage/${fa.document_path}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-blue-500 underline"
@@ -216,64 +244,33 @@ export default function TravelAllowances() {
                                             )}
                                         </td>
                                         <td className="border px-4 py-2">
-                                            <span
-                                                className={`px-2 py-1 rounded ${
-                                                    ta.status === "Approved"
-                                                        ? "bg-green-500 text-white"
-                                                        : ta.status ===
-                                                          "Rejected"
-                                                        ? "bg-red-500 text-white"
-                                                        : "bg-gray-300"
-                                                }`}
-                                            >
-                                                {ta.status || "Pending"}
-                                            </span>
+                                            {fa.status || "Pending"}
                                         </td>
-                                        <td className="border px-4 py-2 flex space-x-2">
+                                        <td className="border px-4 py-2">
                                             <button
-                                                className="px-3 py-1 bg-green-500 text-white rounded"
-                                                onClick={() =>
-                                                    handleStatusChange(
-                                                        ta.id,
-                                                        "Approved"
-                                                    )
-                                                }
+                                                onClick={() => handleEdit(fa)}
+                                                className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                                             >
-                                                Approve
+                                                Edit
                                             </button>
                                             <button
-                                                className="px-3 py-1 bg-red-500 text-white rounded"
                                                 onClick={() =>
-                                                    handleStatusChange(
-                                                        ta.id,
-                                                        "Rejected"
-                                                    )
+                                                    handleDelete(fa.id)
                                                 }
+                                                className="bg-red-500 text-white px-4 py-2 rounded-md ml-2"
                                             >
-                                                Reject
+                                                Delete
                                             </button>
-                                            <Link
-                                                href={`/view-all-document/${ta.id}`}
-                                                className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-all duration-200"
-                                                title="View Details"
-                                                onClick={() =>
-                                                    console.log(
-                                                        `Navigating to loan details of loan ID: ${ta.id}`
-                                                    )
-                                                }
-                                            >
-                                                View Details
-                                            </Link>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan="11"
+                                        colSpan="10"
                                         className="text-center py-4"
                                     >
-                                        No travel allowances found.
+                                        No food allowances found.
                                     </td>
                                 </tr>
                             )}

@@ -5,19 +5,18 @@ import Header from "@/Layouts/Header";
 import Nav from "@/Layouts/Nav";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaCheck, FaTimes, FaSpinner,FaEdit,FaTrash } from "react-icons/fa";
-import { FaEye } from 'react-icons/fa';
-
+import { FaCheck, FaTimes, FaSpinner, FaEdit, FaTrash } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
 
 const LoanManagement = ({ user, user_type, notif, loans, us }) => {
     const [loanData, setLoanData] = useState([]);
     const [reason, setReason] = useState("");
 
     const handleSubmitmodel = () => {
-      onSubmit(loanId, reason);
-      onClose();
+        onSubmit(loanId, reason);
+        onClose();
     };
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const { data, setData, post, reset } = useForm({
         employee_name: "",
@@ -64,17 +63,20 @@ const LoanManagement = ({ user, user_type, notif, loans, us }) => {
     };
     const handleSearchChange = (event) => {
         setSearchQuery(event.target.value);
-      };
-    
-      // Filter loans based on search query (search by Employee Name or Employee ID)
-      const filteredLoans = loans.filter((loan) =>
-        loan.employee_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        loan.employee_id?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    
-      if (loading) {
+    };
+
+    // Filter loans based on search query (search by Employee Name or Employee ID)
+    const filteredLoans = loans.filter(
+        (loan) =>
+            loan.employee_name
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            loan.employee_id?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (loading) {
         return <div>Loading...</div>; // Show loading indicator while fetching data
-      }
+    }
 
     const handleRepaymentChange = (e) => {
         const repaymentType = e.target.value;
@@ -343,206 +345,265 @@ const LoanManagement = ({ user, user_type, notif, loans, us }) => {
                             Submit Loan
                         </button>
                         <div className="overflow-x-auto">
-  <h2 className="text-xl font-bold text-gray-800 mb-4">Employee Loan Details</h2>
-  <table className="min-w-full divide-y divide-gray-300 bg-white shadow-lg rounded-lg overflow-hidden">
-    <thead className="bg-blue-600">
-      <tr>
-        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-          Amount
-        </th>
-        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-          Start Date
-        </th>
-        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-          End Date
-        </th>
-        <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
-          Status
-        </th>
-        <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
-          Actions
-        </th>
-      </tr>
-    </thead>
-    <tbody className="divide-y divide-gray-200">
-      {loans.map((loan) => (
-        <tr key={loan.id} className="hover:bg-gray-50">
-          <td className="px-6 py-4 text-sm text-gray-700">{loan.amount}</td>
-          <td className="px-6 py-4 text-sm text-gray-700">
-            {new Date(loan.start_date).toLocaleDateString()}
-          </td>
-          <td className="px-6 py-4 text-sm text-gray-700">
-            {new Date(loan.end_date).toLocaleDateString()}
-          </td>
-          <td className="px-6 py-4 text-center">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
-                loan.status?.toLowerCase() === 'approved'
-                  ? 'bg-green-600'
-                  : loan.status?.toLowerCase() === 'rejected'
-                  ? 'bg-red-600'
-                  : 'bg-orange-500'
-              }`}
-            >
-              {loan.status}
-            </span>
-          </td>
-          <td className="px-6 py-4 flex justify-center items-center space-x-2">
-        
-            <button
-              onClick={() => handleEditLoan(loan.id)}
-              className="flex items-center justify-center w-8 h-8 bg-yellow-600 text-white rounded-full shadow-lg hover:bg-yellow-700"
-              title="Edit"
-            >
-              <FaEdit />
-            </button>
-            {/* Delete Button */}
-            <button
-              onClick={() => handleDeleteLoan(loan.id)}
-              className="flex items-center justify-center w-8 h-8 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700"
-              title="Delete"
-            >
-              <FaTrash />
-            </button>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
-
-
+                            <h2 className="text-xl font-bold text-gray-800 mb-4">
+                                Employee Loan Details
+                            </h2>
+                            <table className="min-w-full divide-y divide-gray-300 bg-white shadow-lg rounded-lg overflow-hidden">
+                                <thead className="bg-blue-600">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                                            Amount
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                                            Start Date
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                                            End Date
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
+                                            Status
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200">
+                                    {loans.map((loan) => (
+                                        <tr
+                                            key={loan.id}
+                                            className="hover:bg-gray-50"
+                                        >
+                                            <td className="px-6 py-4 text-sm text-gray-700">
+                                                {loan.amount}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-700">
+                                                {new Date(
+                                                    loan.start_date
+                                                ).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-700">
+                                                {new Date(
+                                                    loan.end_date
+                                                ).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <span
+                                                    className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
+                                                        loan.status?.toLowerCase() ===
+                                                        "approved"
+                                                            ? "bg-green-600"
+                                                            : loan.status?.toLowerCase() ===
+                                                              "rejected"
+                                                            ? "bg-red-600"
+                                                            : "bg-orange-500"
+                                                    }`}
+                                                >
+                                                    {loan.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 flex justify-center items-center space-x-2">
+                                                <button
+                                                    onClick={() =>
+                                                        handleEditLoan(loan.id)
+                                                    }
+                                                    className="flex items-center justify-center w-8 h-8 bg-yellow-600 text-white rounded-full shadow-lg hover:bg-yellow-700"
+                                                    title="Edit"
+                                                >
+                                                    <FaEdit />
+                                                </button>
+                                                {/* Delete Button */}
+                                                <button
+                                                    onClick={() =>
+                                                        handleDeleteLoan(
+                                                            loan.id
+                                                        )
+                                                    }
+                                                    className="flex items-center justify-center w-8 h-8 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700"
+                                                    title="Delete"
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    
-                )
-                 : null}
+                ) : null}
                 <div className="mt-8">
-      <h2 className="text-xl font-bold text-gray-800 mb-4">Existing Loans</h2>
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">
+                        Existing Loans
+                    </h2>
 
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search by Employee Name or ID"
-          className="p-2 border border-gray-300 rounded-lg w-full"
-          value={searchQuery}
-          onChange={handleSearchChange}
-        />
-      </div>
+                    <div className="mb-4">
+                        <input
+                            type="text"
+                            placeholder="Search by Employee Name or ID"
+                            className="p-2 border border-gray-300 rounded-lg w-full"
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                        />
+                    </div>
 
-      <div className="overflow-x-auto">
-  <table className="min-w-full divide-y divide-gray-300 bg-white shadow-lg rounded-lg overflow-hidden">
-    <thead className="bg-blue-600">
-      <tr>
-        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-          Employee Name
-        </th>
-        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-          Employee ID
-        </th>
-        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-          Designation
-        </th>
-        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-          Amount
-        </th>
-        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-          Start Date
-        </th>
-        <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
-          End Date
-        </th>
-        <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
-          Status
-        </th>
-        {/* Always show the "Actions" column */}
-        <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
-          Actions
-        </th>
-      </tr>
-    </thead>
-    <tbody className="divide-y divide-gray-200">
-      {filteredLoans.map((loan) => (
-        <tr key={loan.id} className="hover:bg-gray-50">
-          <td className="px-6 py-4 text-sm text-gray-700">{loan.employee_name}</td>
-          <td className="px-6 py-4 text-sm text-gray-700">{loan.id}</td> {/* Employee ID column */}
-          <td className="px-6 py-4 text-sm text-gray-700">{loan.registration}</td>
-          <td className="px-6 py-4 text-sm text-gray-700">{loan.amount}</td>
-          <td className="px-6 py-4 text-sm text-gray-700">
-            {new Date(loan.start_date).toLocaleDateString()}
-          </td>
-          <td className="px-6 py-4 text-sm text-gray-700">
-            {new Date(loan.end_date).toLocaleDateString()}
-          </td>
-          <td className="px-6 py-4 text-center">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
-                loan.status?.toLowerCase() === 'approved'
-                  ? 'bg-green-600'
-                  : loan.status?.toLowerCase() === 'rejected'
-                  ? 'bg-red-600'
-                  : 'bg-orange-500'
-              }`}
-            >
-              {loan.status}
-            </span>
-          </td>
-          <td className="px-6 py-4 flex justify-center items-center space-x-2">
-  {loan.status?.toLowerCase() === 'pending' && (
-    <>
-      <button
-        onClick={() => handleStatusUpdate(loan.id, 'Approved')}
-        className="px-3 py-1 text-sm bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-all duration-200"
-        title="Approve"
-      >
-        Approve
-      </button>
-      <button
-        onClick={() => handleStatusUpdate(loan.id, 'Rejected')}
-        className="px-3 py-1 text-sm bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-all duration-200"
-        title="Reject"
-      >
-        Reject
-      </button>
-    </>
-  )}
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-300 bg-white shadow-lg rounded-lg overflow-hidden">
+                            <thead className="bg-blue-600">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                                        Employee ID
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                                        Employee Name
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                                        Designation
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                                        Amount
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                                        Start Date
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                                        End Date
+                                    </th>
+                                    <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
+                                        Status
+                                    </th>
+                                    {/* Always show the "Actions" column */}
+                                    <th className="px-6 py-3 text-center text-sm font-bold text-white uppercase">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                {filteredLoans.map((loan) => (
+                                    <tr
+                                        key={loan.id}
+                                        className="hover:bg-gray-50"
+                                    >
+                                        <td className="px-6 py-4 text-sm text-gray-700">
+                                            {loan.id}
+                                        </td>{" "}
+                                        {/* Employee ID column */}
+                                        <td className="px-6 py-4 text-sm text-gray-700">
+                                            {loan.employee_name}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-700">
+                                            {loan.registration}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-700">
+                                            {loan.amount}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-700">
+                                            {new Date(
+                                                loan.start_date
+                                            ).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-700">
+                                            {new Date(
+                                                loan.end_date
+                                            ).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
+                                                    loan.status?.toLowerCase() ===
+                                                    "approved"
+                                                        ? "bg-green-600"
+                                                        : loan.status?.toLowerCase() ===
+                                                          "rejected"
+                                                        ? "bg-red-600"
+                                                        : "bg-orange-500"
+                                                }`}
+                                            >
+                                                {loan.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 flex justify-center items-center space-x-2">
+                                            {loan.status?.toLowerCase() ===
+                                                "pending" && (
+                                                <>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleStatusUpdate(
+                                                                loan.id,
+                                                                "Approved"
+                                                            )
+                                                        }
+                                                        className="px-3 py-1 text-sm bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-all duration-200"
+                                                        title="Approve"
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleStatusUpdate(
+                                                                loan.id,
+                                                                "Rejected"
+                                                            )
+                                                        }
+                                                        className="px-3 py-1 text-sm bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-all duration-200"
+                                                        title="Reject"
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </>
+                                            )}
 
-  {loan.status?.toLowerCase() === 'approved' && (
-    <button
-      onClick={() => handleStatusUpdate(loan.id, 'Rejected')}
-      className="px-3 py-1 text-sm bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-all duration-200"
-      title="Reject"
-    >
-      Reject
-    </button>
-  )}
+                                            {loan.status?.toLowerCase() ===
+                                                "approved" && (
+                                                <button
+                                                    onClick={() =>
+                                                        handleStatusUpdate(
+                                                            loan.id,
+                                                            "Rejected"
+                                                        )
+                                                    }
+                                                    className="px-3 py-1 text-sm bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-all duration-200"
+                                                    title="Reject"
+                                                >
+                                                    Reject
+                                                </button>
+                                            )}
 
-  {loan.status?.toLowerCase() === 'rejected' && (
-    <button
-      onClick={() => handleStatusUpdate(loan.id, 'Approved')}
-      className="px-3 py-1 text-sm bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-all duration-200"
-      title="Approve"
-    >
-      Approve
-    </button>
-  )}
+                                            {loan.status?.toLowerCase() ===
+                                                "rejected" && (
+                                                <button
+                                                    onClick={() =>
+                                                        handleStatusUpdate(
+                                                            loan.id,
+                                                            "Approved"
+                                                        )
+                                                    }
+                                                    className="px-3 py-1 text-sm bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-all duration-200"
+                                                    title="Approve"
+                                                >
+                                                    Approve
+                                                </button>
+                                            )}
 
-  <Link
-    href={`/loan-details/${loan.id}`}
-    className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-all duration-200"
-    title="View Details"
-    onClick={() => console.log(`Navigating to loan details of loan ID: ${loan.id}`)}
-  >
-    View Details
-  </Link>
-</td>
-
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
-
-    </div>
+                                            <Link
+                                                href={`/loan-details/${loan.id}`}
+                                                className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-all duration-200"
+                                                title="View Details"
+                                                onClick={() =>
+                                                    console.log(
+                                                        `Navigating to loan details of loan ID: ${loan.id}`
+                                                    )
+                                                }
+                                            >
+                                                View Details
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     );

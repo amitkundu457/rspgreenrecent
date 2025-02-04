@@ -1,12 +1,18 @@
 import React, { useState } from "react";
 import { useForm, usePage } from "@inertiajs/react";
-import Header from "@/Layouts/Header";
 import Nav from "@/Layouts/Nav";
+import Header from "@/Layouts/Header";
+import { Link } from "@inertiajs/react";
 
-export default function FoodAllowances() {
-    const { foodAllowances } = usePage().props; // Fetch data from Laravel controller
+export default function TravelAllowances({ user, notif, allEmployees }) {
+    const { travelAllowances } = usePage().props;
     const [editing, setEditing] = useState(null);
+    const [showExtraPayment, setShowExtraPayment] = useState(false);
 
+    // Console log to check allEmployees data
+    console.log("Employees:", allEmployees);
+
+    // Setting up the form data
     const {
         data,
         setData,
@@ -17,81 +23,97 @@ export default function FoodAllowances() {
         reset,
     } = useForm({
         id: "",
-        employee_name: "",
-        amount: "",
-        food_date: "",
+        employee_id: "",
+        employee_id: "", // Store employee name too
+        amount: "", // Advance Payment
+        travel_date: "",
         reason: "",
-        document: null,
+        document_path: null,
+        payment_by: "",
+        payment_mode: "Cash",
+        extra_payment: "", // Extra Payment
     });
 
-    // Handle Create & Update
+    // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
+
         if (editing) {
-            put(route("food-allowances.update", data.id), {
+            put(route("travel-allowances.update", data.id), {
                 onSuccess: () => {
                     reset();
                     setEditing(null);
+                    setShowExtraPayment(false);
                 },
             });
         } else {
-            post(route("food-allowances.store"), {
-                onSuccess: () => reset(),
+            post(route("travel-allowances.store"), {
+                onSuccess: () => {
+                    reset();
+                    setShowExtraPayment(false);
+                },
             });
-        }
-    };
-
-    // Handle Edit
-    const handleEdit = (allowance) => {
-        setEditing(allowance.id);
-        setData({
-            id: allowance.id,
-            employee_name: allowance.employee_name,
-            amount: allowance.amount,
-            food_date: allowance.food_date,
-            reason: allowance.reason,
-            document: null,
-        });
-    };
-
-    // Handle Delete
-    const handleDelete = (id) => {
-        if (confirm("Are you sure you want to delete this allowance?")) {
-            destroy(route("food-allowances.destroy", id));
         }
     };
 
     return (
         <div className="w-[85%] absolute right-0 overflow-hidden bg-gray-100 min-h-screen">
-            <Header />
+            <Header user={user} notif={notif} />
             <Nav />
             <div className="p-8 bg-white rounded-b-md">
-                <h1 className="text-2xl font-bold mb-6">Food Allowances</h1>
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-2xl font-bold">
+                        Food Allowances Advance
+                    </h1>
+                    <Link href="/foodreq">
+                        <button className="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
+                            <span className="text-lg mr-2">+</span> Add Request
+                            for Payment
+                        </button>
+                    </Link>
+                </div>
 
-                {/* Create & Edit Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <input
-                        type="text"
-                        placeholder="Employee Name"
-                        value={data.employee_name}
-                        onChange={(e) =>
-                            setData("employee_name", e.target.value)
-                        }
+                    {/* Employee Selection */}
+                    <select
+                        value={data.employee_id}
+                        onChange={(e) => {
+                            const selectedEmployee = allEmployees.find(
+                                (emp) => emp.id === parseInt(e.target.value)
+                            );
+                            setData({
+                                ...data,
+                                employee_id: selectedEmployee?.id || "", // Ensure this is a valid user ID
+                            });
+                        }}
                         required
                         className="w-full p-2 border rounded-md"
-                    />
-                    <input
-                        type="number"
-                        placeholder="Amount"
-                        value={data.amount}
-                        onChange={(e) => setData("amount", e.target.value)}
-                        required
-                        className="w-full p-2 border rounded-md"
-                    />
+                    >
+                        <option value="">Select Employee</option>
+                        {allEmployees?.map((employee) => (
+                            <option key={employee.id} value={employee.id}>
+                                {employee.employee_name}{" "}
+                                {/* Ensure this field exists */}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Hide Advance Payment when Extra Payment is selected */}
+                    {!showExtraPayment && (
+                        <input
+                            type="number"
+                            placeholder="Advance Payment"
+                            value={data.amount}
+                            onChange={(e) => setData("amount", e.target.value)}
+                            required
+                            className="w-full p-2 border rounded-md"
+                        />
+                    )}
+
                     <input
                         type="date"
-                        value={data.food_date}
-                        onChange={(e) => setData("food_date", e.target.value)}
+                        value={data.travel_date}
+                        onChange={(e) => setData("travel_date", e.target.value)}
                         required
                         className="w-full p-2 border rounded-md"
                     />
@@ -102,8 +124,56 @@ export default function FoodAllowances() {
                         className="w-full p-2 border rounded-md"
                     />
                     <input
+                        type="text"
+                        placeholder="Payment By"
+                        value={data.payment_by}
+                        onChange={(e) => setData("payment_by", e.target.value)}
+                        className="w-full p-2 border rounded-md"
+                    />
+
+                    {/* Extra Payment Toggle */}
+                    <div className="flex items-center space-x-4">
+                        <label className="font-medium">Extra Payment?</label>
+                        <input
+                            type="radio"
+                            id="extra-payment-yes"
+                            name="extra_payment"
+                            checked={showExtraPayment}
+                            onChange={() => setShowExtraPayment(true)}
+                        />
+                        <label htmlFor="extra-payment-yes">Yes</label>
+                        <input
+                            type="radio"
+                            id="extra-payment-no"
+                            name="extra_payment"
+                            checked={!showExtraPayment}
+                            onChange={() => {
+                                setShowExtraPayment(false);
+                                setData("extra_payment", "");
+                            }}
+                        />
+                        <label htmlFor="extra-payment-no">No</label>
+                    </div>
+
+                    {/* Extra Payment Input (Conditional) */}
+                    {showExtraPayment && (
+                        <input
+                            type="number"
+                            placeholder="Extra Payment"
+                            value={data.extra_payment}
+                            onChange={(e) =>
+                                setData("extra_payment", e.target.value)
+                            }
+                            className="w-full p-2 border rounded-md"
+                        />
+                    )}
+
+                    {/* File Upload */}
+                    <input
                         type="file"
-                        onChange={(e) => setData("document", e.target.files[0])}
+                        onChange={(e) =>
+                            setData("document_path", e.target.files[0])
+                        }
                         className="w-full p-2 border rounded-md"
                     />
 
@@ -118,88 +188,92 @@ export default function FoodAllowances() {
                     >
                         {editing ? "Update" : "Create"}
                     </button>
-
-                    {editing && (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                reset();
-                                setEditing(null);
-                            }}
-                            className="w-full p-2 bg-gray-500 text-white rounded-md"
-                        >
-                            Cancel
-                        </button>
-                    )}
                 </form>
 
-                {/* Table Display with All Fields */}
-                <table className="w-full mt-6 border-collapse border border-gray-300">
-                    <thead>
-                        <tr className="bg-gray-100">
-                            <th className="border px-4 py-2">Employee Name</th>
-                            <th className="border px-4 py-2">Amount</th>
-                            <th className="border px-4 py-2">Food Date</th>
-                            <th className="border px-4 py-2">Reason</th>
-                            <th className="border px-4 py-2">Document</th>
-                            <th className="border px-4 py-2">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {foodAllowances.length > 0 ? (
-                            foodAllowances.map((fa) => (
-                                <tr key={fa.id} className="border">
-                                    <td className="border px-4 py-2">
-                                        {fa.employee_name}
-                                    </td>
-                                    <td className="border px-4 py-2">
-                                        Rs{fa.amount}
-                                    </td>
-                                    <td className="border px-4 py-2">
-                                        {fa.food_date}
-                                    </td>
-                                    <td className="border px-4 py-2">
-                                        {fa.reason || "N/A"}
-                                    </td>
-                                    <td className="border px-4 py-2">
-                                        {fa.document_path ? (
-                                            <a
-                                                href={`/storage/${fa.document_path}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-500 underline"
-                                            >
-                                                View Document
-                                            </a>
-                                        ) : (
-                                            "No Document"
-                                        )}
-                                    </td>
-                                    <td className="border px-4 py-2 flex justify-center space-x-4">
-                                        <button
-                                            onClick={() => handleEdit(fa)}
-                                            className="text-blue-500 hover:underline"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(fa.id)}
-                                            className="text-red-500 hover:underline"
-                                        >
-                                            Delete
-                                        </button>
+                {/* Travel Allowances Table */}
+                {/* 
+                    <table className="w-full mt-6 border-collapse border border-gray-300">
+                        <thead>
+                            <tr className="bg-gray-100">
+                                <th className="border px-4 py-2">Employee Name</th>
+                                <th className="border px-4 py-2">Advance Payment</th>
+                                <th className="border px-4 py-2">Destination</th>
+                                <th className="border px-4 py-2">Travel Date</th>
+                                <th className="border px-4 py-2">Reason</th>
+                                <th className="border px-4 py-2">Payment By</th>
+                                <th className="border px-4 py-2">Payment Mode</th>
+                                <th className="border px-4 py-2">Extra Payment</th>
+                                <th className="border px-4 py-2">document_path</th>
+                                <th className="border px-4 py-2">Status</th>
+                                <th className="border px-4 py-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {travelAllowances.length > 0 ? (
+                                travelAllowances.map((ta) => (
+                                    <tr key={ta.id} className="border">
+                                        <td className="border px-4 py-2">{ta.employee_id}</td>
+                                        <td className="border px-4 py-2">Rs {ta.amount}</td>
+                                        <td className="border px-4 py-2">{ta.destination}</td>
+                                        <td className="border px-4 py-2">{ta.travel_date}</td>
+                                        <td className="border px-4 py-2">{ta.reason}</td>
+                                        <td className="border px-4 py-2">{ta.payment_by}</td>
+                                        <td className="border px-4 py-2">{ta.payment_mode}</td>
+                                        <td className="border px-4 py-2">{ta.extra_payment || "N/A"}</td>
+                                        <td className="border px-4 py-2">
+                                            {ta.document_path_path ? (
+                                                <a
+                                                    href={`/storage/${ta.document_path_path}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-500 underline"
+                                                >
+                                                    View document_path
+                                                </a>
+                                            ) : (
+                                                "No document_path"
+                                            )}
+                                        </td>
+                                        <td className="border px-4 py-2 text-center">
+                                            {ta.status === "approved" && (
+                                                <span className="text-green-600">Approved</span>
+                                            )}
+                                            {ta.status === "rejected" && (
+                                                <span className="text-red-600">Rejected</span>
+                                            )}
+                                            {ta.status === "pending" && (
+                                                <div className="flex justify-center space-x-2">
+                                                    <button
+                                                        className="bg-green-500 text-white px-2 py-1 rounded"
+                                                        onClick={() => updateStatus(ta.id, "approved")}
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                    <button
+                                                        className="bg-red-500 text-white px-2 py-1 rounded"
+                                                        onClick={() => updateStatus(ta.id, "rejected")}
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="border px-4 py-2 flex justify-center space-x-4">
+                                            <button onClick={() => handleEdit(ta)}>Edit</button>
+                                            <button onClick={() => handleDelete(ta.id)}>Delete</button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="11" className="text-center py-4">
+                                        No travel allowances found.
                                     </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="6" className="text-center py-4">
-                                    No food allowances found.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                            )}
+                        </tbody>
+                    </table>
+                */}
             </div>
         </div>
     );

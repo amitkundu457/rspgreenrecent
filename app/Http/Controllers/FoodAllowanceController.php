@@ -2,20 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FoodAllowance;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use App\Models\Employee;
+use Illuminate\Http\Request;
+use App\Models\FoodAllowance;
+use Illuminate\Support\Facades\Storage;
 
 class FoodAllowanceController extends Controller
 {
     // Render Inertia page
     public function index()
     {
+        $allEmployees = Employee::join('users', 'employees.user_id', '=', 'users.id')
+            ->join('designations', 'employees.designation_id', '=', 'designations.id')
+            ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name')
+            ->get();
+
+        // Get all food allowances and dump them
+        $foodAllowances = FoodAllowance::all();
+        // dd($foodAllowances);
+
         return Inertia::render('Allowances/FoodAllowances', [
-            'foodAllowances' => FoodAllowance::all()
+            'foodAllowances' => $foodAllowances,
+            'allEmployees' => $allEmployees,
         ]);
     }
+
 
     // Store a new food allowance
     public function store(Request $request)
@@ -66,6 +78,27 @@ class FoodAllowanceController extends Controller
         $foodAllowance->update($validated);
 
         return redirect()->back();
+    }
+
+    // Show food allowance details (destination field removed)
+    public function show(Request $request)
+    {
+        // Remove references to 'destination' as it's no longer needed
+        // $foodAllowances = FoodAllowance::with('documentsByEmployeeFood')->get()->map(function ($fa) {
+        //     return [
+        //         'id' => $fa->id,
+        //         'employee_name' => $fa->employee_name,
+        //         'amount' => $fa->amount,
+        //         'food_date' => $fa->food_date,
+        //         'reason' => $fa->reason,
+        //         'document_paths' => $fa->documentsByEmployeeFood->pluck('file_path'),
+        //         'status' => $fa->status,
+        //     ];
+        // });
+
+        return Inertia::render('Allowances/FoodRequest', [
+            // 'foodAllowances' => $foodAllowances,
+        ]);
     }
 
     // Delete a food allowance
