@@ -8,6 +8,7 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Models\TravelAllowance;
 use App\Models\DocumentByEmployee;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class TravelAllowanceController extends Controller
@@ -26,7 +27,7 @@ class TravelAllowanceController extends Controller
 
     public function store(Request $request)
     {
-        // Validate the request, including the file upload
+        // dd($request->all());
         $request->validate([
             'employee_id' => 'required|exists:employees,id', // Assuming employees table exists
             'amount' => 'required|numeric',
@@ -56,7 +57,7 @@ class TravelAllowanceController extends Controller
         if ($request->hasFile('document_path')) {
             $filePath = $request->file('document_path')->store('documents', 'public');
         }
-
+        // dd($TravelAllowance);
         // Create the document record in the database
         $abc = DocumentByEmployee::create([
             'travel_allowance_id' => $TravelAllowance->id,
@@ -132,6 +133,15 @@ class TravelAllowanceController extends Controller
             return abort(404, 'Travel Allowance not found');
         }
 
+        // Get all associated documents from the 'documents_byemployee' table for the employee
+        $documents = DB::table('documents_byemployee')
+            ->where('employee_id', $travelAllowance->employee_id)  // Use employee_id to fetch all documents for this employee
+            ->get();
+
+        if ($documents->isEmpty()) {
+            return abort(404, 'No documents found for this employee');
+        }
+
         // Get any existing travel allowance with the same ID and add the extra payment
         $existingAllowance = TravelAllowance::where('id', $id)->first();
         if ($existingAllowance) {
@@ -149,11 +159,13 @@ class TravelAllowanceController extends Controller
                 'reason' => $travelAllowance->reason,
                 'payment_by' => $travelAllowance->payment_by,
                 'extra_payment' => $existingAllowance ? $existingAllowance->extra_payment : $travelAllowance->extra_payment,
-                'document_path' => $travelAllowance->document_path,
+                'documents' => $documents, // Pass all documents for the employee
                 'status' => $travelAllowance->status ?? 'Pending',
             ]
         ]);
     }
+
+
 
 
 

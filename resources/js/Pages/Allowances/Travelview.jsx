@@ -11,7 +11,6 @@ const TravelView = ({ travelAllowance, user, notif, user_type }) => {
             </p>
         );
     }
-    console.log("aaaahhhh", travelAllowance);
 
     return (
         <div className="w-[85.2%] absolute right-0 overflow-hidden p-6">
@@ -25,10 +24,10 @@ const TravelView = ({ travelAllowance, user, notif, user_type }) => {
                 </h2>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <p>
+                    {/* <p>
                         <strong>Employee Name:</strong>{" "}
                         {travelAllowance.employee_name}
-                    </p>
+                    </p> */}
                     <p>
                         <strong>Advance:</strong> ₹{travelAllowance.amount}
                     </p>
@@ -57,19 +56,37 @@ const TravelView = ({ travelAllowance, user, notif, user_type }) => {
                     </p>
                 </div>
 
-                {/* Document Display */}
-                {travelAllowance.document_path && (
-                    <div className="mt-4">
-                        <h3 className="text-lg font-semibold">
-                            Travel Document:
-                        </h3>
-                        <img
-                            src={`/storage/${travelAllowance.document_path}`}
-                            alt="Travel Document"
-                            className="mt-2 w-48 h-48 object-cover rounded-md border"
-                        />
-                    </div>
-                )}
+                {/* Documents Display */}
+                {travelAllowance.documents &&
+                    travelAllowance.documents.length > 0 && (
+                        <div className="mt-4">
+                            <h3 className="text-lg font-semibold">
+                                Travel Documents:
+                            </h3>
+                            <div className="grid grid-cols-3 gap-4">
+                                {travelAllowance.documents.map(
+                                    (document, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex flex-col items-center"
+                                        >
+                                            <img
+                                                src={`/storage/${document.document_path}`}
+                                                alt={`Travel Document ${
+                                                    index + 1
+                                                }`}
+                                                className="mt-2 w-48 h-48 object-cover rounded-md border"
+                                            />
+                                            <p className="mt-2 text-center text-sm">
+                                                {document.document_name ||
+                                                    `Document ${index + 1}`}
+                                            </p>
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        </div>
+                    )}
             </div>
         </div>
     );
