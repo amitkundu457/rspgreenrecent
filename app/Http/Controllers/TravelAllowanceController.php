@@ -33,58 +33,78 @@ class TravelAllowanceController
 
         ]);
     }
-
     public function store(Request $request)
-    {
-        $us = Auth::user()->id;
-        dd($us);
-        $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'amount' => 'required|numeric',
-            'destination' => 'required|string',
-            'travel_date' => 'required|date',
-            'reason' => 'required|string',
-            'payment_by' => 'required|string',
-            'extra_payment' => 'nullable|numeric',
-            'status' => 'nullable|string',
-            'document_name' => 'nullable|string',
-            'document_path' => 'required|file|mimes:pdf,jpg,png,docx|max:10240',
-        ]);
-    
-        $TravelAllowance = TravelAllowance::create([
-            'employee_id' => $request->employee_id ?? $us,
-            'amount' => $request->amount,
-            'destination' => $request->destination,
-            'travel_date' => $request->travel_date,
-            'reason' => $request->reason,
-            'payment_by' => $request->payment_by,
-            'extra_payment' => $request->extra_payment,
-            'status' => $request->status,
-        ]);
-    
-        $cs = DestinationAmount::create([
-            'amount' => $request->employee_id ?? $us,
-            'destination' => $request->employee_id ?? $us
-        ]);
-    
-        if ($request->hasFile('document_path')) {
-            $filePath = $request->file('document_path')->store('documents', 'public');
-        }
-    
-        $abc = DocumentByEmployee::create([
-            'travel_allowance_id' => $TravelAllowance->id,
-            'employee_id' => $TravelAllowance->employee_id,
-            'document_name' => $request->document_name,
-            'document_path' => $filePath ?? null,
-        ]);
-    
-        return back()->with([
-            'success' => 'Travel allowance and document uploaded successfully',
-            'us' =>$us,
-            'travel_allowance' => $TravelAllowance,
-            'document' => $abc
-        ]);
+{
+    // Debug: Check if Auth is working
+    $user = Auth::user(); 
+    dd($request->all(), $user); // Check if Auth::user() is returning a valid user object
+
+    // Proceed with the rest of the code if user is valid
+    if (!$user) {
+        return back()->with('error', 'User not authenticated');
     }
+
+    $us = $user->id; // Get authenticated user's ID
+
+    // Validate incoming data
+    $request->validate([
+        'employee_id' => 'nullable|exists:users,id',  // make employee_id optional
+        'amount' => 'required|numeric',
+        'destination' => 'required|string',
+        'travel_date' => 'required|date',
+        'reason' => 'required|string',
+        'payment_by' => 'nullable|string',
+        'extra_payment' => 'nullable|numeric',
+        'status' => 'nullable|string',
+        'document_name' => 'nullable|string',
+        'document_path' => 'required|file|mimes:pdf,jpg,png,docx|max:10240',
+    ]);
+
+    // Assign employee_id using ternary operator
+    $employee_id = $request->employee_id ?: $us;
+
+    // Create TravelAllowance record
+    $TravelAllowance = TravelAllowance::create([
+        'employee_id' => $employee_id,
+        'amount' => $request->amount,
+        'destination' => $request->destination,
+        'travel_date' => $request->travel_date,
+        'reason' => $request->reason,
+        'payment_by' => $request->payment_by,
+        'extra_payment' => $request->extra_payment,
+        'status' => $request->status,
+    ]);
+
+    // Create DestinationAmount record
+    $cs = DestinationAmount::create([
+        'amount' => $request->amount,
+        'destination' => $request->destination,
+    ]);
+
+    // Handle file upload if present
+    if ($request->hasFile('document_path')) {
+        $filePath = $request->file('document_path')->store('documents', 'public');
+    }
+
+    // Create DocumentByEmployee record
+    $abc = DocumentByEmployee::create([
+        'travel_allowance_id' => $TravelAllowance->id,
+        'employee_id' => $TravelAllowance->employee_id,
+        'document_name' => $request->document_name,
+        'document_path' => $filePath ?? null,
+    ]);
+
+    // Return success response with data
+    return back()->with([
+        'success' => 'Travel allowance and document uploaded successfully',
+        'us' => $us,
+        'travel_allowance' => $TravelAllowance,
+        'document' => $abc
+    ]);
+}
+
+
+    
 
 
     public function update(Request $request, $id)
@@ -194,7 +214,7 @@ class TravelAllowanceController
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:approved,rejected',
+            'status' => 'required',
         ]);
 
         $travelAllowance = TravelAllowance::findOrFail($id);
