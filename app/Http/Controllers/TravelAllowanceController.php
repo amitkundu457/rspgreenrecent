@@ -7,11 +7,13 @@ use Inertia\Inertia;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Models\TravelAllowance;
-use App\Models\DocumentByEmployee;
-
 use App\Models\DestinationAmount;
+
+use App\Models\DocumentByEmployee;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+
+use Illuminate\Support\Facades\Auth;
 
 
 class TravelAllowanceController
@@ -22,17 +24,22 @@ class TravelAllowanceController
             ->join('designations', 'employees.designation_id', '=', 'designations.id')
             ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name')
             ->get();
+            $us = Auth::user()->id;
+
         return Inertia::render('Allowances/TravelAllowances', [
             'travelAllowances' => TravelAllowance::all(),
-            'allEmployees' =>  $allEmployees
+            'allEmployees' =>  $allEmployees,
+            'us' =>$us,
+
         ]);
     }
 
     public function store(Request $request)
     {
-        // dd($request->all());
+        $us = Auth::user()->id;
+        dd($us);
         $request->validate([
-            'employee_id' => 'required|exists:employees,id', // Assuming employees table exists
+            'employee_id' => 'required|exists:employees,id',
             'amount' => 'required|numeric',
             'destination' => 'required|string',
             'travel_date' => 'required|date',
@@ -41,12 +48,11 @@ class TravelAllowanceController
             'extra_payment' => 'nullable|numeric',
             'status' => 'nullable|string',
             'document_name' => 'nullable|string',
-            'document_path' => 'required|file|mimes:pdf,jpg,png,docx|max:10240', // Validation for file upload
+            'document_path' => 'required|file|mimes:pdf,jpg,png,docx|max:10240',
         ]);
-
-        // Store the travel allowance
+    
         $TravelAllowance = TravelAllowance::create([
-            'employee_id' => $request->employee_id,
+            'employee_id' => $request->employee_id ?? $us,
             'amount' => $request->amount,
             'destination' => $request->destination,
             'travel_date' => $request->travel_date,
@@ -55,23 +61,30 @@ class TravelAllowanceController
             'extra_payment' => $request->extra_payment,
             'status' => $request->status,
         ]);
-
-        // Handle file upload and store it in the 'documents' folder
+    
+        $cs = DestinationAmount::create([
+            'amount' => $request->employee_id ?? $us,
+            'destination' => $request->employee_id ?? $us
+        ]);
+    
         if ($request->hasFile('document_path')) {
             $filePath = $request->file('document_path')->store('documents', 'public');
         }
-        // dd($TravelAllowance);
-        // Create the document record in the database
+    
         $abc = DocumentByEmployee::create([
             'travel_allowance_id' => $TravelAllowance->id,
             'employee_id' => $TravelAllowance->employee_id,
             'document_name' => $request->document_name,
-            'document_path' => $filePath ?? null, // Store the file path in the database
+            'document_path' => $filePath ?? null,
         ]);
-
-        return back()->with('success', 'Travel allowance and document uploaded successfully');
+    
+        return back()->with([
+            'success' => 'Travel allowance and document uploaded successfully',
+            'us' =>$us,
+            'travel_allowance' => $TravelAllowance,
+            'document' => $abc
+        ]);
     }
-
 
 
     public function update(Request $request, $id)
@@ -105,6 +118,7 @@ class TravelAllowanceController
     public function show()
     {
 
+        $us = Auth::user()->id;
         $travelAllowances = TravelAllowance::with(['documentsByEmployee', 'destinationAmount'])->get()->map(function ($ta) {
             return [
                 'id' => $ta->id,
@@ -120,10 +134,11 @@ class TravelAllowanceController
             ];
         });
 
-        dd($travelAllowances);
+        // dd($travelAllowances);
 
         return Inertia::render('Allowances/TravelRequest', [
             'travelAllowances' => $travelAllowances,
+            'us' =>$us,
         ]);
     }
 

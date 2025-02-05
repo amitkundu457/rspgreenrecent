@@ -25,6 +25,7 @@ const Nav = ({ user_type, usrrr }) => {
     const [permissions, setPermissions] = useState([]);
     const [toggle, SetToggle] = useState(true);
     const { props, url } = usePage();
+    console.log("User Roles:", props.auth.user.roles);
 
     useEffect(() => {
         if (Array.isArray(user_type)) {
@@ -35,21 +36,21 @@ const Nav = ({ user_type, usrrr }) => {
     }, [user_type]);
 
     const menuitems = [
-        { name: "employees", link: "/employees", perm: "view_employee" },
+        { name: "employees", link: "/employees", perm: "create_role" },
 
         { name: "leave management", link: "/leave-index", perm: "view_leave" },
-        { name: "Loan Management", link: "/loans", perm: "view_leave" },
+        { name: "Loan Management", link: "/loans", perm: "view_employee" },
         {
             name: "Advancce-Salary Management",
             link: "/advanceloan",
             perm: "view_leave",
         },
-        { name: "employee setup", link: "/branches", perm: "view_employee" },
+        { name: "employee setup", link: "/branches", perm: "create_role" },
         // { name: "attendance", link: "/attendance", perm: "view_attendance" },
         { name: "Salary generate", link: "/salaries", perm: "view_salary" },
-        { name: "Attendance", link: "/attendance", perm: "view_salary" },
+        { name: "Attendance", link: "/attendance", perm: "view_employee" },
         // { name: "Generate Titles", link: "/titles", perm: "view_salary" },
-
+ 
         {
             name: "Salary generator employee wise",
             link: "/all-salary",
@@ -112,14 +113,15 @@ const Nav = ({ user_type, usrrr }) => {
                             <span>Dashboard</span>{" "}
                         </Link>
                     </li>
-                    {props.auth.user.roles[0]?.name === "admin" && (
-                        <DropdownMenu
-                            icon={<FaHome />}
-                            name={"HRMS & Payroll"}
-                            items={menuitems}
-                        />
-                    )}
-                    {props.auth.user.roles[0]?.name === "Employee" && (
+                    {(props.auth.user.roles[0]?.name === "admin" || permissions.includes('view_employee')) && (
+    <DropdownMenu
+        icon={<FaHome />}
+        name={"HRMS & Payroll"}
+        items={menuitems}
+    />
+)}
+
+                    {props.auth.user.roles[0]?.name === "view_task" && (
                         <li
                             className={
                                 url === "/Quotation"
@@ -192,84 +194,67 @@ const Nav = ({ user_type, usrrr }) => {
                             ]}
                         />
                     )}
-                    <DropdownMenu
-                        icon={<FaFolderClosed />}
-                        name={"Project Management"}
-                        items={[
-                            // {
-                            //     name: "Projects",
-                            //     link: "/projects",
-                            //     perm: "view_project",
-                            // },
-                            {
-                                name: "Timesheet",
-                                link: "/daily-status",
-                                perm: "view_timsheet",
-                                hide: !(
-                                    props.auth.user.roles[0]?.name === "admin"
-                                ), // Will hide unless the role is "admin"
-                            },
+                   <DropdownMenu
+    icon={<FaFolderClosed />}
+    name={"Project Management"}
+    items={[
+        {
+            name: "Timesheet",
+            link: "/daily-status",
+            perm: "view_timsheet",
+            hide: !(
+                props.auth.user.roles[0]?.name === "admin" || 
+                permissions.includes('view_timsheet')
+            ), // Will hide unless the role is "admin" or has 'view_timsheet' permission
+        },
+        {
+            name: "Projects",
+            link: "/projects-task",
+            perm: "view_project",
+            hide: !(permissions.includes('view_project') || props.auth.user.roles[0]?.name === "admin"),
+        },
+        {
+            name: "Add Employee",
+            link: "/task-assingbyadmin",
+            perm: "view_project",
+            hide: !(permissions.includes('view_project') || props.auth.user.roles[0]?.name === "admin"),
+        },
+        { name: "Reports", link: "/reports-get" },
+        {
+            name: "project-stages",
+            link: "/project-all-stages",
+            hide: !(permissions.includes('view_project') || props.auth.user.roles[0]?.name === "admin"),
+        },
+    ]}
+ />
+{permissions.includes('admin') || permissions.includes('view_employee') ? (
+  <DropdownMenu
+    icon={<MdAddTask />}
+    name="Allowance"
+    items={[
+      { name: "Travel Allowance", link: "/travel-allowances" ,
+        perm: "view_employee",
+      },
+      { name: "Food Allowance", link: "/food-allowances", perm: "view_employee" },
+    ]}
+  />
+) : null}
 
-                            {
-                                name: "Projects",
-                                link: "/projects-task",
-                                perm: "view_project",
-                            },
-                            {
-                                name: "Add Employee",
-                                link: "/task-assingbyadmin",
-                                perm: "view_project",
-                            },
-                            //  <Link href="task-employee">Add Employee</Link>
-                            // {
-                            //     name: "Task Calendar",
-                            //     link: "/taskcalendar",
-                            //     // perm: "view_task",
-                            // },
-                            { name: "Reports", link: "/reports-get" },
-                            {
-                                name: "project-stages",
-                                link: "/project-all-stages",
-                            },
-                        ]}
-                    />
-                    {props.auth.user.roles[0]?.name === "admin" && (
-                        <DropdownMenu
-                            icon={<MdAddTask />}
-                            name={"Allowance"}
-                            items={[
-                                {
-                                    name: "Travel Allowance",
-                                    link: "/travel-allowances",
-                                },
-                                {
-                                    name: "Food Allowance",
-                                    link: "/food-allowances",
-                                },
-                            ]}
-                        />
-                    )}
 
-                    {props.auth.user.roles[0]?.name === "admin" && (
-                        <DropdownMenu
-                            icon={<MdHolidayVillage />}
-                            name={"Holiday"}
-                            items={[
-                                {
-                                    name: "Holiday-location",
-                                    link: "/holiday-locationswise",
-                                },
-                                {
-                                    name: "Holiday List",
-                                    link: "/holidays-location",
-                                },
-                                {
-                                    name: "Holiday Calender",
-                                    link: "/holidays-calender",
-                                },
-                            ]}
-                        />
-                    )}
+
+{permissions.includes('admin') || permissions.includes('view_employee') ?(
+  <DropdownMenu
+    icon={<MdHolidayVillage />}
+    name="Holiday"
+    items={[
+      { name: "Holiday-location", link: "/holiday-locationswise", perm: "view_employee" },
+      { name: "Holiday List", link: "/holidays-location", perm: "view_employee" },
+      { name: "Holiday Calendar", link: "/holidays-calender", perm: "view_employee" },
+    ]}
+  />
+) : null}
+
+
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <DropdownMenu
                             icon={<FaFolderClosed />}
@@ -374,24 +359,23 @@ const Nav = ({ user_type, usrrr }) => {
                             </Link>
                         </li>
                     )}
-                    {props.auth.user.roles[0]?.name === "admin" && (
-                        <li
-                            className={
-                                url === "/Quotation"
-                                    ? "active bg-[#0A1B3F] p-2 px-5 text-[0.9rem] text-white"
-                                    : "p-2 text-black text-[0.9rem]"
-                            }
-                        >
-                            <Link href="/Quotation" className="flex space-x-2">
-                                {" "}
-                                <span>
-                                    {" "}
-                                    <FaHandPaper />
-                                </span>{" "}
-                                <span>Quotation</span>{" "}
-                            </Link>
-                        </li>
-                    )}
+                 {permissions.includes('admin') || permissions.includes('view_employee') ? (
+    <li
+        className={
+            url === "/Quotation"
+                ? "active bg-[#0A1B3F] p-2 px-5 text-[0.9rem] text-white"
+                : "p-2 text-black text-[0.9rem]"
+        }
+    >
+        <Link href="/Quotation" className="flex space-x-2">
+            <span><FaHandPaper /></span>
+            <span>Quotation</span>
+        </Link>
+    </li>
+) : (
+    ''
+)}
+
                 </ul>
             </div>
         </nav>
