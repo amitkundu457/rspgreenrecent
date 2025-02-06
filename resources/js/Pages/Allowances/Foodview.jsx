@@ -2,7 +2,7 @@ import Header from "@/Layouts/Header";
 import Nav from "@/Layouts/Nav";
 import React from "react";
 
-const FoodView = ({ travelAllowance, user, notif, user_type }) => {
+const TravelView = ({ travelAllowance, user, notif, user_type }) => {
     // Check if no travel allowance is found
     if (!travelAllowance) {
         return (
@@ -20,7 +20,7 @@ const FoodView = ({ travelAllowance, user, notif, user_type }) => {
             {/* Travel Allowance Details */}
             <div className="bg-white shadow-lg rounded-lg p-6 mt-6">
                 <h2 className="text-2xl font-semibold mb-4">
-                    Travel Allowance Details
+                    Food Allowance Details
                 </h2>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -92,4 +92,4 @@ const FoodView = ({ travelAllowance, user, notif, user_type }) => {
     );
 };
 
-export default FoodView;
+export default TravelView;

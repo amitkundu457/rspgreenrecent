@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Models\FoodAllowance;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class FoodAllowanceController extends Controller
@@ -17,6 +18,8 @@ class FoodAllowanceController extends Controller
             ->join('designations', 'employees.designation_id', '=', 'designations.id')
             ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name')
             ->get();
+            $us = Auth::user()->id;
+
 
         // Get all food allowances and dump them
         $foodAllowances = FoodAllowance::all();
@@ -25,6 +28,7 @@ class FoodAllowanceController extends Controller
         return Inertia::render('Allowances/FoodAllowances', [
             'foodAllowances' => $foodAllowances,
             'allEmployees' => $allEmployees,
+            'us' => $us,
         ]);
     }
 

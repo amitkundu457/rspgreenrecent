@@ -47,7 +47,6 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
         <div>
             {/* Buttons */}
             <div className="flex justify-start space-x-4 mb-4 print:hidden">
-                
                 {/* <button
                     onClick={handleDownloadPDF}
                     className="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-full"
@@ -67,35 +66,49 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
                             employee_id,
                             employeeName,
                             generate_date,
-                            allowance = 0,
                             total_amount = 0,
                             approved_by,
                             approved_date,
                         } = employee;
 
-                        const matchedData = data.find((item) => item.id === employee_id);
-
-                        let totalSalary = total_amount + allowance;
+                        const matchedData = data.find(
+                            (item) => item.id === employee_id
+                        );
 
                         const totalDeduction = selectedDeductions.reduce(
                             (acc, item) => acc + (parseFloat(item.amount) || 0),
                             0
                         );
 
+                        // Deduct leave and late deductions from matchedData
                         let leaveDeduction = 0;
                         let lateDeduction = 0;
+                        let loanDeduction = 0;
 
                         if (matchedData) {
-                            if (matchedData.leave_deduction_amount) {
-                                leaveDeduction = parseFloat(matchedData.leave_deduction_amount);
-                            }
-                            if (matchedData.late_deduction_amount) {
-                                lateDeduction = parseFloat(matchedData.late_deduction_amount);
-                            }
+                            leaveDeduction =
+                                parseFloat(
+                                    matchedData.leave_deduction_amount
+                                ) || 0;
+                            lateDeduction =
+                                parseFloat(matchedData.late_deduction_amount) ||
+                                0;
+                            loanDeduction =
+                                parseFloat(matchedData.loan_amount) || 0; // Fetch loan amount from matchedData
                         }
 
-                        const totalDeductions = totalDeduction + leaveDeduction + lateDeduction;
-                        let netSalary = totalSalary - totalDeductions;
+                        // Total Deductions (leave + late + selected + loan)
+                        const totalDeductions =
+                            totalDeduction +
+                            leaveDeduction +
+                            lateDeduction +
+                            loanDeduction;
+
+                        // Calculate net salary after deductions
+                        let netSalary = total_amount - totalDeductions;
+
+                        // Optional: Round netSalary to two decimal places for clarity
+                        netSalary = Math.round(netSalary * 100) / 100;
 
                         return (
                             <div
@@ -105,84 +118,144 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
                                 <table className="w-full text-left border-collapse">
                                     <thead className="bg-gradient-to-r from-blue-400 to-blue-500 text-white">
                                         <tr>
-                                            <th className="px-6 py-3 border border-gray-300">Field</th>
-                                            <th className="px-6 py-3 border border-gray-300">Details</th>
+                                            <th className="px-6 py-3 border border-gray-300">
+                                                Field
+                                            </th>
+                                            <th className="px-6 py-3 border border-gray-300">
+                                                Details
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody className="text-gray-800">
                                         <tr className="hover:bg-blue-50">
-                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Employee ID</td>
+                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                Employee ID
+                                            </td>
                                             <td className="px-6 py-3 border border-gray-300">
-                                                {data.find((d) => d.id === employee_id)?.employee_id || "N/A"}
+                                                {data.find(
+                                                    (d) => d.id === employee_id
+                                                )?.employee_id || "N/A"}
                                             </td>
                                         </tr>
                                         <tr className="bg-blue-50 hover:bg-blue-100">
-                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Employee Name</td>
+                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                Employee Name
+                                            </td>
                                             <td className="px-6 py-3 border border-gray-300 text-indigo-600 font-bold">
-                                                {data.find((d) => d.id === employee_id)?.employee_name || "N/A"}
+                                                {data.find(
+                                                    (d) => d.id === employee_id
+                                                )?.employee_name || "N/A"}
                                             </td>
                                         </tr>
                                         <tr className="hover:bg-blue-50">
-                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Salary Date</td>
-                                            <td className="px-6 py-3 border border-gray-300">{generate_date || "N/A"}</td>
+                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                Salary Date
+                                            </td>
+                                            <td className="px-6 py-3 border border-gray-300">
+                                                {generate_date || "N/A"}
+                                            </td>
                                         </tr>
                                         <tr className="bg-blue-50 hover:bg-blue-100">
-                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Basic Salary (Include Allowance)</td>
+                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                Basic Salary
+                                            </td>
                                             <td className="px-6 py-3 border border-gray-300 text-green-600 font-bold">
                                                 {formatToCurrency(total_amount)}
                                             </td>
                                         </tr>
-                                        {/* <tr className="hover:bg-blue-50">
-                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Allowance</td>
-                                            <td className="px-6 py-3 border border-gray-300 text-teal-600 font-semibold">
-                                                {formatToCurrency(allowance)}
-                                            </td>
-                                        </tr> */}
+
                                         <tr className="bg-blue-50 hover:bg-blue-100">
-                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Total Earnings</td>
+                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                Loan Amount (Deducted)
+                                            </td>
+                                            <td className="px-6 py-3 border border-gray-300 text-red-600 font-semibold">
+                                                {formatToCurrency(
+                                                    loanDeduction
+                                                )}{" "}
+                                                {/* Correctly fetch the loan amount from matchedData */}
+                                            </td>
+                                        </tr>
+
+                                        <tr className="bg-blue-50 hover:bg-blue-100">
+                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                Total Earnings
+                                            </td>
                                             <td className="px-6 py-3 border border-gray-300 text-indigo-600 font-bold">
-                                                {formatToCurrency(totalSalary)}
+                                                {formatToCurrency(
+                                                    total_amount - loanDeduction
+                                                )}
                                             </td>
                                         </tr>
 
                                         {/* Separate deductions */}
-                                        {matchedData && matchedData.leave_deduction_amount > 0 && (
-                                            <tr className="hover:bg-blue-50">
-                                                <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Leave Deduction</td>
-                                                <td className="px-6 py-3 border border-gray-300 text-red-600 font-semibold">
-                                                    {formatToCurrency(matchedData.leave_deduction_amount)}
-                                                </td>
-                                            </tr>
-                                        )}
+                                        {matchedData &&
+                                            matchedData.leave_deduction_amount >
+                                                0 && (
+                                                <tr className="hover:bg-blue-50">
+                                                    <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                        Leave Deduction
+                                                    </td>
+                                                    <td className="px-6 py-3 border border-gray-300 text-red-600 font-semibold">
+                                                        {formatToCurrency(
+                                                            matchedData.leave_deduction_amount
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            )}
 
-                                        {matchedData && matchedData.late_deduction_amount > 0 && (
-                                            <tr className="hover:bg-blue-50">
-                                                <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Late Deduction</td>
-                                                <td className="px-6 py-3 border border-gray-300 text-red-600 font-semibold">
-                                                    {formatToCurrency(matchedData.late_deduction_amount)} (for {matchedData.late_deduction_days} days)
-                                                </td>
-                                            </tr>
-                                        )}
+                                        {matchedData &&
+                                            matchedData.late_deduction_amount >
+                                                0 && (
+                                                <tr className="hover:bg-blue-50">
+                                                    <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                        Late Deduction
+                                                    </td>
+                                                    <td className="px-6 py-3 border border-gray-300 text-red-600 font-semibold">
+                                                        {formatToCurrency(
+                                                            matchedData.late_deduction_amount
+                                                        )}{" "}
+                                                        (for{" "}
+                                                        {
+                                                            matchedData.late_deduction_days
+                                                        }{" "}
+                                                        days)
+                                                    </td>
+                                                </tr>
+                                            )}
 
                                         <tr className="hover:bg-blue-50">
-                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Total Deductions</td>
+                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                Total Deductions
+                                            </td>
                                             <td className="px-6 py-3 border border-gray-300 text-red-600 font-semibold">
-                                                {formatToCurrency(totalDeductions)}
+                                                {formatToCurrency(
+                                                    totalDeductions
+                                                )}
                                             </td>
                                         </tr>
                                         <tr className="bg-blue-50 hover:bg-blue-100">
-                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Net Salary</td>
+                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                Net Salary
+                                            </td>
                                             <td className="px-6 py-3 border border-gray-300 text-green-700 font-bold">
                                                 {formatToCurrency(netSalary)}
                                             </td>
                                         </tr>
                                         <tr className="hover:bg-blue-50">
-                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Approved By</td>
-                                            <td className="px-6 py-3 border border-gray-300">{approved_by || "N/A"}</td>
+                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                Approved By
+                                            </td>
+                                            <td className="px-6 py-3 border border-gray-300">
+                                                {approved_by || "N/A"}
+                                            </td>
                                         </tr>
                                         <tr className="bg-blue-50 hover:bg-blue-100">
-                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">Approved Date</td>
-                                            <td className="px-6 py-3 border border-gray-300">{approved_date || "N/A"}</td>
+                                            <td className="px-6 py-3 border border-gray-300 text-black font-semibold">
+                                                Approved Date
+                                            </td>
+                                            <td className="px-6 py-3 border border-gray-300">
+                                                {approved_date || "N/A"}
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -190,7 +263,9 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
                         );
                     })
                 ) : (
-                    <p className="text-center text-gray-700 text-lg">No employee data available.</p>
+                    <p className="text-center text-gray-700 text-lg">
+                        No employee data available.
+                    </p>
                 )}
             </div>
         </div>

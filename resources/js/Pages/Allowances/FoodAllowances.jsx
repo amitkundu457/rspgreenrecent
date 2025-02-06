@@ -4,15 +4,29 @@ import Nav from "@/Layouts/Nav";
 import Header from "@/Layouts/Header";
 import { Link } from "@inertiajs/react";
 
-export default function TravelAllowances({ user, notif, allEmployees }) {
+export default function TravelAllowances({ user, notif, allEmployees, us }) {
     const { travelAllowances } = usePage().props;
     const [editing, setEditing] = useState(null);
     const [showExtraPayment, setShowExtraPayment] = useState(false);
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [selectedTA, setSelectedTA] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState("");
 
-    // Console log to check allEmployees data
-    console.log("Employees:", allEmployees);
+    const openRejectModal = (ta) => {
+        setSelectedTA(ta);
+        setIsRejectModalOpen(true);
+    };
 
-    // Setting up the form data
+    const closeRejectModal = () => {
+        setIsRejectModalOpen(false);
+        setRejectionReason("");
+    };
+
+    const handleReject = () => {
+        console.log("Rejected ID:", selectedTA?.id, "Reason:", rejectionReason);
+        closeRejectModal();
+    };
+
     const {
         data,
         setData,
@@ -24,20 +38,18 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
     } = useForm({
         id: "",
         employee_id: "",
-        employee_id: "", // Store employee name too
-        amount: "", // Advance Payment
+        amount: "",
+        destination: "",
         travel_date: "",
         reason: "",
         document_path: null,
         payment_by: "",
         payment_mode: "Cash",
-        extra_payment: "", // Extra Payment
+        extra_payment: "",
     });
 
-    // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
-
         if (editing) {
             put(route("travel-allowances.update", data.id), {
                 onSuccess: () => {
@@ -56,6 +68,20 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
         }
     };
 
+    const handleEdit = (allowance) => {
+        setEditing(allowance.id);
+        setData({ ...allowance });
+        setShowExtraPayment(!!allowance.extra_payment);
+    };
+
+    const handleDelete = (id) => {
+        if (confirm("Are you sure you want to delete this record?")) {
+            destroy(route("travel-allowances.destroy", id), {
+                onSuccess: () => reset(),
+            });
+        }
+    };
+
     return (
         <div className="w-[85%] absolute right-0 overflow-hidden bg-gray-100 min-h-screen">
             <Header user={user} notif={notif} />
@@ -67,39 +93,31 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
                     </h1>
                     <Link href="/foodreq">
                         <button className="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
-                            <span className="text-lg mr-2">+</span> Add Request
-                            for Payment
+                            <span className="text-lg mr-2">+</span>{" "}
+                            {us !== 1
+                                ? "Add Request for Payment"
+                                : "Show all Payment Request"}
                         </button>
                     </Link>
                 </div>
+                {us === 1 && (
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <select
+                            value={data.employee_id}
+                            onChange={(e) =>
+                                setData("employee_id", e.target.value)
+                            }
+                            required
+                            className="w-full p-2 border rounded-md"
+                        >
+                            <option value="">Select Employee</option>
+                            {allEmployees?.map((employee) => (
+                                <option key={employee.id} value={employee.id}>
+                                    {employee.employee_name}
+                                </option>
+                            ))}
+                        </select>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Employee Selection */}
-                    <select
-                        value={data.employee_id}
-                        onChange={(e) => {
-                            const selectedEmployee = allEmployees.find(
-                                (emp) => emp.id === parseInt(e.target.value)
-                            );
-                            setData({
-                                ...data,
-                                employee_id: selectedEmployee?.id || "", // Ensure this is a valid user ID
-                            });
-                        }}
-                        required
-                        className="w-full p-2 border rounded-md"
-                    >
-                        <option value="">Select Employee</option>
-                        {allEmployees?.map((employee) => (
-                            <option key={employee.id} value={employee.id}>
-                                {employee.employee_name}{" "}
-                                {/* Ensure this field exists */}
-                            </option>
-                        ))}
-                    </select>
-
-                    {/* Hide Advance Payment when Extra Payment is selected */}
-                    {!showExtraPayment && (
                         <input
                             type="number"
                             placeholder="Advance Payment"
@@ -108,102 +126,97 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
                             required
                             className="w-full p-2 border rounded-md"
                         />
-                    )}
 
-                    <input
-                        type="date"
-                        value={data.travel_date}
-                        onChange={(e) => setData("travel_date", e.target.value)}
-                        required
-                        className="w-full p-2 border rounded-md"
-                    />
-                    <textarea
-                        placeholder="Reason"
-                        value={data.reason}
-                        onChange={(e) => setData("reason", e.target.value)}
-                        className="w-full p-2 border rounded-md"
-                    />
-                    <input
-                        type="text"
-                        placeholder="Payment By"
-                        value={data.payment_by}
-                        onChange={(e) => setData("payment_by", e.target.value)}
-                        className="w-full p-2 border rounded-md"
-                    />
-
-                    {/* Extra Payment Toggle */}
-                    <div className="flex items-center space-x-4">
-                        <label className="font-medium">Extra Payment?</label>
                         <input
-                            type="radio"
-                            id="extra-payment-yes"
-                            name="extra_payment"
-                            checked={showExtraPayment}
-                            onChange={() => setShowExtraPayment(true)}
-                        />
-                        <label htmlFor="extra-payment-yes">Yes</label>
-                        <input
-                            type="radio"
-                            id="extra-payment-no"
-                            name="extra_payment"
-                            checked={!showExtraPayment}
-                            onChange={() => {
-                                setShowExtraPayment(false);
-                                setData("extra_payment", "");
-                            }}
-                        />
-                        <label htmlFor="extra-payment-no">No</label>
-                    </div>
-
-                    {/* Extra Payment Input (Conditional) */}
-                    {showExtraPayment && (
-                        <input
-                            type="number"
-                            placeholder="Extra Payment"
-                            value={data.extra_payment}
+                            type="text"
+                            placeholder="Destination"
+                            value={data.destination}
                             onChange={(e) =>
-                                setData("extra_payment", e.target.value)
+                                setData("destination", e.target.value)
+                            }
+                            required
+                            className="w-full p-2 border rounded-md"
+                        />
+
+                        <input
+                            type="date"
+                            value={data.travel_date}
+                            onChange={(e) =>
+                                setData("travel_date", e.target.value)
+                            }
+                            required
+                            className="w-full p-2 border rounded-md"
+                        />
+
+                        <textarea
+                            placeholder="Reason"
+                            value={data.reason}
+                            onChange={(e) => setData("reason", e.target.value)}
+                            className="w-full p-2 border rounded-md"
+                        />
+
+                        <input
+                            type="text"
+                            placeholder="Payment By"
+                            value={data.payment_by}
+                            onChange={(e) =>
+                                setData("payment_by", e.target.value)
                             }
                             className="w-full p-2 border rounded-md"
                         />
-                    )}
 
-                    {/* File Upload */}
-                    <input
-                        type="file"
-                        onChange={(e) =>
-                            setData("document_path", e.target.files[0])
-                        }
-                        className="w-full p-2 border rounded-md"
-                    />
+                        <input
+                            type="file"
+                            onChange={(e) =>
+                                setData("document_path", e.target.files[0])
+                            }
+                            className="w-full p-2 border rounded-md"
+                        />
 
-                    <button
-                        type="submit"
-                        className={`w-full p-2 text-white rounded-md ${
-                            processing
-                                ? "bg-gray-400"
-                                : "bg-blue-500 hover:bg-blue-600"
-                        }`}
-                        disabled={processing}
-                    >
-                        {editing ? "Update" : "Create"}
-                    </button>
-                </form>
-
-                {/* Travel Allowances Table */}
-                {/* 
-                    <table className="w-full mt-6 border-collapse border border-gray-300">
+                        <button
+                            type="submit"
+                            className={`w-full p-2 text-white rounded-md ${
+                                processing
+                                    ? "bg-gray-400"
+                                    : "bg-blue-500 hover:bg-blue-600"
+                            }`}
+                            disabled={processing}
+                        >
+                            {editing ? "Update" : "Create"}
+                        </button>
+                    </form>
+                )}
+            </div>
+            {us !== 1 && travelAllowances?.length > 0 && (
+                <div className="overflow-y-auto max-h-[400px] mt-6">
+                    <h2 className="text-xl font-bold mb-4">
+                        All Travel Allowances
+                    </h2>
+                    <table className="w-full border-collapse border border-gray-300">
                         <thead>
                             <tr className="bg-gray-100">
-                                <th className="border px-4 py-2">Employee Name</th>
-                                <th className="border px-4 py-2">Advance Payment</th>
-                                <th className="border px-4 py-2">Destination</th>
-                                <th className="border px-4 py-2">Travel Date</th>
+                                <th className="border px-4 py-2">
+                                    Employee Id
+                                </th>
+                                <th className="border px-4 py-2">
+                                    Employee Name
+                                </th>
+                                <th className="border px-4 py-2">
+                                    Advance Payment
+                                </th>
+                                <th className="border px-4 py-2">Date</th>
                                 <th className="border px-4 py-2">Reason</th>
+                                <th className="border px-4 py-2">
+                                    Destination
+                                </th>
                                 <th className="border px-4 py-2">Payment By</th>
-                                <th className="border px-4 py-2">Payment Mode</th>
-                                <th className="border px-4 py-2">Extra Payment</th>
-                                <th className="border px-4 py-2">document_path</th>
+                                <th className="border px-4 py-2">
+                                    Payment Mode
+                                </th>
+                                <th className="border px-4 py-2">
+                                    Extra Payment
+                                </th>
+                                {/* <th className="border px-4 py-2">Document</th> */}
                                 <th className="border px-4 py-2">Status</th>
                                 <th className="border px-4 py-2">Actions</th>
                             </tr>
@@ -212,69 +225,77 @@ export default function TravelAllowances({ user, notif, allEmployees }) {
                             {travelAllowances.length > 0 ? (
                                 travelAllowances.map((ta) => (
                                     <tr key={ta.id} className="border">
-                                        <td className="border px-4 py-2">{ta.employee_id}</td>
-                                        <td className="border px-4 py-2">Rs {ta.amount}</td>
-                                        <td className="border px-4 py-2">{ta.destination}</td>
-                                        <td className="border px-4 py-2">{ta.travel_date}</td>
-                                        <td className="border px-4 py-2">{ta.reason}</td>
-                                        <td className="border px-4 py-2">{ta.payment_by}</td>
-                                        <td className="border px-4 py-2">{ta.payment_mode}</td>
-                                        <td className="border px-4 py-2">{ta.extra_payment || "N/A"}</td>
                                         <td className="border px-4 py-2">
-                                            {ta.document_path_path ? (
+                                            EMP0000{ta.id}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.employee_name}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            Rs {ta.amount}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.travel_date}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.reason}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.destination}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.payment_by}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.payment_mode}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.extra_payment || "N/A"}
+                                        </td>
+                                        {/* <td className="border px-4 py-2">
+                                            {ta.document_path ? (
                                                 <a
-                                                    href={`/storage/${ta.document_path_path}`}
+                                                    href={ta.document_path}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-blue-500 underline"
                                                 >
-                                                    View document_path
+                                                    View Document
                                                 </a>
                                             ) : (
-                                                "No document_path"
+                                                "No Document"
                                             )}
-                                        </td>
-                                        <td className="border px-4 py-2 text-center">
-                                            {ta.status === "approved" && (
-                                                <span className="text-green-600">Approved</span>
-                                            )}
-                                            {ta.status === "rejected" && (
-                                                <span className="text-red-600">Rejected</span>
-                                            )}
-                                            {ta.status === "pending" && (
-                                                <div className="flex justify-center space-x-2">
-                                                    <button
-                                                        className="bg-green-500 text-white px-2 py-1 rounded"
-                                                        onClick={() => updateStatus(ta.id, "approved")}
-                                                    >
-                                                        Approve
-                                                    </button>
-                                                    <button
-                                                        className="bg-red-500 text-white px-2 py-1 rounded"
-                                                        onClick={() => updateStatus(ta.id, "rejected")}
-                                                    >
-                                                        Reject
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="border px-4 py-2 flex justify-center space-x-4">
-                                            <button onClick={() => handleEdit(ta)}>Edit</button>
-                                            <button onClick={() => handleDelete(ta.id)}>Delete</button>
+                                        </td> */}
+                                        <td className="border px-4 py-2">
+                                            <span
+                                                className={`px-2 py-1 rounded ${
+                                                    ta.status === "Approved"
+                                                        ? "bg-green-500 text-white"
+                                                        : ta.status ===
+                                                          "Rejected"
+                                                        ? "bg-red-500 text-white"
+                                                        : "bg-gray-300"
+                                                }`}
+                                            >
+                                                {ta.status}
+                                            </span>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="11" className="text-center py-4">
+                                    <td
+                                        colSpan="12"
+                                        className="text-center py-4"
+                                    >
                                         No travel allowances found.
                                     </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
-                */}
-            </div>
+                </div>
+            )}
         </div>
     );
 }

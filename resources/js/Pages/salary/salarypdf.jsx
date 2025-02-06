@@ -1,5 +1,4 @@
 import React, { useRef } from "react";
-
 const SalaryPrint = React.forwardRef(({ combinedData }, ref) => {
     const printRef = useRef();
     console.log("aabbcc", combinedData);
@@ -57,7 +56,9 @@ const SalaryPrint = React.forwardRef(({ combinedData }, ref) => {
                         Number(data.late_deduction_amount) || 0;
                     const leaveDeduction =
                         Number(data.leave_deduction_amount) || 0;
-                    const totalDeductions = lateDeduction + leaveDeduction;
+                    const loanDeduction = Number(data.loan_amount) || 0; // Add loan deduction
+                    const totalDeductions =
+                        lateDeduction + leaveDeduction + loanDeduction;
                     const totalEarnings = basicSalary + allowance;
                     const netSalary = totalEarnings - totalDeductions;
 
@@ -332,6 +333,34 @@ const SalaryPrint = React.forwardRef(({ combinedData }, ref) => {
                                             }}
                                         >
                                             {leaveDeduction.toFixed(2)}
+                                        </td>
+                                    </tr>
+                                    {/* Loan Deduction */}
+                                    <tr>
+                                        <td
+                                            style={{
+                                                border: "1px solid #ddd",
+                                                padding: "8px",
+                                            }}
+                                        >
+                                            Loan Deduction
+                                        </td>
+                                        <td
+                                            style={{
+                                                border: "1px solid #ddd",
+                                                padding: "8px",
+                                            }}
+                                        >
+                                            Loan Amount
+                                        </td>
+                                        <td
+                                            style={{
+                                                border: "1px solid #ddd",
+                                                padding: "8px",
+                                                textAlign: "right",
+                                            }}
+                                        >
+                                            {loanDeduction.toFixed(2)}
                                         </td>
                                     </tr>
                                 </tbody>

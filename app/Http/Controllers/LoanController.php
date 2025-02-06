@@ -18,7 +18,7 @@ class LoanController extends Controller
         $us = Auth::user()->id;
 
         $loans = Loan::with('user')->get();
-
+        // dd($loans);
         return Inertia::render('Loan/index', [
             'loans' => $loans,
             'us' => $us
@@ -62,11 +62,11 @@ class LoanController extends Controller
             'start_date' => $startDate,
             'end_date' => $endDate,
             'document' => $documentPath,
+            'user_id' => Auth::user()->id,
         ]);
 
         // Fetch the updated list of loans
         $loans = Loan::all();
-
         return Inertia::render('Loan/index', [
             'loans' => $loans,
         ]);
@@ -150,11 +150,9 @@ class LoanController extends Controller
     {
         // Fetch the loan by ID along with the related user (if needed)
         $loan = Loan::with('user')->findOrFail($id);
-    
+
         return Inertia::render('Loan/show', [
             'loan' => $loan, // Pass the loan details to the view
         ]);
     }
-    
-
 }

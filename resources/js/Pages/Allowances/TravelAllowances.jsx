@@ -8,8 +8,34 @@ export default function TravelAllowances({ user, notif, allEmployees, us }) {
     const { travelAllowances } = usePage().props;
     const [editing, setEditing] = useState(null);
     const [showExtraPayment, setShowExtraPayment] = useState(false);
-    
-    const { data, setData, post, put, delete: destroy, processing, reset } = useForm({
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [selectedTA, setSelectedTA] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState("");
+
+    const openRejectModal = (ta) => {
+        setSelectedTA(ta);
+        setIsRejectModalOpen(true);
+    };
+
+    const closeRejectModal = () => {
+        setIsRejectModalOpen(false);
+        setRejectionReason("");
+    };
+
+    const handleReject = () => {
+        console.log("Rejected ID:", selectedTA?.id, "Reason:", rejectionReason);
+        closeRejectModal();
+    };
+
+    const {
+        data,
+        setData,
+        post,
+        put,
+        delete: destroy,
+        processing,
+        reset,
+    } = useForm({
         id: "",
         employee_id: "",
         amount: "",
@@ -62,10 +88,15 @@ export default function TravelAllowances({ user, notif, allEmployees, us }) {
             <Nav />
             <div className="p-8 bg-white rounded-b-md">
                 <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-2xl font-bold">Travel Allowances Advance</h1>
+                    <h1 className="text-2xl font-bold">
+                        Travel Allowances Advance
+                    </h1>
                     <Link href="/travelreq">
                         <button className="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
-                            <span className="text-lg mr-2">+</span> {us !== 1 ? "Add Request for Payment" : "Show all Payment Request"}
+                            <span className="text-lg mr-2">+</span>{" "}
+                            {us !== 1
+                                ? "Add Request for Payment"
+                                : "Show all Payment Request"}
                         </button>
                     </Link>
                 </div>
@@ -73,7 +104,9 @@ export default function TravelAllowances({ user, notif, allEmployees, us }) {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <select
                             value={data.employee_id}
-                            onChange={(e) => setData("employee_id", e.target.value)}
+                            onChange={(e) =>
+                                setData("employee_id", e.target.value)
+                            }
                             required
                             className="w-full p-2 border rounded-md"
                         >
@@ -98,7 +131,9 @@ export default function TravelAllowances({ user, notif, allEmployees, us }) {
                             type="text"
                             placeholder="Destination"
                             value={data.destination}
-                            onChange={(e) => setData("destination", e.target.value)}
+                            onChange={(e) =>
+                                setData("destination", e.target.value)
+                            }
                             required
                             className="w-full p-2 border rounded-md"
                         />
@@ -106,7 +141,9 @@ export default function TravelAllowances({ user, notif, allEmployees, us }) {
                         <input
                             type="date"
                             value={data.travel_date}
-                            onChange={(e) => setData("travel_date", e.target.value)}
+                            onChange={(e) =>
+                                setData("travel_date", e.target.value)
+                            }
                             required
                             className="w-full p-2 border rounded-md"
                         />
@@ -122,19 +159,27 @@ export default function TravelAllowances({ user, notif, allEmployees, us }) {
                             type="text"
                             placeholder="Payment By"
                             value={data.payment_by}
-                            onChange={(e) => setData("payment_by", e.target.value)}
+                            onChange={(e) =>
+                                setData("payment_by", e.target.value)
+                            }
                             className="w-full p-2 border rounded-md"
                         />
 
                         <input
                             type="file"
-                            onChange={(e) => setData("document_path", e.target.files[0])}
+                            onChange={(e) =>
+                                setData("document_path", e.target.files[0])
+                            }
                             className="w-full p-2 border rounded-md"
                         />
 
                         <button
                             type="submit"
-                            className={`w-full p-2 text-white rounded-md ${processing ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"}`}
+                            className={`w-full p-2 text-white rounded-md ${
+                                processing
+                                    ? "bg-gray-400"
+                                    : "bg-blue-500 hover:bg-blue-600"
+                            }`}
                             disabled={processing}
                         >
                             {editing ? "Update" : "Create"}
@@ -143,33 +188,113 @@ export default function TravelAllowances({ user, notif, allEmployees, us }) {
                 )}
             </div>
             {us !== 1 && travelAllowances?.length > 0 && (
-                <table className="w-full mt-6 border-collapse border border-gray-300">
-                    <thead>
-                        <tr className="bg-gray-200">
-                            <th className="border p-2">Amount</th>
-                            <th className="border p-2">Destination</th>
-                            <th className="border p-2">Payment By</th>
-                            <th className="border p-2">Status</th>
-                            <th className="border p-2">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {travelAllowances.map((item) => (
-                            <tr key={item.id} className="border">
-                                <td className="border p-2">{item.amount}</td>
-                                <td className="border p-2">{item.destination}</td>
-                                <td className="border p-2">{item.payment_by}</td>
-                                <td className={`border p-2 ${item.status === "Rejected" ? "text-red-500" : "text-green-500"}`}>
-                                    {item.status}
-                                </td>
-                                <td className="border p-2 flex space-x-2">
-                                    <button onClick={() => handleEdit(item)} className="bg-yellow-500 text-white px-2 py-1 rounded">Edit</button>
-                                    <button onClick={() => handleDelete(item.id)} className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
-                                </td>
+                <div className="overflow-y-auto max-h-[400px] mt-6">
+                    <h2 className="text-xl font-bold mb-4">
+                        All Travel Allowances
+                    </h2>
+                    <table className="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr className="bg-gray-100">
+                                <th className="border px-4 py-2">
+                                    Employee Id
+                                </th>
+                                <th className="border px-4 py-2">
+                                    Employee Name
+                                </th>
+                                <th className="border px-4 py-2">
+                                    Advance Payment
+                                </th>
+                                <th className="border px-4 py-2">Date</th>
+                                <th className="border px-4 py-2">Reason</th>
+                                <th className="border px-4 py-2">
+                                    Destination
+                                </th>
+                                <th className="border px-4 py-2">Payment By</th>
+                                <th className="border px-4 py-2">
+                                    Payment Mode
+                                </th>
+                                <th className="border px-4 py-2">
+                                    Extra Payment
+                                </th>
+                                {/* <th className="border px-4 py-2">Document</th> */}
+                                <th className="border px-4 py-2">Status</th>
+                                <th className="border px-4 py-2">Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {travelAllowances.length > 0 ? (
+                                travelAllowances.map((ta) => (
+                                    <tr key={ta.id} className="border">
+                                        <td className="border px-4 py-2">
+                                            EMP0000{ta.id}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.employee_name}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            Rs {ta.amount}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.travel_date}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.reason}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.destination}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.payment_by}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.payment_mode}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {ta.extra_payment || "N/A"}
+                                        </td>
+                                        {/* <td className="border px-4 py-2">
+                                            {ta.document_path ? (
+                                                <a
+                                                    href={ta.document_path}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-500 underline"
+                                                >
+                                                    View Document
+                                                </a>
+                                            ) : (
+                                                "No Document"
+                                            )}
+                                        </td> */}
+                                        <td className="border px-4 py-2">
+                                            <span
+                                                className={`px-2 py-1 rounded ${
+                                                    ta.status === "Approved"
+                                                        ? "bg-green-500 text-white"
+                                                        : ta.status ===
+                                                          "Rejected"
+                                                        ? "bg-red-500 text-white"
+                                                        : "bg-gray-300"
+                                                }`}
+                                            >
+                                                {ta.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td
+                                        colSpan="12"
+                                        className="text-center py-4"
+                                    >
+                                        No travel allowances found.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             )}
         </div>
     );

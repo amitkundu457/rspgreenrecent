@@ -20,6 +20,7 @@ const SalaryPage = ({
     const [filteredSalaries, setFilteredSalaries] = useState([]);
     const [selectedSalary, setSelectedSalary] = useState(null);
     const printRef = useRef();
+    console.log("ggggg", combinedData);
 
     // Map employee IDs to their names and employee types for quick lookup
     const nameMap = employees.reduce((acc, emp) => {
@@ -59,7 +60,8 @@ const SalaryPage = ({
         const filtered = salary.filter((sal) => {
             const matchesEmployee =
                 selectedEmployee === "All Employees" ||
-                sal.employee_id === employees.find(emp => emp.name === selectedEmployee)?.id;
+                sal.employee_id ===
+                    employees.find((emp) => emp.name === selectedEmployee)?.id;
             const matchesMonth =
                 !selectedMonth || sal.generate_date.startsWith(selectedMonth);
             return matchesEmployee && matchesMonth;
@@ -83,9 +85,13 @@ const SalaryPage = ({
                             <select
                                 className="border p-2 rounded"
                                 value={selectedEmployee}
-                                onChange={(e) => setSelectedEmployee(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedEmployee(e.target.value)
+                                }
                             >
-                                <option value="All Employees">All Employees</option>
+                                <option value="All Employees">
+                                    All Employees
+                                </option>
                                 {employees.map((emp) => (
                                     <option key={emp.id} value={emp.name}>
                                         {emp.name}
@@ -97,7 +103,9 @@ const SalaryPage = ({
                                 type="month"
                                 className="border p-2 rounded"
                                 value={selectedMonth}
-                                onChange={(e) => setSelectedMonth(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedMonth(e.target.value)
+                                }
                             />
                             <button
                                 className="bg-blue-500 text-white p-2 rounded"
@@ -110,9 +118,15 @@ const SalaryPage = ({
                         <table className="w-full border-collapse">
                             <thead className="bg-gray-100">
                                 <tr>
-                                    <th className="border p-2">Employee Name</th>
-                                    <th className="border p-2">Employee Type</th>
-                                    <th className="border p-2">Salary Generate Date</th>
+                                    <th className="border p-2">
+                                        Employee Name
+                                    </th>
+                                    <th className="border p-2">
+                                        Employee Type
+                                    </th>
+                                    <th className="border p-2">
+                                        Salary Generate Date
+                                    </th>
                                     <th className="border p-2">Net Amount</th>
                                     <th className="border p-2">Action</th>
                                 </tr>
@@ -120,27 +134,43 @@ const SalaryPage = ({
                             <tbody>
                                 {filteredSalaries.map((sal) => {
                                     const employee = nameMap[sal.employee_id];
-                                    console.log("jhgf",employee)
+                                    console.log("jhgf", employee);
                                     return (
                                         <tr key={sal.id}>
                                             <td className="border p-2">
-                                                {employee ? employee.name : "Pinaki Ray"}
+                                                {employee
+                                                    ? employee.name
+                                                    : "Pinaki Ray"}
                                             </td>
                                             <td className="border p-2">
-                                                {employee ? employee.type : "Permanent"}
+                                                {employee
+                                                    ? employee.type
+                                                    : "Permanent"}
                                             </td>
-                                            <td className="border p-2">{sal.generate_date}</td>
-                                            <td className="border p-2">{sal.total_amount}</td>
+                                            <td className="border p-2">
+                                                {sal.generate_date}
+                                            </td>
+                                            <td className="border p-2">
+                                                {sal.total_amount}
+                                            </td>
                                             <td className="border p-2">
                                                 <button
                                                     className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded mr-2"
                                                     onClick={() =>
                                                         setSelectedSalary({
                                                             ...sal,
-                                                            employeeName: employee ? employee.name : "Unknown Employee",
-                                                            employeeType: employee ? employee.type : "Unknown Type",
-                                                            employeeId: sal.employee_id,
-                                                            deductions: deductionsss,
+                                                            employeeName:
+                                                                employee
+                                                                    ? employee.name
+                                                                    : "Unknown Employee",
+                                                            employeeType:
+                                                                employee
+                                                                    ? employee.type
+                                                                    : "Unknown Type",
+                                                            employeeId:
+                                                                sal.employee_id,
+                                                            deductions:
+                                                                deductionsss,
                                                         })
                                                     }
                                                     title="View salary details"
@@ -163,12 +193,12 @@ const SalaryPage = ({
                     </>
                 ) : (
                     <div>
-                        <button
+                        {/* <button
                             className="bg-blue-500 text-white p-2 rounded mt-4"
                             onClick={handlePrint}
                         >
                             Print Salary Slip
-                        </button>
+                        </button> */}
                         <button
                             className="bg-gray-500 text-white p-2 rounded mt-4 ml-2"
                             onClick={() => setSelectedSalary(null)}
@@ -185,7 +215,6 @@ const SalaryPage = ({
                                 employeeId={selectedSalary.employeeId}
                             />
                         </div>
-                        
                     </div>
                 )}
             </div>

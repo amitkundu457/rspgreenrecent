@@ -24,87 +24,87 @@ class TravelAllowanceController
             ->join('designations', 'employees.designation_id', '=', 'designations.id')
             ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name')
             ->get();
-            $us = Auth::user()->id;
+        $us = Auth::user()->id;
 
         return Inertia::render('Allowances/TravelAllowances', [
             'travelAllowances' => TravelAllowance::all(),
             'allEmployees' =>  $allEmployees,
-            'us' =>$us,
+            'us' => $us,
 
         ]);
     }
     public function store(Request $request)
-{
-    // Debug: Check if Auth is working
-    $user = Auth::user(); 
-    dd($request->all(), $user); // Check if Auth::user() is returning a valid user object
+    {
+        // Debug: Check if Auth is working
+        $user = Auth::user();
+        // dd($request->all(), $user); // Check if Auth::user() is returning a valid user object
 
-    // Proceed with the rest of the code if user is valid
-    if (!$user) {
-        return back()->with('error', 'User not authenticated');
+        // Proceed with the rest of the code if user is valid
+        if (!$user) {
+            return back()->with('error', 'User not authenticated');
+        }
+
+        $us = $user->id; // Get authenticated user's ID
+
+        // Validate incoming data
+        $request->validate([
+            'employee_id' => 'nullable',  // make employee_id optional
+            'amount' => 'required|numeric',
+            'destination' => 'required|string',
+            'travel_date' => 'required|date',
+            'reason' => 'required|string',
+            'payment_by' => 'nullable|string',
+            'extra_payment' => 'nullable|numeric',
+            'status' => 'nullable|string',
+            'document_name' => 'nullable|string',
+            'document_path' => 'required|file|mimes:pdf,jpg,png,docx|max:10240',
+        ]);
+
+        // Assign employee_id using ternary operator
+        $employee_id = $request->employee_id ?: $us;
+
+        // Create TravelAllowance record
+        $TravelAllowance = TravelAllowance::create([
+            'employee_id' => $employee_id,
+            'amount' => $request->amount,
+            'destination' => $request->destination,
+            'travel_date' => $request->travel_date,
+            'reason' => $request->reason,
+            'payment_by' => $request->payment_by,
+            'extra_payment' => $request->extra_payment,
+            'status' => $request->status,
+        ]);
+
+        // Create DestinationAmount record
+        $cs = DestinationAmount::create([
+            'amount' => $request->amount,
+            'destination' => $request->destination,
+        ]);
+
+        // Handle file upload if present
+        if ($request->hasFile('document_path')) {
+            $filePath = $request->file('document_path')->store('documents', 'public');
+        }
+
+        // Create DocumentByEmployee record
+        $abc = DocumentByEmployee::create([
+            'travel_allowance_id' => $TravelAllowance->id,
+            'employee_id' => $TravelAllowance->employee_id,
+            'document_name' => $request->document_name,
+            'document_path' => $filePath ?? null,
+        ]);
+
+        // Return success response with data
+        return back()->with([
+            'success' => 'Travel allowance and document uploaded successfully',
+            'us' => $us,
+            'travel_allowance' => $TravelAllowance,
+            'document' => $abc
+        ]);
     }
 
-    $us = $user->id; // Get authenticated user's ID
-
-    // Validate incoming data
-    $request->validate([
-        'employee_id' => 'nullable|exists:users,id',  // make employee_id optional
-        'amount' => 'required|numeric',
-        'destination' => 'required|string',
-        'travel_date' => 'required|date',
-        'reason' => 'required|string',
-        'payment_by' => 'nullable|string',
-        'extra_payment' => 'nullable|numeric',
-        'status' => 'nullable|string',
-        'document_name' => 'nullable|string',
-        'document_path' => 'required|file|mimes:pdf,jpg,png,docx|max:10240',
-    ]);
-
-    // Assign employee_id using ternary operator
-    $employee_id = $request->employee_id ?: $us;
-
-    // Create TravelAllowance record
-    $TravelAllowance = TravelAllowance::create([
-        'employee_id' => $employee_id,
-        'amount' => $request->amount,
-        'destination' => $request->destination,
-        'travel_date' => $request->travel_date,
-        'reason' => $request->reason,
-        'payment_by' => $request->payment_by,
-        'extra_payment' => $request->extra_payment,
-        'status' => $request->status,
-    ]);
-
-    // Create DestinationAmount record
-    $cs = DestinationAmount::create([
-        'amount' => $request->amount,
-        'destination' => $request->destination,
-    ]);
-
-    // Handle file upload if present
-    if ($request->hasFile('document_path')) {
-        $filePath = $request->file('document_path')->store('documents', 'public');
-    }
-
-    // Create DocumentByEmployee record
-    $abc = DocumentByEmployee::create([
-        'travel_allowance_id' => $TravelAllowance->id,
-        'employee_id' => $TravelAllowance->employee_id,
-        'document_name' => $request->document_name,
-        'document_path' => $filePath ?? null,
-    ]);
-
-    // Return success response with data
-    return back()->with([
-        'success' => 'Travel allowance and document uploaded successfully',
-        'us' => $us,
-        'travel_allowance' => $TravelAllowance,
-        'document' => $abc
-    ]);
-}
 
 
-    
 
 
     public function update(Request $request, $id)
@@ -158,7 +158,7 @@ class TravelAllowanceController
 
         return Inertia::render('Allowances/TravelRequest', [
             'travelAllowances' => $travelAllowances,
-            'us' =>$us,
+            'us' => $us,
         ]);
     }
 
