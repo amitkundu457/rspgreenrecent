@@ -237,7 +237,7 @@ class SalaryController extends Controller
             ->select('users.name', 'users.id', 'employees.basic_salary')
             ->get();
 
-        // Fetch combined data for employees, attendance, leave, holidays, and loans
+        // Fetch combined data for employees, attendance, leave, holidays, loans, and advance loans
         $combinedData = DB::table('branches')
             ->join('holidays', 'branches.id', '=', 'holidays.id')
             ->join('employees', 'employees.branch_id', '=', 'branches.id')
@@ -248,7 +248,8 @@ class SalaryController extends Controller
             ->leftJoin('loans', function ($join) {
                 $join->on('loans.user_id', '=', 'users.id')
                     ->where('loans.status', '=', 'approved');
-            }) // Loan join
+            })
+            ->leftJoin('advanceloan', 'advanceloan.user_id', '=', 'users.id')
             ->select(
                 'holidays.name as holiday_name',
                 'holidays.start_date as holiday_start_date',
@@ -263,10 +264,11 @@ class SalaryController extends Controller
                 DB::raw('COALESCE(SUM(TIME_TO_SEC(attendances.total_time)) / 3600, 0) as total_time'),
                 DB::raw('COUNT(attendances.id) as total_working_days'),
                 DB::raw('SUM(CASE WHEN in_time > "10:00:00" THEN 1 ELSE 0 END) as late_days'),
-                DB::raw('SUM(loans.amount) as loan_amount'), // Sum all loans for each employee
+                DB::raw('SUM(loans.amount) as loan_amount'),
                 DB::raw('MAX(loans.repayment_terms) as repayment_terms'),
                 DB::raw('MAX(loans.duration_months) as duration_months'),
-                DB::raw('MAX(loans.monthly_installment) as monthly_installment')
+                DB::raw('MAX(loans.monthly_installment) as monthly_installment'),
+                DB::raw('SUM(advanceloan.loan_amount) as advance_loan_amount')
             )
             ->groupBy(
                 'employees.id',
@@ -277,6 +279,7 @@ class SalaryController extends Controller
                 'leave_management.id'
             )
             ->get();
+        // dd($combinedData);
 
         // Process the combined data to calculate deductions
         $combinedData = $combinedData->map(function ($item) {
@@ -304,12 +307,16 @@ class SalaryController extends Controller
                 $loanDeduction = $item->monthly_installment;
             }
 
+            // Handle advance loan deduction
+            $advanceLoanDeduction = $item->advance_loan_amount ?? 0;
+
             // Add calculated fields
             $item->adjusted_leave_days = $adjustedLeaveDays;
             $item->leave_deduction_amount = round($leaveDeductionAmount, 2);
             $item->late_deduction_days = $lateDeductionDays;
             $item->late_deduction_amount = round($lateDeductionAmount, 2);
             $item->loan_deduction = round($loanDeduction, 2);
+            $item->advance_loan_deduction = round($advanceLoanDeduction, 2);
 
             return $item;
         });
@@ -331,9 +338,10 @@ class SalaryController extends Controller
             $leaveDeduction = $employeeData->leave_deduction_amount ?? 0;
             $lateDeduction = $employeeData->late_deduction_amount ?? 0;
             $loanDeduction = $employeeData->loan_deduction ?? 0;
+            $advanceLoanDeduction = $employeeData->advance_loan_deduction ?? 0;
 
             // Update the total salary after deductions
-            $updatedSalary = $basicSalary - $leaveDeduction - $lateDeduction - $loanDeduction;
+            $updatedSalary = $basicSalary - $leaveDeduction - $lateDeduction - $loanDeduction - $advanceLoanDeduction;
 
             // Save updated salary in the database
             $sal->total_amount = max(0, $updatedSalary);
