@@ -207,7 +207,7 @@ const Nav = ({ user_type, usrrr }) => {
                                 perm: "view_timsheet",
                                 hide: !(
                                     props.auth.user.roles[0]?.name === "admin"
-                                ), // Will hide unless the role is "admin"
+                                ), 
                             },
 
                             {

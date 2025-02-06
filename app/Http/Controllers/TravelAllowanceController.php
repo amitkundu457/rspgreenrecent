@@ -120,7 +120,7 @@ class TravelAllowanceController
             ];
         });
 
-        dd($travelAllowances);
+        // dd($travelAllowances);
 
         return Inertia::render('Allowances/TravelRequest', [
             'travelAllowances' => $travelAllowances,

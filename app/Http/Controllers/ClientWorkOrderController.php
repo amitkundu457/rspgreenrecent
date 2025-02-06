@@ -33,6 +33,7 @@ class ClientWorkOrderController extends Controller
             'document' => 'nullable', // Only document file validation
         ]);
 
+
         // Store the document if provided
         if ($request->hasFile('document')) {
             $validated['document'] = $request->file('document')->store('work_order_documents', 'public');
