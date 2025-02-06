@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -21,9 +20,21 @@ class TravelAllowance extends Model
         'status',
     ];
 
-    // Define relationship with DocumentByEmployee
+    // Relationship with DocumentByEmployee
     public function documentsByEmployee()
     {
         return $this->hasMany(DocumentByEmployee::class, 'travel_allowance_id');
+    }
+
+    // Relationship with Employee
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
+    // Relationship with DestinationAmount (Assuming there is a destination_amounts table)
+    public function destinationAmount()
+    {
+        return $this->hasOne(DestinationAmount::class, 'destination_id', 'destination');
     }
 }
