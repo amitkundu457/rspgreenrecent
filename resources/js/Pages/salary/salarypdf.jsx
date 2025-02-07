@@ -49,19 +49,16 @@ const SalaryPrint = React.forwardRef(({ combinedData }, ref) => {
                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 }}
             >
-                {combinedData.map((data, index) => {
-                    const basicSalary = Number(data.basic_salary) || 0;
-                    const allowance = basicSalary * 0.2;
-                    const lateDeduction =
-                        Number(data.late_deduction_amount) || 0;
-                        const advanceLoanDeduction = Number(data.advance_loan_deduction) || 0;
-                    const leaveDeduction =
-                        Number(data.leave_deduction_amount) || 0;
-                    const loanDeduction = Number(data.loan_amount) || 0; // Add loan deduction
-                    const totalDeductions =
-                        lateDeduction + leaveDeduction + loanDeduction+advanceLoanDeduction;
-                    const totalEarnings = basicSalary ;
-                    const netSalary =  basicSalary - totalDeductions;
+               {combinedData.map((data, index) => {
+    const basicSalary = Number(data.basic_salary) || 0;
+    const lateDeduction = Number(data.late_deduction_amount) || 0;
+    const advanceLoanDeduction = Number(data.advance_loan_deduction) || 0;
+    const leaveDeduction = Number(data.leave_deduction_amount) || 0;
+    const loanDeduction = Number(data.loan_amount) || 0;
+
+    const totalDeductions = lateDeduction + leaveDeduction + loanDeduction + advanceLoanDeduction;
+    const totalEarnings = basicSalary; // Define total earnings correctly
+    const netSalary = totalEarnings - totalDeductions; // Correct calculation
                     
 
                     return (
