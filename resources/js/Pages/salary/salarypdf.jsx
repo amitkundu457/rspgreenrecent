@@ -54,13 +54,15 @@ const SalaryPrint = React.forwardRef(({ combinedData }, ref) => {
                     const allowance = basicSalary * 0.2;
                     const lateDeduction =
                         Number(data.late_deduction_amount) || 0;
+                        const advanceLoanDeduction = Number(data.advance_loan_deduction) || 0;
                     const leaveDeduction =
                         Number(data.leave_deduction_amount) || 0;
                     const loanDeduction = Number(data.loan_amount) || 0; // Add loan deduction
                     const totalDeductions =
-                        lateDeduction + leaveDeduction + loanDeduction;
-                    const totalEarnings = basicSalary + allowance;
-                    const netSalary = totalEarnings - totalDeductions;
+                        lateDeduction + leaveDeduction + loanDeduction+advanceLoanDeduction;
+                    const totalEarnings = basicSalary ;
+                    const netSalary =  basicSalary - totalDeductions;
+                    
 
                     return (
                         <div key={index}>
@@ -203,23 +205,23 @@ const SalaryPrint = React.forwardRef(({ combinedData }, ref) => {
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td
+                                        {/* <td
                                             style={{
                                                 border: "1px solid #ddd",
                                                 padding: "8px",
                                             }}
                                         >
                                             Allowance
-                                        </td>
-                                        <td
+                                        </td> */}
+                                        {/* <td
                                             style={{
                                                 border: "1px solid #ddd",
                                                 padding: "8px",
                                             }}
                                         >
                                             20% of Basic
-                                        </td>
-                                        <td
+                                        </td> */}
+                                        {/* <td
                                             style={{
                                                 border: "1px solid #ddd",
                                                 padding: "8px",
@@ -227,7 +229,7 @@ const SalaryPrint = React.forwardRef(({ combinedData }, ref) => {
                                             }}
                                         >
                                             {allowance.toFixed(2)}
-                                        </td>
+                                        </td> */}
                                     </tr>
                                 </tbody>
                             </table>
@@ -335,6 +337,33 @@ const SalaryPrint = React.forwardRef(({ combinedData }, ref) => {
                                             {leaveDeduction.toFixed(2)}
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <td
+                                            style={{
+                                                border: "1px solid #ddd",
+                                                padding: "8px",
+                                            }}
+                                        >
+                                            Advance Salary Deduction
+                                        </td>
+                                        <td
+                                            style={{
+                                                border: "1px solid #ddd",
+                                                padding: "8px",
+                                            }}
+                                        >
+                                             Advance Salary
+                                        </td>
+                                        <td
+                                            style={{
+                                                border: "1px solid #ddd",
+                                                padding: "8px",
+                                                textAlign: "right",
+                                            }}
+                                        >
+                                            {advanceLoanDeduction.toFixed(2)}
+                                        </td>
+                                    </tr>
                                     {/* Loan Deduction */}
                                     <tr>
                                         <td
@@ -364,6 +393,7 @@ const SalaryPrint = React.forwardRef(({ combinedData }, ref) => {
                                         </td>
                                     </tr>
                                 </tbody>
+                                
                             </table>
 
                             <h3

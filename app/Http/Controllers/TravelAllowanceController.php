@@ -6,14 +6,15 @@ use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use App\Models\EmployeeExpense;
 use App\Models\TravelAllowance;
-use App\Models\DestinationAmount;
 
+use App\Models\DestinationAmount;
 use App\Models\DocumentByEmployee;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 
 class TravelAllowanceController
@@ -35,73 +36,80 @@ class TravelAllowanceController
     }
     public function store(Request $request)
     {
-        // Debug: Check if Auth is working
+        $allEmployees = Employee::join('users', 'employees.user_id', '=', 'users.id')
+        ->join('designations', 'employees.designation_id', '=', 'designations.id')
+        ->select('employees.*', 'users.name as employee_name', 'designations.name as designation_name')
+        ->get();
+        // dd($request->all());
         $user = Auth::user();
-        // dd($request->all(), $user); // Check if Auth::user() is returning a valid user object
-
-        // Proceed with the rest of the code if user is valid
         if (!$user) {
             return back()->with('error', 'User not authenticated');
         }
-
-        $us = $user->id; // Get authenticated user's ID
-
-        // Validate incoming data
-        $request->validate([
-            'employee_id' => 'nullable',  // make employee_id optional
-            'amount' => 'required|numeric',
-            'destination' => 'required|string',
-            'travel_date' => 'required|date',
-            'reason' => 'required|string',
-            'payment_by' => 'nullable|string',
-            'extra_payment' => 'nullable|numeric',
-            'status' => 'nullable|string',
-            'document_name' => 'nullable|string',
-            'document_path' => 'required|file|mimes:pdf,jpg,png,docx|max:10240',
-        ]);
-
-        // Assign employee_id using ternary operator
-        $employee_id = $request->employee_id ?: $us;
-
-        // Create TravelAllowance record
-        $TravelAllowance = TravelAllowance::create([
-            'employee_id' => $employee_id,
-            'amount' => $request->amount,
-            'destination' => $request->destination,
-            'travel_date' => $request->travel_date,
-            'reason' => $request->reason,
-            'payment_by' => $request->payment_by,
-            'extra_payment' => $request->extra_payment,
-            'status' => $request->status,
-        ]);
-
-        // Create DestinationAmount record
-        $cs = DestinationAmount::create([
-            'amount' => $request->amount,
-            'destination' => $request->destination,
-        ]);
-
-        // Handle file upload if present
-        if ($request->hasFile('document_path')) {
-            $filePath = $request->file('document_path')->store('documents', 'public');
+    
+        $employee_id = $request->employee_id ?: $user->id;
+    
+        if ($request->destination && $request->travel_date) {
+            // ✅ Travel Allowance Logic
+            $travelAllowance = TravelAllowance::create([
+                'employee_id' => $employee_id,
+                'amount' => $request->amount,
+                'destination' => $request->destination,
+                'travel_date' => $request->travel_date,
+                'reason' => $request->reason,
+                'payment_by' => $request->payment_by,
+                'extra_payment' => $request->extra_payment,
+                'status' => $request->status,
+            ]);
+    
+            // ✅ Store DestinationAmount
+            $destinationAmount = DestinationAmount::create([
+                'amount' => $request->amount,
+                'destination' => $request->destination,
+                'destination_id' => $travelAllowance->id,
+            ]);
+    
+            // ✅ Handle Travel Allowance Document Upload
+            $filePath = null;
+            if ($request->hasFile('document_path')) {
+                $filePath = $request->file('document_path')->store('documents', 'public');
+            }
+    
+            // ✅ Store DocumentByEmployee
+            $document = DocumentByEmployee::create([
+                'travel_allowance_id' => $travelAllowance->id,
+                'employee_id' => $travelAllowance->employee_id,
+                'document_name' => $request->document_name,
+                'document_path' => $filePath,
+            ]);
+    
+            return back()->with([
+                'success' => 'Travel allowance and document uploaded successfully',
+                'travel_allowance' => $travelAllowance,
+                'destination_amount' => $destinationAmount,
+                'document' => $document,
+            ]);
+        } else {
+            // ✅ Employee Expense Logic
+            $photoPath = null;
+            if ($request->hasFile('expense_photo')) {
+                $photoPath = $request->file('expense_photo')->store('expense_photos', 'public');
+            }
+    
+            $expense = EmployeeExpense::create([
+                'amount' => $request->amount,
+                'reason' => $request->reason,
+            ]);
+    
+            return back()->with([
+                'success' => 'Employee travel expense stored successfully',
+                'expense' => $expense,
+            ]);
         }
-
-        // Create DocumentByEmployee record
-        $abc = DocumentByEmployee::create([
-            'travel_allowance_id' => $TravelAllowance->id,
-            'employee_id' => $TravelAllowance->employee_id,
-            'document_name' => $request->document_name,
-            'document_path' => $filePath ?? null,
-        ]);
-
-        // Return success response with data
-        return back()->with([
-            'success' => 'Travel allowance and document uploaded successfully',
-            'us' => $us,
-            'travel_allowance' => $TravelAllowance,
-            'document' => $abc
-        ]);
     }
+    
+    
+    
+    
 
 
 

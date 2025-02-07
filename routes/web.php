@@ -427,6 +427,7 @@ Route::delete('/travel-allowances/{id}', [TravelAllowanceController::class, 'des
 Route::get('/travelreq', [TravelAllowanceController::class, 'show'])->name('travel-allowances.show');
 Route::get('/view-all-document/{id}', [TravelAllowanceController::class, 'showdoc'])->name('travel-allowances.showdoc');
 Route::put('/travel-allowances/{id}/status', [TravelAllowanceController::class, 'updateStatus']);
+Route::post('/store-expense', [TravelAllowanceController::class, 'store']);
 
 
 

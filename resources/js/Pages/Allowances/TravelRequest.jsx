@@ -231,12 +231,12 @@ export default function TravelAllowances({ user, user_type, notif }) {
                                     <th className="border px-4 py-2">
                                         Employee Id
                                     </th>
-                                    <th className="border px-4 py-2">
+                                    {/* <th className="border px-4 py-2">
                                         Employee Name
-                                    </th>
-                                    <th className="border px-4 py-2">
+                                    </th> */}
+                                    {/* <th className="border px-4 py-2">
                                         Advance Payment
-                                    </th>
+                                    </th> */}
                                     <th className="border px-4 py-2">Date</th>
                                     <th className="border px-4 py-2">Reason</th>
                                     <th className="border px-4 py-2">
@@ -254,12 +254,12 @@ export default function TravelAllowances({ user, user_type, notif }) {
                                         <td className="border px-4 py-2">
                                             EMP0000{ta.id}
                                         </td>
-                                        <td className="border px-4 py-2">
+                                        {/* <td className="border px-4 py-2">
                                             {ta.employee_name}
-                                        </td>
-                                        <td className="border px-4 py-2">
+                                        </td> */}
+                                        {/* <td className="border px-4 py-2">
                                             Rs {ta.amount}
-                                        </td>
+                                        </td> */}
                                         <td className="border px-4 py-2">
                                             {ta.travel_date}
                                         </td>

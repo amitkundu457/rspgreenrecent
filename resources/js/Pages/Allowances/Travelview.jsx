@@ -3,7 +3,6 @@ import Nav from "@/Layouts/Nav";
 import React from "react";
 
 const TravelView = ({ travelAllowance, user, notif, user_type }) => {
-    // Check if no travel allowance is found
     if (!travelAllowance) {
         return (
             <p className="text-center text-red-500">
@@ -11,6 +10,13 @@ const TravelView = ({ travelAllowance, user, notif, user_type }) => {
             </p>
         );
     }
+
+    // Fixed expenses set to ₹50
+    const expenses = 50;
+    const advanceAmount = travelAllowance.amount;
+
+    // Calculate surplus: Advance - Expenses
+    const surplus = advanceAmount - expenses;
 
     return (
         <div className="w-[85.2%] absolute right-0 overflow-hidden p-6">
@@ -24,72 +30,60 @@ const TravelView = ({ travelAllowance, user, notif, user_type }) => {
                 </h2>
 
                 <div className="grid grid-cols-2 gap-4">
-                    {/* <p>
-                        <strong>Employee Name:</strong>{" "}
-                        {travelAllowance.employee_name}
-                    </p> */}
                     <p>
-                        <strong>Advance:</strong> ₹{travelAllowance.amount}
+                        <strong>Advance:</strong> ₹{advanceAmount}
                     </p>
                     <p>
-                        <strong>Destination:</strong>{" "}
-                        {travelAllowance.destination}
+                        <strong>Destination:</strong> {travelAllowance.destination}
                     </p>
                     <p>
-                        <strong>Travel Date:</strong>{" "}
-                        {travelAllowance.travel_date}
+                        <strong>Travel Date:</strong> {travelAllowance.travel_date}
                     </p>
                     <p>
-                        <strong>Reason:</strong> {travelAllowance.reason}
+                        <strong>Payment By:</strong> {travelAllowance.payment_by}
                     </p>
                     <p>
-                        <strong>Payment By:</strong>{" "}
-                        {travelAllowance.payment_by}
+                        <strong>Status:</strong> {travelAllowance.status ?? "Pending"}
                     </p>
                     <p>
-                        <strong>Extra Payment:</strong> ₹
-                        {travelAllowance.extra_payment}
+                        <strong>Expenses:</strong> ₹{expenses}
                     </p>
                     <p>
-                        <strong>Status:</strong>{" "}
-                        {travelAllowance.status ?? "Pending"}
+                        <strong>Surplus:</strong>{" "}
+                        <span className={surplus < 0 ? "text-red-500" : "text-green-500"}>
+                            ₹{surplus}
+                        </span>
+                    </p>
+                    <p>
+                        <strong>Reason:</strong> aa
                     </p>
                 </div>
 
                 {/* Documents Display */}
-                {travelAllowance.documents &&
-                    travelAllowance.documents.length > 0 && (
-                        <div className="mt-4">
-                            <h3 className="text-lg font-semibold">
-                                Travel Documents:
-                            </h3>
-                            <div className="grid grid-cols-3 gap-4">
-                                {travelAllowance.documents.map(
-                                    (document, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex flex-col items-center"
-                                        >
-                                            <img
-                                                src={`/storage/${document.document_path}`}
-                                                alt={`Travel Document ${
-                                                    index + 1
-                                                }`}
-                                                className="mt-2 w-48 h-48 object-cover rounded-md border"
-                                            />
-                                            <p className="mt-2 text-center text-sm">
-                                                {document.document_name ||
-                                                    `Document ${index + 1}`}
-                                            </p>
-                                        </div>
-                                    )
-                                )}
-                            </div>
+                {travelAllowance.documents?.length > 0 && (
+                    <div className="mt-4">
+                        <h3 className="text-lg font-semibold">Travel Documents:</h3>
+                        <div className="grid grid-cols-3 gap-4">
+                            {travelAllowance.documents.map((document, index) => (
+                                <div key={index} className="flex flex-col items-center">
+                                    <img
+                                        src={`/storage/${document.document_path}`}
+                                        alt={`Travel Document ${index + 1}`}
+                                        className="mt-2 w-48 h-48 object-cover rounded-md border"
+                                    />
+                                    <p className="mt-2 text-center text-sm">
+                                        {document.document_name || `Document ${index + 1}`}
+                                    </p>
+                                </div>
+                            ))}
                         </div>
-                    )}
+                    </div>
+                )}
             </div>
         </div>
     );
 };
 
 export default TravelView;
+
+

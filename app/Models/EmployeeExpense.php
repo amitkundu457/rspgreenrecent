@@ -5,20 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LeaveManagement extends Model
+class EmployeeExpense extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'employee_id',
-        'leave_type_id',
-        'sdate',
-        'edate',
+        'amount',
         'reason',
-        'remark',
-        'hours',
-        'status',
-        'is_unpaid',
-        'documents',
-        'admin_reject'
+        'photo_path',
     ];
+
+    // Relationship with User Model
+    public function employee()
+    {
+        return $this->belongsTo(User::class, 'employee_id');
+    }
 }
