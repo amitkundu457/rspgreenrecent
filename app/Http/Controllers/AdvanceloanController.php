@@ -29,17 +29,25 @@ class AdvanceloanController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'loan_amount' => 'required|numeric',
-            'remarks' => 'nullable|string',
-        ]);
+{
+    // dd($request->all());
+    // Create a new Advanceloan record with data from the request
+    
+    Advanceloan::create([
+        'borrower_name' => $request->borrower_name,
+        'loan_amount' => $request->loan_amount,
+        // 'loan_date' => $request->loan_date,
+        // 'due_date' => $request->due_date,
+        'remarks' => $request->remarks,
+        'payable_amount' => $request->payable_amount,
+        'remaining_amount' => $request->remaining_amount,
+        'user_id' => $request->id,
+    ]);
+    
+    // Redirect back with a success message
+    return back()->with('success', 'Advance Loan created successfully.');
+}
 
-        Advanceloan::create($validated);
-
-        // Redirect back with success message
-        return back()->with('success', 'Advance Loan created successfully.');
-    }
 
     /**
      * Display the specified resource.

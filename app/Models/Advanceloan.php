@@ -18,8 +18,8 @@ class Advanceloan extends Model
         'loan_date',
         'due_date',
         'remarks',
-        'Payable_Amount',
-        'Remaining_Amount',
+        'remaining_amount',
+        'payable_amount',
         'user_id'
     ];
 }

@@ -190,22 +190,22 @@ const SalaryPrint = React.forwardRef(({ combinedData }, ref) => {
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td
+                                        {/* <td
                                             style={{
                                                 border: "1px solid #ddd",
                                                 padding: "8px",
                                             }}
                                         >
                                             Allowance
-                                        </td>
-                                        <td
+                                        </td> */}
+                                        {/* <td
                                             style={{
                                                 border: "1px solid #ddd",
                                                 padding: "8px",
                                             }}
                                         >
                                             20% of Basic
-                                        </td>
+                                        </td> */}
                                         <td
                                             style={{
                                                 border: "1px solid #ddd",
@@ -300,6 +300,18 @@ const SalaryPrint = React.forwardRef(({ combinedData }, ref) => {
                                             {lateDeduction.toFixed(2)}
                                         </td>
                                     </tr>
+                                    <tr>
+    <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+        Advance Loan Deduction
+    </td>
+    <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+        Loan Payment
+    </td>
+    <td style={{ border: "1px solid #ddd", padding: "8px", textAlign: "right" }}>
+        {advanceLoanDeduction.toFixed(2)}
+    </td>
+</tr>
+
                                     <tr>
                                         <td
                                             style={{

@@ -5,48 +5,28 @@ import Header from "@/Layouts/Header";
 import Nav from "@/Layouts/Nav";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import {
-    FaCheck,
-    FaTimes,
-    FaSpinner,
-    FaEdit,
-    FaTrashAlt,
-} from "react-icons/fa";
+import { FaSpinner } from "react-icons/fa";
 
-const LoanManagement = ({
-    user,
-    user_type,
-    notif,
-    loans,
-    us,
-    advanceloans,
-    employees,
-}) => {
+const LoanManagement = ({ user, user_type, notif, us, employees ,advanceloans,}) => {
     const [loanData, setLoanData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [editLoan, setEditLoan] = useState(null); // For edit functionality
-    console.log("aaa", employees);
 
-    const { data, setData, post, put, reset } = useForm({
+    const { data, setData, post, reset } = useForm({
+        user_id: "",
         borrower_name: "",
         loan_amount: "",
         loan_date: null,
         due_date: null,
         remarks: "",
-        Payable_Amount: "",
-        Remaining_Amount: "",
+        payable_amount: "",
+        remaining_amount: "",
     });
+    console.log("Employees Data:", employees);
+
 
     const formatDateForDatabase = (date) => {
         if (!date) return null;
-        const d = new Date(date);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, "0");
-        const day = String(d.getDate()).padStart(2, "0");
-        const hours = String(d.getHours()).padStart(2, "0");
-        const minutes = String(d.getMinutes()).padStart(2, "0");
-        const seconds = String(d.getSeconds()).padStart(2, "0");
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        return date.toISOString().split("T")[0];
     };
 
     const fetchLoans = async () => {
@@ -63,17 +43,14 @@ const LoanManagement = ({
     };
 
     const handleSubmit = () => {
-        const formattedLoanDate = formatDateForDatabase(data.loan_date);
-        const formattedDueDate = formatDateForDatabase(data.due_date);
-
         post("/advanceloan", {
             data: {
                 ...data,
-                loan_date: formattedLoanDate,
-                due_date: formattedDueDate,
+                loan_date: formatDateForDatabase(data.loan_date),
+                due_date: formatDateForDatabase(data.due_date),
             },
             onSuccess: () => {
-                alert("Advance salary added successfully!");
+                alert("Advance loan added successfully!");
                 fetchLoans();
                 reset();
             },
@@ -82,54 +59,6 @@ const LoanManagement = ({
                 alert("An error occurred while adding the loan.");
             },
         });
-    };
-
-    const handleEdit = (loan) => {
-        setEditLoan(loan);
-        setData({
-            borrower_name: loan.borrower_name,
-            loan_amount: loan.loan_amount,
-            loan_date: new Date(loan.loan_date),
-            remarks: loan.remarks,
-            Payable_Amount: loan.payable_amount,
-            Remaining_Amount: loan.remaining_amount,
-        });
-    };
-
-    const handleUpdate = () => {
-        const formattedLoanDate = formatDateForDatabase(data.loan_date);
-        const formattedDueDate = formatDateForDatabase(data.due_date);
-
-        put(`/advanceloan/${editLoan.id}`, {
-            data: {
-                ...data,
-                loan_date: formattedLoanDate,
-                due_date: formattedDueDate,
-            },
-            onSuccess: () => {
-                alert("Loan updated successfully!");
-                fetchLoans();
-                setEditLoan(null);
-                reset();
-            },
-            onError: (errors) => {
-                console.error(errors);
-                alert("An error occurred while updating the loan.");
-            },
-        });
-    };
-
-    const handleDelete = async (loanId) => {
-        if (window.confirm("Are you sure you want to delete this loan?")) {
-            try {
-                await axios.delete(`/advanceloan/${loanId}`);
-                alert("Loan deleted successfully!");
-                fetchLoans();
-            } catch (error) {
-                console.error("Error deleting loan:", error);
-                alert("An error occurred while deleting the loan.");
-            }
-        }
     };
 
     useEffect(() => {
@@ -141,99 +70,76 @@ const LoanManagement = ({
             <Header user={user} notif={notif} />
             <Nav user_type={user_type} />
             <div className="container mx-auto p-6 bg-gray-50 rounded-lg shadow-xl max-w-5xl">
-                <h1 className="text-3xl font-bold text-center text-blue-800 mb-6">
-                    Advance Salary
-                </h1>
-
+                <h1 className="text-3xl font-bold text-center text-blue-800 mb-6">Advance Loan</h1>
                 {us !== 1 && (
                     <div className="bg-white p-6 rounded-lg shadow-md space-y-6">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            {/* Select Employee */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Select Employee
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700">Select Employee</label>
                                 <select
-                                    value={data.employee_id}
-                                    onChange={(e) => {
-                                        const selectedEmployee = employees.find(
-                                            (emp) =>
-                                                emp.employee_id ===
-                                                e.target.value
-                                        );
-                                        if (selectedEmployee) {
-                                            setData(
-                                                "employee_id",
-                                                selectedEmployee.employee_id
-                                            );
-                                            setData(
-                                                "borrower_name",
-                                                selectedEmployee.name
-                                            );
-                                            setData(
-                                                "loan_amount",
-                                                selectedEmployee.basic_salary
-                                            );
-                                        }
-                                    }}
-                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">Select an Employee</option>
-                                    {employees.map((employee) => (
-                                        <option
-                                            key={employee.id}
-                                            value={employee.employee_id}
-                                        >
-                                            {employee.name} -{" "}
-                                            {employee.employee_id}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+    value={data.id || ""}
+    onChange={(e) => {
+        const selectedId = e.target.value; 
+        console.log("Selected ID:", selectedId);
 
-                            {/* Salary Amount */}
+        if (!selectedId) return; // Prevent errors if empty
+
+        const selectedEmployee = employees?.find(
+            emp => emp.id.toString() === selectedId
+        );
+
+        console.log("Selected Employee:", selectedEmployee);
+
+        if (selectedEmployee) {
+            setData(prevData => ({
+                ...prevData,
+                id: selectedEmployee.id, // Store id instead of user_id
+                borrower_name: selectedEmployee.name,
+                loan_amount: selectedEmployee.basic_salary,
+            }));
+        }
+    }}
+    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+>
+    <option value="">Select an Employee</option>
+    {employees?.map((employee) => (
+        <option key={employee.id} value={employee.id}>
+            {employee.name} - {employee.employee_id}
+        </option>
+    ))}
+</select>
+
+                            </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Salary Amount
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700">Loan Amount</label>
                                 <input
                                     type="number"
                                     value={data.loan_amount}
-                                    onChange={(e) =>
-                                        setData("loan_amount", e.target.value)
-                                    }
+                                    onChange={(e) => setData("loan_amount", e.target.value)}
                                     className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
                         </div>
-
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            {/* Payable Amount */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Payable Amount
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700">Payable Amount</label>
                                 <input
                                     type="number"
                                     value={data.payable_amount}
                                     onChange={(e) => {
                                         const payable = Number(e.target.value);
-                                        const salary = Number(data.loan_amount);
-                                        setData("payable_amount", payable);
-                                        setData(
-                                            "remaining_amount",
-                                            salary - payable
-                                        );
+                                        const salary = Number(data.loan_amount) || 0;
+                                        setData({
+                                            ...data,
+                                            payable_amount: payable,
+                                            remaining_amount: salary - payable,
+                                        });
                                     }}
                                     className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
-
-                            {/* Remaining Amount (Read-Only) */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Remaining Amount
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700">Remaining Amount</label>
                                 <input
                                     type="number"
                                     value={data.remaining_amount || 0}
@@ -242,51 +148,47 @@ const LoanManagement = ({
                                 />
                             </div>
                         </div>
-
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            {/* Date */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Payment Date
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700">Loan Date</label>
                                 <DatePicker
                                     selected={data.loan_date}
-                                    onChange={(date) =>
-                                        setData("loan_date", date)
-                                    }
+                                    onChange={(date) => setData("loan_date", date)}
+                                    dateFormat="yyyy-MM-dd"
+                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Due Date</label>
+                                <DatePicker
+                                    selected={data.due_date}
+                                    onChange={(date) => setData("due_date", date)}
                                     dateFormat="yyyy-MM-dd"
                                     className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
                         </div>
-
-                        {/* Remarks */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Remarks
-                            </label>
+                            <label className="block text-sm font-medium text-gray-700">Remarks</label>
                             <textarea
                                 value={data.remarks}
-                                onChange={(e) =>
-                                    setData("remarks", e.target.value)
-                                }
+                                onChange={(e) => setData("remarks", e.target.value)}
                                 className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                                 rows="3"
                             ></textarea>
                         </div>
-
-                        {/* Submit Button */}
                         <button
-                            onClick={editLoan ? handleUpdate : handleSubmit}
+                            onClick={handleSubmit}
                             className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 flex items-center justify-center"
                         >
-                            {loading ? (
-                                <FaSpinner className="animate-spin mr-2" />
-                            ) : null}
-                            {editLoan ? "Update Loan" : "Submit"}
+                            {loading ? <FaSpinner className="animate-spin mr-2" /> : null}
+                            Submit
                         </button>
                     </div>
                 )}
+            
+
+        
 
                 {/* Existing Loans Table */}
                 <div className="mt-8">
@@ -329,7 +231,7 @@ const LoanManagement = ({
                                         </td>
 
                                         <td className="px-6 py-4 text-sm text-gray-700">
-                                            {loan.loan_amount}
+                                            {loan.payable_amount}
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-700">
                                             {loan.remarks}
@@ -339,7 +241,7 @@ const LoanManagement = ({
                                                 onClick={() => handleEdit(loan)}
                                                 className="text-blue-500 mr-2"
                                             >
-                                                <FaEdit />
+                                                {/* <FaEdit /> */}
                                             </button>
                                             <button
                                                 onClick={() =>
@@ -347,7 +249,7 @@ const LoanManagement = ({
                                                 }
                                                 className="text-red-500"
                                             >
-                                                <FaTrashAlt />
+                                                {/* <FaTrashAlt /> */}
                                             </button>
                                         </td>
                                     </tr>
