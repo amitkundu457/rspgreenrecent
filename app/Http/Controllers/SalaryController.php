@@ -117,7 +117,8 @@ class SalaryController extends Controller
                 'branches.id',
                 'locations_holiday.id',
                 'users.id',
-                'leave_management.id'
+                'leave_management.id',
+                `holidays` . `name holiday_name`,
             )
             ->get();
         // dd($combinedData);
@@ -281,7 +282,8 @@ class SalaryController extends Controller
                 'branches.id',
                 'locations_holiday.id',
                 'users.id',
-                'leave_management.id'
+                'leave_management.id',
+                `holidays` . `name holiday_name`,
             )
             ->get();
         // dd($combinedData);

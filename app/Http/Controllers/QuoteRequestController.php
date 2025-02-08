@@ -33,10 +33,9 @@ class QuoteRequestController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
         Log::info('Received Quote Request:', $request->all());
 
-        // Convert source to lowercase before validation
+        // Convert source to lowercase
         $request->merge(['source' => strtolower($request->input('source'))]);
 
         try {
@@ -68,13 +67,14 @@ class QuoteRequestController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation Error: ' . json_encode($e->errors()));
 
-            return redirect()->back()->withErrors($e->errors());
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             Log::error('Error storing quote request: ' . $e->getMessage());
 
             return redirect()->back()->with('error', 'Something went wrong. Please try again.');
         }
     }
+
 
     /**
      * Display the specified resource.

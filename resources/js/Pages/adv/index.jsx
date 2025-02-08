@@ -7,7 +7,14 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaSpinner } from "react-icons/fa";
 
-const LoanManagement = ({ user, user_type, notif, us, employees ,advanceloans,}) => {
+const LoanManagement = ({
+    user,
+    user_type,
+    notif,
+    us,
+    employees,
+    advanceloans,
+}) => {
     const [loanData, setLoanData] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -22,7 +29,6 @@ const LoanManagement = ({ user, user_type, notif, us, employees ,advanceloans,})
         remaining_amount: "",
     });
     console.log("Employees Data:", employees);
-
 
     const formatDateForDatabase = (date) => {
         if (!date) return null;
@@ -70,65 +76,87 @@ const LoanManagement = ({ user, user_type, notif, us, employees ,advanceloans,})
             <Header user={user} notif={notif} />
             <Nav user_type={user_type} />
             <div className="container mx-auto p-6 bg-gray-50 rounded-lg shadow-xl max-w-5xl">
-                <h1 className="text-3xl font-bold text-center text-blue-800 mb-6">Advance Loan</h1>
+                <h1 className="text-3xl font-bold text-center text-blue-800 mb-6">
+                    Advance Loan
+                </h1>
                 {us !== 1 && (
                     <div className="bg-white p-6 rounded-lg shadow-md space-y-6">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Select Employee</label>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Select Employee
+                                </label>
                                 <select
-    value={data.id || ""}
-    onChange={(e) => {
-        const selectedId = e.target.value; 
-        console.log("Selected ID:", selectedId);
+                                    value={data.id || ""}
+                                    onChange={(e) => {
+                                        const selectedId = e.target.value;
+                                        console.log("Selected ID:", selectedId);
 
-        if (!selectedId) return; // Prevent errors if empty
+                                        if (!selectedId) return; // Prevent errors if empty
 
-        const selectedEmployee = employees?.find(
-            emp => emp.id.toString() === selectedId
-        );
+                                        const selectedEmployee =
+                                            employees?.find(
+                                                (emp) =>
+                                                    emp.id.toString() ===
+                                                    selectedId
+                                            );
 
-        console.log("Selected Employee:", selectedEmployee);
+                                        console.log(
+                                            "Selected Employee:",
+                                            selectedEmployee
+                                        );
 
-        if (selectedEmployee) {
-            setData(prevData => ({
-                ...prevData,
-                id: selectedEmployee.id, // Store id instead of user_id
-                borrower_name: selectedEmployee.name,
-                loan_amount: selectedEmployee.basic_salary,
-            }));
-        }
-    }}
-    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
->
-    <option value="">Select an Employee</option>
-    {employees?.map((employee) => (
-        <option key={employee.id} value={employee.id}>
-            {employee.name} - {employee.employee_id}
-        </option>
-    ))}
-</select>
-
+                                        if (selectedEmployee) {
+                                            setData((prevData) => ({
+                                                ...prevData,
+                                                id: selectedEmployee.id, // Store id instead of user_id
+                                                borrower_name:
+                                                    selectedEmployee.name,
+                                                loan_amount:
+                                                    selectedEmployee.basic_salary,
+                                            }));
+                                        }
+                                    }}
+                                    className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">Select an Employee</option>
+                                    {employees?.map((employee) => (
+                                        <option
+                                            key={employee.id}
+                                            value={employee.id}
+                                        >
+                                            {employee.name} -{" "}
+                                            {employee.employee_id}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Loan Amount</label>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Loan Amount
+                                </label>
                                 <input
                                     type="number"
                                     value={data.loan_amount}
-                                    onChange={(e) => setData("loan_amount", e.target.value)}
+                                    onChange={(e) =>
+                                        setData("loan_amount", e.target.value)
+                                    }
                                     className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Payable Amount</label>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Payable Amount
+                                </label>
                                 <input
                                     type="number"
                                     value={data.payable_amount}
                                     onChange={(e) => {
                                         const payable = Number(e.target.value);
-                                        const salary = Number(data.loan_amount) || 0;
+                                        const salary =
+                                            Number(data.loan_amount) || 0;
                                         setData({
                                             ...data,
                                             payable_amount: payable,
@@ -139,7 +167,9 @@ const LoanManagement = ({ user, user_type, notif, us, employees ,advanceloans,})
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Remaining Amount</label>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Remaining Amount
+                                </label>
                                 <input
                                     type="number"
                                     value={data.remaining_amount || 0}
@@ -150,29 +180,41 @@ const LoanManagement = ({ user, user_type, notif, us, employees ,advanceloans,})
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Loan Date</label>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Loan Date
+                                </label>
                                 <DatePicker
                                     selected={data.loan_date}
-                                    onChange={(date) => setData("loan_date", date)}
+                                    onChange={(date) =>
+                                        setData("loan_date", date)
+                                    }
                                     dateFormat="yyyy-MM-dd"
                                     className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Due Date</label>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Due Date
+                                </label>
                                 <DatePicker
                                     selected={data.due_date}
-                                    onChange={(date) => setData("due_date", date)}
+                                    onChange={(date) =>
+                                        setData("due_date", date)
+                                    }
                                     dateFormat="yyyy-MM-dd"
                                     className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Remarks</label>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Remarks
+                            </label>
                             <textarea
                                 value={data.remarks}
-                                onChange={(e) => setData("remarks", e.target.value)}
+                                onChange={(e) =>
+                                    setData("remarks", e.target.value)
+                                }
                                 className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                                 rows="3"
                             ></textarea>
@@ -181,14 +223,13 @@ const LoanManagement = ({ user, user_type, notif, us, employees ,advanceloans,})
                             onClick={handleSubmit}
                             className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 flex items-center justify-center"
                         >
-                            {loading ? <FaSpinner className="animate-spin mr-2" /> : null}
+                            {loading ? (
+                                <FaSpinner className="animate-spin mr-2" />
+                            ) : null}
                             Submit
                         </button>
                     </div>
                 )}
-            
-
-        
 
                 {/* Existing Loans Table */}
                 <div className="mt-8">
@@ -212,9 +253,9 @@ const LoanManagement = ({ user, user_type, notif, us, employees ,advanceloans,})
                                     <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
                                         Remarks
                                     </th>
-                                    <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
+                                    {/* <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase">
                                         Actions
-                                    </th>
+                                    </th> */}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
@@ -236,12 +277,12 @@ const LoanManagement = ({ user, user_type, notif, us, employees ,advanceloans,})
                                         <td className="px-6 py-4 text-sm text-gray-700">
                                             {loan.remarks}
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-700">
+                                        {/* <td className="px-6 py-4 text-sm text-gray-700">
                                             <button
                                                 onClick={() => handleEdit(loan)}
                                                 className="text-blue-500 mr-2"
                                             >
-                                                {/* <FaEdit /> */}
+                                                <FaEdit />
                                             </button>
                                             <button
                                                 onClick={() =>
@@ -249,9 +290,9 @@ const LoanManagement = ({ user, user_type, notif, us, employees ,advanceloans,})
                                                 }
                                                 className="text-red-500"
                                             >
-                                                {/* <FaTrashAlt /> */}
+                                                <FaTrashAlt />
                                             </button>
-                                        </td>
+                                        </td> */}
                                     </tr>
                                 ))}
                             </tbody>

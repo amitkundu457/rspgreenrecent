@@ -405,13 +405,13 @@ const Task = ({
                                             ${selectedProject.estimate_budget}
                                         </span>
                                     </p> */}
-                                    <p className="text-gray-700">
+                                    {/* <p className="text-gray-700">
                                         <strong>Estimate Time:</strong>{" "}
                                         <span className="font-semibold">
                                             {selectedProject.estimate_time}{" "}
                                             hours
                                         </span>
-                                    </p>
+                                    </p> */}
                                     <p className="text-gray-700">
                                         <strong>Progress:</strong>{" "}
                                         <span className="font-semibold">
