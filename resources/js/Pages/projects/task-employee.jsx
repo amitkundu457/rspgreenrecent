@@ -19,6 +19,7 @@ const Task = ({
     taskcategory,
     employee,
     projects,
+    userss,
 }) => {
     const [query, setQuery] = useState("");
     const [filteredTasks, setFilteredTasks] = useState([]);
@@ -39,6 +40,8 @@ const Task = ({
         project_id: projects.length > 0 ? projects[0].id : "",
     });
     const { props } = usePage();
+    console.log("abcd", userss);
+    console.log("userss value and type:", userss, typeof userss);
 
     useEffect(() => {
         const allTasks = tasks.flatMap((project) => project.tasks);
@@ -120,6 +123,10 @@ const Task = ({
         { length: totalPages },
         (_, index) => index + 1
     );
+    const selectedProject = projects.find(
+        (project) => project.id === parseInt(data.project_id)
+    );
+    console.log("Selected Project:", selectedProject);
 
     const handleSearch = (event) => {
         setQuery(event.target.value);
@@ -210,7 +217,9 @@ const Task = ({
             );
         }
     };
-
+    // const selectedProject = projects.find(
+    //     (project) => project.id === parseInt(data.project_id)
+    // );
     const normalizedTaskName = data.task_name
         .replace(/\u00A0/g, " ") // Replace non-breaking spaces with regular spaces
         .trim();
@@ -248,166 +257,178 @@ const Task = ({
                     </div>
                 </div>
                 <br />
-                <table className="w-full border border-collapse border-gray-200 table-auto">
-                    <thead className="bg-[#0A1B3F] text-white">
-                        <tr>
-                            <th className="px-4 py-2 border border-gray-300">
-                                Project Name
-                            </th>
-                            <th className="px-4 py-2 border border-gray-300">
-                                Rate
-                            </th>
-                            {/* <th className="px-4 py-2 border border-gray-300">Task Name</th> */}
-                            <th className="px-4 py-2 border border-gray-300">
-                                Start Date
-                            </th>
-                            <th className="px-4 py-2 border border-gray-300">
-                                End Date
-                            </th>
-                            {/* {props.auth.user.roles[0]?.name === "admin" && (
-                                <th className="px-4 py-2 border border-gray-300">
-                                    Assigned Users
-                                </th>
-                            )} */}
-                            <th className="px-4 py-2 border border-gray-300">
-                                Estimate Time hours
-                            </th>
-                            <th className="px-4 py-2 border border-gray-300">
-                                Priority
-                            </th>
-                            <th className="px-4 py-2 border border-gray-300">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentTasks.length > 0 ? (
-                            currentTasks.map((task, index) => {
-                                const projectName =
-                                    tasks.find((project) =>
-                                        project.tasks.includes(task)
-                                    )?.title || "Unknown Project";
-                                console.log("Logging task data:", task);
-                                return (
-                                    <tr key={index}>
-                                        {/* <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">{projectName}</td> */}
-                                        <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
-                                            {task.task_name}
-                                        </td>
-                                        <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
-                                            {task.rate}
-                                        </td>
-                                        <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
-                                            {task.sdate}
-                                        </td>
-                                        <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
-                                            {task.edate}
-                                        </td>
-                                        <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
-                                            {task.estimate_hours}
-                                        </td>
+                {userss?.type === 1 ? (
+                    <div>
+                        {/* Form Section */}
+                        <div className="mb-4">
+                            <label className="block mb-2 text-sm font-medium text-gray-900">
+                                Assign Task:
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Enter task name"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                            />
+                        </div>
 
-                                        {/* {props.auth.user.roles[0]?.name ===
-                                            "admin" && (
-                                            <td className="px-4 py-2 border border-gray-300">
-                                                {task.users.map(
-                                                    (user, userIndex) => (
-                                                        <span
-                                                            className="bg-blue-400 text-white text-xs font-medium me-2 px-2.5 py-0.5 rounded-full"
-                                                            key={userIndex}
-                                                        >
-                                                            {user.name} -{" "}
-                                                            {
-                                                                user.pivot
-                                                                    .employee_hours
-                                                            }{" "}
-                                                            hours
-                                                            {userIndex <
-                                                                task.users
-                                                                    .length -
-                                                                    1 && ", "}
-                                                        </span>
-                                                    )
-                                                )}
+                        {/* Table Section */}
+                        <table className="w-full border border-collapse border-gray-200 table-auto">
+                            <thead className="bg-[#0A1B3F] text-white">
+                                <tr>
+                                    <th className="px-4 py-2 border border-gray-300">
+                                        Project Name
+                                    </th>
+                                    <th className="px-4 py-2 border border-gray-300">
+                                        Rate
+                                    </th>
+                                    <th className="px-4 py-2 border border-gray-300">
+                                        Start Date
+                                    </th>
+                                    <th className="px-4 py-2 border border-gray-300">
+                                        End Date
+                                    </th>
+                                    <th className="px-4 py-2 border border-gray-300">
+                                        Estimate Time hours
+                                    </th>
+                                    <th className="px-4 py-2 border border-gray-300">
+                                        Priority
+                                    </th>
+                                    <th className="px-4 py-2 border border-gray-300">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentTasks.length > 0 ? (
+                                    currentTasks.map((task, index) => (
+                                        <tr key={index}>
+                                            <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
+                                                {task.task_name}
                                             </td>
-                                        )} */}
-                                        <td
-                                            className={`px-4 py-2 font-semibold border border-gray-300 text-[0.9rem] ${
-                                                task.priority === 0
-                                                    ? "text-green-600"
+                                            <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
+                                                {task.rate}
+                                            </td>
+                                            <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
+                                                {task.sdate}
+                                            </td>
+                                            <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
+                                                {task.edate}
+                                            </td>
+                                            <td className="px-4 py-2 border border-gray-300 text-[0.9rem]">
+                                                {task.estimate_hours}
+                                            </td>
+                                            <td
+                                                className={`px-4 py-2 font-semibold border border-gray-300 text-[0.9rem] ${
+                                                    task.priority === 0
+                                                        ? "text-green-600"
+                                                        : task.priority === 1
+                                                        ? "text-amber-600"
+                                                        : "text-red-500"
+                                                }`}
+                                            >
+                                                {task.priority === 0
+                                                    ? "Low"
                                                     : task.priority === 1
-                                                    ? "text-amber-600"
-                                                    : "text-red-500"
-                                            }`}
+                                                    ? "Medium"
+                                                    : "High"}
+                                            </td>
+                                            <td className="border border-gray-300">
+                                                <div className="flex px-4 py-2 space-x-2">
+                                                    {props.permission.includes(
+                                                        "edit_task"
+                                                    ) && (
+                                                        <Link
+                                                            href={`/task-assing-all/${task.id}`}
+                                                        >
+                                                            <span className="text-blue-500 cursor-pointer hover:text-blue-700">
+                                                                Assign Employee
+                                                            </span>
+                                                        </Link>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan="7"
+                                            className="p-3 text-center"
                                         >
-                                            {task.priority === 0
-                                                ? "Low"
-                                                : task.priority == 1
-                                                ? "Medium"
-                                                : "High"}
-                                        </td>
-                                        <td className="border border-gray-300">
-                                            <div className="flex px-4 py-2 space-x-2 ">
-                                                {props.permission.includes(
-                                                    "edit_task"
-                                                ) && (
-                                                    <Link
-                                                        href={`/task-assing-all/${task.id}`}
-                                                    >
-                                                        <span className="text-blue-500 cursor-pointer hover:text-blue-700">
-                                                            Assing Employee
-                                                        </span>
-                                                    </Link>
-                                                )}
-
-                                                {/* {props.permission.includes(
-                                                    "edit_task"
-                                                ) && (
-                                                    <Link
-                                                        href={`/task-edit/${task.id}`}
-                                                    >
-                                                        <FaEdit className="text-blue-500 cursor-pointer hover:text-blue-700" />
-                                                    </Link>
-                                                )} */}
-
-                                                {/* {props.permission.includes(
-                                                    "delete_task"
-                                                ) && (
-                                                    <RiDeleteBinLine
-                                                        className="text-red-500 cursor-pointer hover:text-red-700"
-                                                        onClick={(e) =>
-                                                            handleDelete(
-                                                                e,
-                                                                task.id
-                                                            )
-                                                        }
-                                                    />
-                                                )} */}
-                                                {/* {
-                                                    props.permission.includes('edit_task') &&
-                                                    <button
-                                                        onClick={() =>
-                                                            handleCopyClick(projectName)
-                                                        }
-                                                        className="text-green-500 cursor-pointer hover:text-green-700"
-                                                    >
-                                                        Copy
-                                                    </button>
-                                                } */}
-                                            </div>
+                                            No tasks found
                                         </td>
                                     </tr>
-                                );
-                            })
-                        ) : (
-                            <tr>
-                                <td colSpan="4" className="p-3 text-center">
-                                    No tasks found
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="p-6 bg-white shadow-md rounded-lg">
+                        {/* Admin User Info */}
+                        <div className="p-6 bg-white shadow-md rounded-lg">
+                            {/* Assigned User */}
+                            <div className="mb-4 text-lg font-semibold text-gray-800">
+                                🏷 <strong>Assigning Task to:</strong>{" "}
+                                <span className="text-blue-600">
+                                    {userss?.name}
+                                </span>
+                            </div>
+
+                            {/* Project Details */}
+                            {selectedProject ? (
+                                <div className="p-4 border rounded-lg bg-gray-50">
+                                    <h3 className="mb-2 text-xl font-semibold text-gray-800">
+                                        📌 Project Details
+                                    </h3>
+
+                                    <p className="text-gray-700">
+                                        <strong>Project Name:</strong>{" "}
+                                        <span className="font-semibold text-blue-600">
+                                            {selectedProject.title}
+                                        </span>
+                                    </p>
+                                    <p className="text-gray-700">
+                                        <strong>Start Date:</strong>{" "}
+                                        <span className="font-semibold">
+                                            {selectedProject.start_date}
+                                        </span>
+                                    </p>
+                                    <p className="text-gray-700">
+                                        <strong>End Date:</strong>{" "}
+                                        <span className="font-semibold">
+                                            {selectedProject.end_date}
+                                        </span>
+                                    </p>
+                                    {/* <p className="text-gray-700">
+                                        <strong>Estimate Budget:</strong>{" "}
+                                        <span className="font-semibold">
+                                            ${selectedProject.estimate_budget}
+                                        </span>
+                                    </p> */}
+                                    <p className="text-gray-700">
+                                        <strong>Estimate Time:</strong>{" "}
+                                        <span className="font-semibold">
+                                            {selectedProject.estimate_time}{" "}
+                                            hours
+                                        </span>
+                                    </p>
+                                    <p className="text-gray-700">
+                                        <strong>Progress:</strong>{" "}
+                                        <span className="font-semibold">
+                                            {selectedProject.progress}%
+                                        </span>
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="text-red-500">
+                                    ⚠ No project selected
+                                </div>
+                            )}
+                        </div>
+                        {/* Assign Task Input */}
+                    </div>
+                )}
+
                 <div className="flex justify-center mt-4">
                     {pageNumbers.map((number) => (
                         <button

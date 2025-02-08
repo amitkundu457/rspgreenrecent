@@ -272,6 +272,7 @@ class ProjectController extends Controller
     public function taskEmployee()
     {
         $userss = Auth::user();
+        // dd($userss);
         $user = Auth::user()->name;
         if ($userss) {
             // Ensure permissions are assigned and fetched correctly
@@ -304,7 +305,8 @@ class ProjectController extends Controller
             'notif',
             'taskcategory',
             'employee',
-            'projects'
+            'projects',
+            'userss'
         ));
     }
 
@@ -577,7 +579,8 @@ class ProjectController extends Controller
     {
 
         $userss = Auth::user();
-
+        dd($userss);
+        $us = Auth::user()->id;
         $user = Auth::user()->name;
         if ($userss) {
             // Ensure permissions are assigned and fetched correctly

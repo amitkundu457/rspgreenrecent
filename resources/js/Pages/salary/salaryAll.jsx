@@ -121,9 +121,9 @@ const SalaryPage = ({
                                     <th className="border p-2">
                                         Employee Name
                                     </th>
-                                    <th className="border p-2">
+                                    {/* <th className="border p-2">
                                         Employee Type
-                                    </th>
+                                    </th> */}
                                     <th className="border p-2">
                                         Salary Generate Date
                                     </th>
@@ -142,11 +142,11 @@ const SalaryPage = ({
                                                     ? employee.name
                                                     : "Pinaki Ray"}
                                             </td>
-                                            <td className="border p-2">
+                                            {/* <td className="border p-2">
                                                 {employee
                                                     ? employee.type
                                                     : "Permanent"}
-                                            </td>
+                                            </td> */}
                                             <td className="border p-2">
                                                 {sal.generate_date}
                                             </td>

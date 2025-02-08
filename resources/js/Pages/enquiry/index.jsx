@@ -20,6 +20,7 @@ const RequestInquiryForm = ({ user, user_type, notif, quotes }) => {
         subject: "",
         message: "",
         document: null,
+        lastdate: "",
     });
 
     useEffect(() => {
@@ -124,6 +125,18 @@ const RequestInquiryForm = ({ user, user_type, notif, quotes }) => {
                                     <option value="Tender">Tender</option>
                                 </select>
 
+                                {data.source === "Tender" && (
+                                    <input
+                                        type="date"
+                                        name="lastdate"
+                                        className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        value={data.lastdate}
+                                        onChange={(e) =>
+                                            setData("lastdate", e.target.value)
+                                        }
+                                    />
+                                )}
+
                                 <>
                                     <input
                                         type="text"
@@ -210,7 +223,7 @@ const RequestInquiryForm = ({ user, user_type, notif, quotes }) => {
                                     Contact
                                 </th>
                                 <th className="border border-gray-300 p-2">
-                                    Subject
+                                    Last Date
                                 </th>
                                 <th className="border border-gray-300 p-2">
                                     Message
@@ -239,15 +252,18 @@ const RequestInquiryForm = ({ user, user_type, notif, quotes }) => {
                                         {inquiry.contact || "-"}
                                     </td>
                                     <td className="border border-gray-300 p-2">
-                                        {inquiry.subject || "-"}
+                                        {inquiry.lastdate || "-"}
                                     </td>
                                     <td className="border border-gray-300 p-2">
                                         {inquiry.message || "-"}
                                     </td>
+
                                     {/* <td className="border border-gray-300 p-2">
                                         {inquiry.document ? (
                                             <a
-                                                href={inquiry.document}
+                                                href={`/documents/${inquiry.document
+                                                    .split("/")
+                                                    .pop()}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-blue-500 underline"
@@ -258,6 +274,7 @@ const RequestInquiryForm = ({ user, user_type, notif, quotes }) => {
                                             "-"
                                         )}
                                     </td> */}
+
                                     <td className="border border-gray-300 p-2">
                                         <button
                                             className="bg-yellow-500 text-white px-2 py-1 rounded mr-2 hover:bg-yellow-600"

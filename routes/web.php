@@ -346,6 +346,7 @@ Route::resource('/Quotation', QuotationController::class);
 Route::resource('enquiry', QuoteRequestController::class);
 Route::resource('clients-workOrder', ClientWorkOrderController::class);
 
+
 Route::get('/clients-workOrder/{id}/show', [ClientWorkOrderController::class, 'showPdf']);
 
 Route::get('/seller-work-orders', [SellerWorkOrderController::class, 'index'])->name('sallerWork/index');

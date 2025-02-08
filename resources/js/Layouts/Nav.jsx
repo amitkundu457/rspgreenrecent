@@ -189,7 +189,7 @@ const Nav = ({ user_type, usrrr }) => {
                                     link: "/clients-workOrder",
                                 },
                                 {
-                                    name: "Seller Work-Order",
+                                    name: "Purchase Order",
                                     link: "/seller-work-orders",
                                 },
                             ]}
@@ -202,11 +202,11 @@ const Nav = ({ user_type, usrrr }) => {
                             {
                                 name: "Timesheet",
                                 link: "/daily-status",
-                                perm: "view_timsheet",
+                                perm: "view_employee",
                                 hide: !(
                                     props.auth.user.roles[0]?.name ===
                                         "admin" ||
-                                    permissions.includes("view_timsheet")
+                                    permissions.includes("view_employee")
                                 ), // Will hide unless the role is "admin" or has 'view_timsheet' permission
                             },
                             {
@@ -221,11 +221,7 @@ const Nav = ({ user_type, usrrr }) => {
                             {
                                 name: "Add Employee",
                                 link: "/task-assingbyadmin",
-                                perm: "view_project",
-                                hide: !(
-                                    permissions.includes("view_project") ||
-                                    props.auth.user.roles[0]?.name === "admin"
-                                ),
+                                perm: "view_employee",
                             },
                             { name: "Reports", link: "/reports-get" },
                             {

@@ -16,6 +16,7 @@ class QuoteRequest extends Model
         'subject',
         'message',
         'document',
-        'source'
+        'source',
+        'lastdate'
     ];
 }

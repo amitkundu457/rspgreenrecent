@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\QuoteRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 class QuoteRequestController extends Controller
 {
@@ -32,43 +33,48 @@ class QuoteRequestController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-           
-            'source' => 'required|in:direct,quotation,tender', // Validate source dropdown
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // File validation
-        ]);
+        // dd($request->all());
+        Log::info('Received Quote Request:', $request->all());
 
-        if ($request->hasFile('document')) {
-            $validated['document'] = $request->file('document')->store('documents', 'public');
+        // Convert source to lowercase before validation
+        $request->merge(['source' => strtolower($request->input('source'))]);
+
+        try {
+            // Validate input
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email',
+                'contact' => 'required|string|max:20',
+                'subject' => 'nullable|string|max:255',
+                'message' => 'nullable|string',
+                'source' => 'required|in:direct,quotation,tender',
+                'lastdate' => $request->input('source') === 'tender' ? 'required|date' : 'nullable|date',
+                'document' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+            ]);
+
+            Log::info('Validation passed', $validated);
+
+            // Handle file upload
+            if ($request->hasFile('document')) {
+                $validated['document'] = $request->file('document')->store('documents', 'public');
+            }
+
+            // Insert into database
+            $quote = QuoteRequest::create($validated);
+
+            Log::info('Quote request stored successfully', ['id' => $quote->id]);
+
+            return redirect()->route('enquiry.index')->with('success', 'Enquiry request submitted successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation Error: ' . json_encode($e->errors()));
+
+            return redirect()->back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            Log::error('Error storing quote request: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Something went wrong. Please try again.');
         }
-
-        QuoteRequest::create($validated);
-
-        return redirect()->route('enquiry.index')->with('success', 'Enquiry request submitted successfully!');
     }
-
-    // public function update(Request $request, $id)
-    // {
-    //     $validated = $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'email' => 'required|email',
-    //         'contact' => 'required|string|max:20',
-    //         'subject' => 'nullable|string|max:255',
-    //         'message' => 'nullable|string',
-    //         'source' => 'required|in:direct,quotation,tender', // Validate source dropdown
-    //         'document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // File validation
-    //     ]);
-
-    //     $quote = QuoteRequest::findOrFail($id);
-
-    //     if ($request->hasFile('document')) {
-    //         $validated['document'] = $request->file('document')->store('documents', 'public');
-    //     }
-
-    //     $quote->update($validated);
-
-    //     return redirect()->route('enquiry.index')->with('success', 'Enquiry request updated successfully!');
-    // }
 
     /**
      * Display the specified resource.
@@ -96,30 +102,32 @@ class QuoteRequestController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-   
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'contact' => 'required|string|max:20',
-            'subject' => 'nullable|string|max:255',
-            'message' => 'nullable|string',
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Validate document file
-            'source' => 'required|in:direct,quotation,tender', // Validate source dropdown
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // File validation
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email',
+                'contact' => 'required|string|max:20',
+                'subject' => 'nullable|string|max:255',
+                'message' => 'nullable|string',
+                'source' => 'required|in:direct,quotation,tender',
+                'document' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+            ]);
 
-        $quote = QuoteRequest::findOrFail($id);
+            $quote = QuoteRequest::findOrFail($id);
 
-        if ($request->hasFile('document')) {
-            $file = $request->file('document');
-            $validated['document'] = $file->store('documents', 'public'); // Save to storage/app/public/documents
+            // Handle file upload
+            if ($request->hasFile('document')) {
+                $validated['document'] = $request->file('document')->store('documents', 'public');
+            }
+
+            $quote->update($validated);
+
+            return redirect()->route('enquiry.index')->with('success', 'Enquiry request updated successfully!');
+        } catch (\Exception $e) {
+            Log::error('Error updating quote request: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        $quote->update($validated);
-
-        return redirect()->route('enquiry.index')
-            ->with('success', 'Enquiry request updated successfully!');
     }
 
     /**
@@ -127,10 +135,14 @@ class QuoteRequestController extends Controller
      */
     public function destroy($id)
     {
-        $quote = QuoteRequest::findOrFail($id);
-        $quote->delete();
+        try {
+            $quote = QuoteRequest::findOrFail($id);
+            $quote->delete();
 
-        return redirect()->route('enquiry.index')
-            ->with('success', 'Enquiry request deleted successfully!');
+            return redirect()->route('enquiry.index')->with('success', 'Enquiry request deleted successfully!');
+        } catch (\Exception $e) {
+            Log::error('Error deleting quote request: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

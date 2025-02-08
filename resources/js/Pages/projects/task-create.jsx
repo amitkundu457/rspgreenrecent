@@ -132,7 +132,7 @@ const TaskCreate = ({
 
             // Cleanup on unmount
             return () => {
-                projectChoicesInstance.destroy();
+                // projectChoicesInstance.destroy();
                 // employeeChoicesInstance.destroy();
             };
         }, []);
